@@ -222,7 +222,7 @@ const Insights = () => {
     sectionRefs.current[key]?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  const { ranked, correlationCards, metrics, metricGroups, groupScores, profileSummary } = useMemo(() => {
+  const { ranked, correlationCards, metrics, metricGroups, assetGroupScores } = useMemo(() => {
     const ranked = [...assets].sort((a, b) => b.roas - a.roas);
     const metrics = getActiveMetrics(assets);
     const correlationCards = buildCorrelationCards(assets, metrics);
