@@ -58,6 +58,7 @@ const FilterBar = ({ selectedChannels, sort, selectedCount, showInsights, onChan
       {showInsights && (
         <button
           disabled={selectedCount < 2}
+          onClick={onGetInsights}
           className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-colors ${
             selectedCount >= 2
               ? "bg-primary text-primary-foreground hover:bg-primary/90"
