@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { FolderOpen, ArrowLeft } from "lucide-react";
 import type { Channel } from "@/data/mockData";
 import AppSidebar from "@/components/AppSidebar";
