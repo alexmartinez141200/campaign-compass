@@ -33,16 +33,19 @@ const kpiInfo: Record<string, string> = {
   "Revenue": "Total purchase value attributed to this ad within the conversion window.",
   "CPA": "Cost Per Acquisition — how much you pay for each purchase. Lower CPA means more efficient conversion spend.",
   "Plays": "Total number of times the video started playing, including auto-plays in feed.",
-  "ThruPlays": "Number of times the video was played to completion or for at least 15 seconds. Meta metric.",
+  "ThruPlays": "Number of times the video was played to completion or for at least 15 seconds. Meta-specific metric.",
+  "Completed Views": "Number of times the video was watched to completion. TikTok's equivalent of Meta's ThruPlays.",
   "Avg Watch": "Average duration a viewer watched the video before scrolling or closing.",
-  "ThruPlay Rate": "Percentage of total plays that counted as ThruPlays. Higher rate indicates more engaging content.",
+  "ThruPlay Rate": "Percentage of total plays that counted as ThruPlays (15s+ or completion). Meta-specific.",
+  "Completion Rate": "Percentage of viewers who watched the video to completion. TikTok's primary content retention metric.",
   "Video Views": "Total 2-second+ video views. TikTok's primary video metric.",
   "Video View Rate": "Percentage of impressions that resulted in a 2s+ video view. Higher = stronger hook.",
+  "6s Views": "Video views that reached 6 seconds. TikTok's key hook metric — did your content hold attention past the critical first moments?",
+  "6s View Rate": "Percentage of total video views that reached 6 seconds. The definitive measure of hook strength on TikTok.",
   "Profile Visits": "Number of times users visited your TikTok profile after seeing this ad.",
   "Follows": "New followers attributed to this ad. Measures brand-building effectiveness.",
   "Paid Likes": "Likes from paid impressions only, excluding organic engagement.",
   "Paid Shares": "Shares from paid impressions only. High shares indicate viral potential.",
-  "Completion Rate": "Percentage of viewers who watched the video to at least 95%. Indicates strong content retention.",
 };
 
 // ─── Insights Generator ───
