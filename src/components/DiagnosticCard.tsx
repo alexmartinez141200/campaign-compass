@@ -67,7 +67,7 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.025 }}
-      className={`group flex items-center h-[68px] px-4 rounded-lg cursor-pointer transition-all duration-100 border ${
+      className={`group flex items-center h-[68px] ${showCheckbox ? "px-4" : "px-0"} rounded-lg cursor-pointer transition-all duration-100 border ${
         selected
           ? "border-primary/25 bg-primary/[0.02]"
           : "border-transparent bg-surface hover:bg-muted/30"
@@ -89,7 +89,7 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
       )}
 
       {/* Number */}
-      <div className="ml-3 w-5 flex-shrink-0 text-center">
+      <div className={`${showCheckbox ? "ml-3" : "ml-0"} w-5 flex-shrink-0 text-center`}>
         <span className="text-[11px] font-mono font-medium text-muted-foreground/50">{rank + 1}</span>
       </div>
 
