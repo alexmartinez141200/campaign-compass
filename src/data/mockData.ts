@@ -5,6 +5,18 @@ import creative4 from "@/assets/creative-4.jpg";
 
 export type Channel = "meta" | "tiktok" | "google" | "linkedin" | "amazon";
 
+export interface DailyMetric {
+  date: string;
+  spend: number;
+  impressions: number;
+  clicks: number;
+  conversions: number;
+  purchaseValue: number;
+  roas: number;
+  ctr: number;
+  cpm: number;
+}
+
 export interface CreativeAsset {
   id: string;
   name: string;
@@ -53,6 +65,38 @@ export interface CreativeAsset {
   qualityRanking: "above_average" | "average" | "below_average";
   engagementRateRanking: "above_average" | "average" | "below_average";
   conversionRateRanking: "above_average" | "average" | "below_average";
+  // Daily breakdown
+  dailyMetrics: DailyMetric[];
+}
+
+function generateDailyMetrics(totalSpend: number, totalImpressions: number, totalClicks: number, totalConversions: number, totalPurchaseValue: number, days: number = 14): DailyMetric[] {
+  const metrics: DailyMetric[] = [];
+  const now = new Date();
+  let remainSpend = totalSpend, remainImpr = totalImpressions, remainClicks = totalClicks, remainConv = totalConversions, remainPV = totalPurchaseValue;
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const weight = 0.7 + Math.random() * 0.6; // variance
+    const daySpend = i === 0 ? remainSpend : Math.round(totalSpend / days * weight);
+    const dayImpr = i === 0 ? remainImpr : Math.round(totalImpressions / days * weight);
+    const dayClicks = i === 0 ? remainClicks : Math.round(totalClicks / days * weight);
+    const dayConv = i === 0 ? remainConv : Math.round(totalConversions / days * weight);
+    const dayPV = i === 0 ? remainPV : Math.round(totalPurchaseValue / days * weight);
+    remainSpend -= daySpend; remainImpr -= dayImpr; remainClicks -= dayClicks; remainConv -= dayConv; remainPV -= dayPV;
+    metrics.push({
+      date: `${d.getMonth() + 1}/${d.getDate()}`,
+      spend: Math.max(0, daySpend),
+      impressions: Math.max(0, dayImpr),
+      clicks: Math.max(0, dayClicks),
+      conversions: Math.max(0, dayConv),
+      purchaseValue: Math.max(0, dayPV),
+      roas: daySpend > 0 ? Math.round(dayPV / daySpend * 10) / 10 : 0,
+      ctr: dayImpr > 0 ? Math.round(dayClicks / dayImpr * 10000) / 100 : 0,
+      cpm: dayImpr > 0 ? Math.round(daySpend / dayImpr * 100000) / 100 : 0,
+    });
+  }
+  return metrics;
 }
 
 export interface Campaign {
