@@ -375,7 +375,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
         <ChartCard title="CPM Over Time">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={daily}>
+            <LineChart data={filteredDaily}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
               <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
               <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `$${v}`} />
