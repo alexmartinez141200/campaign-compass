@@ -68,12 +68,14 @@ export interface CreativeAsset {
   postSaves: number;
   // Video (optional for non-video)
   videoPlays?: number;
-  thruPlays?: number;
+  thruPlays?: number; // Meta: ThruPlays (15s+ or completion)
+  completedViews?: number; // TikTok: video completions
   avgWatchTime?: number;
   videoWatched25?: number;
   videoWatched50?: number;
   videoWatched75?: number;
   videoWatched95?: number;
+  videoViews6s?: number; // TikTok: 6-second focused views (hook metric)
   // Conversions
   conversions: number;
   purchaseValue: number;
