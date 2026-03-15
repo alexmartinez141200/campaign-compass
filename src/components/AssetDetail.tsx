@@ -365,7 +365,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         {isTikTok ? (
           <>
             {/* ═══ A. VIDEO PERFORMANCE (TikTok's core — first) ═══ */}
-            <SectionHeader title="Video Performance" description="TikTok video metrics — view rate and retention show content quality and hook strength." />
+            <SectionHeader title="Video Performance" description="TikTok video metrics — 6-second view rate measures hook strength, completion rate shows content quality." />
             <div className="grid grid-cols-2 gap-3">
               <div className="grid grid-cols-3 gap-3">
                 <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} sub="2s+ views" />
