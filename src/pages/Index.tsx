@@ -5,6 +5,7 @@ import AppSidebar from "@/components/AppSidebar";
 import CampaignHeader from "@/components/CampaignHeader";
 import CampaignList from "@/components/CampaignList";
 import DiagnosticCard, { DiagnosticHeader } from "@/components/DiagnosticCard";
+import AssetDetail from "@/components/AssetDetail";
 import FilterBar from "@/components/FilterBar";
 import { campaigns } from "@/data/mockData";
 
@@ -17,6 +18,7 @@ const Index = () => {
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>([]);
   const [sort, setSort] = useState<SortOption>("roas");
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
+  const [viewingAssetId, setViewingAssetId] = useState<string | null>(null);
 
   const toggleAssetSelection = (id: string) => {
     setSelectedAssets((prev) => {
@@ -57,14 +59,27 @@ const Index = () => {
           {selectedCampaign ? (
             <>
               <button
-                onClick={() => setSelectedCampaignId(null)}
+                onClick={() => { setSelectedCampaignId(null); setViewingAssetId(null); }}
                 className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Campaigns
               </button>
               <span className="text-muted-foreground/40">/</span>
-              <span className="text-[13px] font-medium text-foreground">{selectedCampaign.name}</span>
+              <button
+                onClick={() => setViewingAssetId(null)}
+                className={`text-[13px] font-medium transition-colors ${viewingAssetId ? "text-muted-foreground hover:text-foreground" : "text-foreground"}`}
+              >
+                {selectedCampaign.name}
+              </button>
+              {viewingAssetId && (
+                <>
+                  <span className="text-muted-foreground/40">/</span>
+                  <span className="text-[13px] font-medium text-foreground">
+                    {selectedCampaign.assets.find(a => a.id === viewingAssetId)?.name}
+                  </span>
+                </>
+              )}
             </>
           ) : (
             <>
@@ -137,7 +152,13 @@ const Index = () => {
                 onSelect={(id) => setSelectedCampaignId(id)}
               />
             </>
-          ) : (
+          ) : viewingAssetId && selectedCampaign ? (
+            <AssetDetail
+              asset={selectedCampaign.assets.find(a => a.id === viewingAssetId)!}
+              campaignAssets={selectedCampaign.assets}
+              onBack={() => setViewingAssetId(null)}
+            />
+          ) : selectedCampaign ? (
             <>
               {/* Campaign detail view */}
               <CampaignHeader campaign={selectedCampaign} />
@@ -150,7 +171,7 @@ const Index = () => {
                 <DiagnosticHeader />
                 {filteredAssets.length > 0 ? (
                   filteredAssets.map((asset, i) => (
-                    <DiagnosticCard key={asset.id} asset={asset} index={i} rank={i} maxRoas={Math.max(...filteredAssets.map(a => a.roas))} selected={selectedAssets.has(asset.id)} onSelectToggle={toggleAssetSelection} />
+                    <DiagnosticCard key={asset.id} asset={asset} index={i} rank={i} maxRoas={Math.max(...filteredAssets.map(a => a.roas))} selected={selectedAssets.has(asset.id)} onSelectToggle={toggleAssetSelection} onClick={() => setViewingAssetId(asset.id)} />
                   ))
                 ) : (
                   <div className="py-20 text-center text-muted-foreground text-sm">
@@ -159,7 +180,7 @@ const Index = () => {
                 )}
               </div>
             </>
-          )}
+          ) : null}
         </div>
       </main>
     </div>

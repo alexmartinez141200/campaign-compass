@@ -17,6 +17,7 @@ interface DiagnosticCardProps {
   maxRoas: number;
   selected?: boolean;
   onSelectToggle?: (id: string) => void;
+  onClick?: () => void;
 }
 
 /** Column header row — render once above the list */
@@ -39,7 +40,7 @@ export const DiagnosticHeader = () => (
   </div>
 );
 
-const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelectToggle }: DiagnosticCardProps) => {
+const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelectToggle, onClick }: DiagnosticCardProps) => {
   const isTop = rank === 0;
   const roasPercent = Math.min((asset.roas / maxRoas) * 100, 100);
 
@@ -55,6 +56,7 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
 
   return (
     <motion.div
+      onClick={onClick}
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.025 }}
