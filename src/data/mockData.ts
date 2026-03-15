@@ -195,6 +195,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRI-7734", name: "Static_Product_03", type: "image", thumbnail: creative2, dimensions: "1200×628", channel: "meta",
+        creativeProfile: { aspectRatio: "16:9", motionIntensity: "None", colorContrast: "Medium", brandProminence: "Dominant", brandConsistency: "High", funnelStage: "Conversion", callToAction: "Buy Now", productInFirst3s: true },
         spend: 7200, impressions: 182000, reach: 145000, frequency: 1.26, clicks: 4550, linkClicks: 3640, outboundClicks: 3280,
         postReactions: 1890, postComments: 142, postShares: 310, postSaves: 680,
         conversions: 295, purchaseValue: 24480, addToCart: 890, initiateCheckout: 520, landingPageViews: 3100,
