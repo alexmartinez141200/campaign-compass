@@ -442,11 +442,11 @@ const Insights = () => {
               <table className="w-full">
                 <thead>
                   <tr className="bg-muted/30 border-b border-border">
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-5 py-2.5 text-left w-[18%]">Attribute</th>
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-5 py-2.5 text-left w-[18%]">Best</th>
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-5 py-2.5 text-left w-[18%]">Worst</th>
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-5 py-2.5 text-right w-[10%]">ROAS Δ</th>
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-5 py-2.5 text-left">Insight</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Attribute</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Best</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Worst</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right">ROAS Δ</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Insight</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -463,20 +463,20 @@ const Insights = () => {
                         onClick={() => setOpenModal(`correlation:${card.attr.key}`)}
                         className="border-b border-border/20 last:border-0 hover:bg-primary/[0.03] transition-colors cursor-pointer group"
                       >
-                        <td className="px-5 py-3.5 text-[13px] font-semibold text-foreground group-hover:text-primary transition-colors">{card.attr.label}</td>
-                        <td className="px-5 py-3.5">
-                          <span className="text-[13px] font-mono font-semibold text-accent">{topGroup.value}</span>
+                        <td className="px-4 py-2.5 text-[11px] font-semibold text-foreground group-hover:text-primary transition-colors">{card.attr.label}</td>
+                        <td className="px-4 py-2.5">
+                          <span className="text-[11px] font-mono font-semibold text-accent">{topGroup.value}</span>
                         </td>
-                        <td className="px-5 py-3.5">
-                          <span className="text-[13px] font-mono font-semibold text-destructive">{botGroup.value}</span>
+                        <td className="px-4 py-2.5">
+                          <span className="text-[11px] font-mono font-semibold text-destructive">{botGroup.value}</span>
                         </td>
-                        <td className="px-5 py-3.5 text-right">
-                          <span className={`text-[13px] font-mono font-bold ${significant ? "text-accent" : "text-muted-foreground"}`}>
+                        <td className="px-4 py-2.5 text-right">
+                          <span className={`text-[11px] font-mono font-bold ${significant ? "text-accent" : "text-muted-foreground"}`}>
                             {diff > 0 ? "+" : ""}{diff}%
                           </span>
                         </td>
-                        <td className="px-5 py-3.5">
-                          <span className="text-[12px] text-muted-foreground">{card.takeaway || "Similar performance"}</span>
+                        <td className="px-4 py-2.5">
+                          <span className="text-[10px] text-muted-foreground">{card.takeaway || "Similar performance"}</span>
                         </td>
                       </tr>
                     );
