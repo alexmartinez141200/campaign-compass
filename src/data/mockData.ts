@@ -102,6 +102,10 @@ export interface CreativeAsset {
   paidLikes?: number;
   paidShares?: number;
   videoViewRate?: number; // % of impressions that resulted in 2s+ view
+  // Google Ads-specific metrics
+  viewThroughConversions?: number; // Conversions from users who saw but didn't click
+  avgCpv?: number; // Average Cost Per Video View (Google Video)
+  interactionRate?: number; // Interactions / Impressions (Google)
   // Daily breakdown
   dailyMetrics: DailyMetric[];
 }
