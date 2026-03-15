@@ -60,6 +60,26 @@ const Index = () => {
     });
   }, [selectedCampaign, selectedChannels, sort]);
 
+  // All creatives flat list
+  const allCreativeAssets = useMemo(() => {
+    const list: { campaignName: string; asset: (typeof campaigns)[0]["assets"][0] }[] = [];
+    for (const c of campaigns) {
+      for (const a of c.assets) list.push({ campaignName: c.name, asset: a });
+    }
+    return list;
+  }, []);
+
+  const filteredCreatives = useMemo(() => {
+    let list = allCreativeAssets;
+    if (creativeFilterChannel !== "all") list = list.filter(r => r.asset.channel === creativeFilterChannel);
+    return [...list].sort((a, b) => {
+      if (creativeSortKey === "name") return a.asset.name.localeCompare(b.asset.name);
+      if (creativeSortKey === "roas") return b.asset.roas - a.asset.roas;
+      if (creativeSortKey === "spend") return b.asset.spend - a.asset.spend;
+      return b.asset.conversions - a.asset.conversions;
+    });
+  }, [allCreativeAssets, creativeFilterChannel, creativeSortKey]);
+
   return (
     <div className="min-h-screen bg-background">
       <AppSidebar />
