@@ -408,56 +408,29 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
       </div>
 
-      {/* Delivery & Traffic — reach, clicks, and trends in one card */}
+      {/* Delivery & Traffic */}
       <SectionTitle>Delivery & Traffic</SectionTitle>
       <div className="rounded-lg border border-border/60 bg-surface p-4">
-        {/* Reach metrics */}
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        {/* Shared reach metrics — relevant to both charts */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Impressions</p>
             <p className="text-lg font-mono font-bold text-foreground">{asset.impressions.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground">Total ad views — drives both CPM and CTR calculations</p>
           </div>
           <div>
             <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Reach</p>
             <p className="text-lg font-mono font-bold text-foreground">{asset.reach.toLocaleString()}</p>
-            <p className="text-[10px] text-muted-foreground">Freq: {asset.frequency.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPM</p>
-            <p className="text-lg font-mono font-bold text-foreground">${asset.cpm.toFixed(2)}</p>
+            <p className="text-[10px] text-muted-foreground">Unique users · Freq: {asset.frequency.toFixed(2)}</p>
           </div>
         </div>
 
-        {/* Click metrics */}
-        <div className="grid grid-cols-5 gap-4 pt-3 border-t border-border/30 mb-4">
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Link Clicks</p>
-            <p className="text-[15px] font-mono font-bold text-foreground">{asset.linkClicks.toLocaleString()}</p>
-            <p className="text-[10px] text-muted-foreground">CTR: {asset.ctr}%</p>
-          </div>
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPC</p>
-            <p className="text-[15px] font-mono font-bold text-foreground">${asset.cpc.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">All Clicks</p>
-            <p className="text-[15px] font-mono font-bold text-foreground">{asset.clicks.toLocaleString()}</p>
-            <p className="text-[10px] text-muted-foreground">CTR: {asset.ctrAll}%</p>
-          </div>
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Outbound Clicks</p>
-            <p className="text-[15px] font-mono font-bold text-foreground">{asset.outboundClicks.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPC (All)</p>
-            <p className="text-[15px] font-mono font-bold text-foreground">${asset.cpcAll.toFixed(2)}</p>
-          </div>
-        </div>
-
-        {/* CTR & CPM trend charts */}
+        {/* Two-column: CTR chart + metrics | CPM chart + metrics */}
         <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border/30">
+          {/* CTR column */}
           <div>
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">CTR % Over Time</p>
+            <p className="text-[9px] text-muted-foreground mb-2">Link Clicks ÷ Impressions</p>
             <div className="h-40">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={filteredDaily}>
@@ -469,9 +442,34 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                 </LineChart>
               </ResponsiveContainer>
             </div>
+            {/* Click metrics under CTR chart */}
+            <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-border/20">
+              <div>
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Link Clicks</p>
+                <p className="text-[14px] font-mono font-bold text-foreground">{asset.linkClicks.toLocaleString()}</p>
+                <p className="text-[9px] text-muted-foreground">CTR: {asset.ctr}%</p>
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPC</p>
+                <p className="text-[14px] font-mono font-bold text-foreground">${asset.cpc.toFixed(2)}</p>
+                <p className="text-[9px] text-muted-foreground">Spend ÷ Link Clicks</p>
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">All Clicks</p>
+                <p className="text-[14px] font-mono font-bold text-foreground">{asset.clicks.toLocaleString()}</p>
+                <p className="text-[9px] text-muted-foreground">CTR: {asset.ctrAll}%</p>
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Outbound Clicks</p>
+                <p className="text-[14px] font-mono font-bold text-foreground">{asset.outboundClicks.toLocaleString()}</p>
+              </div>
+            </div>
           </div>
+
+          {/* CPM column */}
           <div>
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">CPM Over Time</p>
+            <p className="text-[9px] text-muted-foreground mb-2">Spend ÷ Impressions × 1,000</p>
             <div className="h-40">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={filteredDaily}>
@@ -482,6 +480,29 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                   <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={{ r: 2 }} />
                 </LineChart>
               </ResponsiveContainer>
+            </div>
+            {/* Cost metrics under CPM chart */}
+            <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-border/20">
+              <div>
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPM</p>
+                <p className="text-[14px] font-mono font-bold text-foreground">${asset.cpm.toFixed(2)}</p>
+                <p className="text-[9px] text-muted-foreground">Cost per 1K impressions</p>
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPC (All)</p>
+                <p className="text-[14px] font-mono font-bold text-foreground">${asset.cpcAll.toFixed(2)}</p>
+                <p className="text-[9px] text-muted-foreground">Spend ÷ All Clicks</p>
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Landing Page Views</p>
+                <p className="text-[14px] font-mono font-bold text-foreground">{asset.landingPageViews.toLocaleString()}</p>
+                <p className="text-[9px] text-muted-foreground">Post-click arrivals</p>
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Total Spend</p>
+                <p className="text-[14px] font-mono font-bold text-foreground">${asset.spend.toLocaleString()}</p>
+                <p className="text-[9px] text-muted-foreground">Budget consumed</p>
+              </div>
             </div>
           </div>
         </div>
