@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { Campaign, Channel } from "@/data/mockData";
 import { channelConfig } from "./ChannelIcon";
 import ChannelIcon from "./ChannelIcon";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 interface CampaignHeaderProps {
   campaign: Campaign;
