@@ -47,6 +47,7 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
               campaign.status === "active" ? "bg-accent/10 text-accent-teal" : "bg-secondary text-muted-foreground"
             }`}>{campaign.status}</span>
             <span className="text-[11px] text-muted-foreground font-mono">{campaign.startDate} → {campaign.endDate}</span>
+            <span className="text-[11px] text-muted-foreground">by <span className="font-medium text-foreground/80">{campaign.owner}</span></span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Budget</span>
