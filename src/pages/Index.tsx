@@ -43,7 +43,7 @@ const Index = () => {
   };
 
   const visibleCampaigns = campaigns.filter((c) =>
-    campaignTab === "active" ? c.status === "active" : c.status !== "active"
+    campaignFilter === "all" ? true : campaignFilter === "active" ? c.status === "active" : c.status !== "active"
   );
 
   const selectedCampaign = selectedCampaignId
