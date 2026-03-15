@@ -41,7 +41,6 @@ export const DiagnosticHeader = ({ sort, onSortChange }: { sort?: SortOption; on
     <div className="min-w-[48px] mr-4 flex-shrink-0 text-center">CPC</div>
     <div className="min-w-[44px] flex-shrink-0 text-center">Conv.</div>
     <div className="w-3.5 ml-4 flex-shrink-0" />
-    )}
   </div>
 );
 
