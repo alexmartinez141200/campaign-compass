@@ -296,6 +296,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                   if (range?.to) setCalendarOpen(false);
                 }}
                 numberOfMonths={1}
+                className="p-3 pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
