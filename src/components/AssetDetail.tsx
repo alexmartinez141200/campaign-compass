@@ -29,6 +29,7 @@ const kpiInfo: Record<string, string> = {
   "CPC (Link)": "Cost Per Click on links only. Measures the efficiency of driving traffic to your destination.",
   "CPC (All)": "Cost Per Click including all click types — link clicks, post reactions, profile visits, etc.",
   "Outbound Clicks": "Clicks that take users off-platform to your website. Closest metric to actual site visits.",
+  "Website Clicks": "Clicks that take users to your website from TikTok. Equivalent to outbound clicks.",
   "Revenue": "Total purchase value attributed to this ad within the conversion window.",
   "CPA": "Cost Per Acquisition — how much you pay for each purchase. Lower CPA means more efficient conversion spend.",
   "Plays": "Total number of times the video started playing, including auto-plays in feed.",
@@ -41,6 +42,7 @@ const kpiInfo: Record<string, string> = {
   "Follows": "New followers attributed to this ad. Measures brand-building effectiveness.",
   "Paid Likes": "Likes from paid impressions only, excluding organic engagement.",
   "Paid Shares": "Shares from paid impressions only. High shares indicate viral potential.",
+  "Completion Rate": "Percentage of viewers who watched the video to at least 95%. Indicates strong content retention.",
 };
 
 // ─── Insights Generator ───
