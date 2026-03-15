@@ -8,12 +8,17 @@ import { campaigns } from "@/data/mockData";
 
 type AssetFilter = "all" | "video" | "image" | "carousel";
 type SortOption = "roas" | "spend" | "delta";
+type CampaignTab = "active" | "archived";
 
 const Index = () => {
+  const [campaignTab, setCampaignTab] = useState<CampaignTab>("active");
   const [activeCampaignId, setActiveCampaignId] = useState(campaigns[0].id);
   const [filter, setFilter] = useState<AssetFilter>("all");
   const [sort, setSort] = useState<SortOption>("roas");
 
+  const visibleCampaigns = campaigns.filter((c) =>
+    campaignTab === "active" ? c.status === "active" : c.status !== "active"
+  );
   const campaign = campaigns.find((c) => c.id === activeCampaignId)!;
 
   const filteredAssets = useMemo(() => {
@@ -41,22 +46,45 @@ const Index = () => {
         </div>
 
         <div className="p-6">
-        {/* Campaign tabs */}
-        <div className="flex gap-1 border-b border-border mb-6">
-          {campaigns.map((c) => (
+        {/* Active / Archived tabs */}
+        <div className="flex gap-1 border-b border-border mb-5">
+          {(["active", "archived"] as CampaignTab[]).map((tab) => (
             <button
-              key={c.id}
-              onClick={() => setActiveCampaignId(c.id)}
-              className={`px-4 py-2.5 text-[13px] font-medium transition-colors duration-100 border-b-2 -mb-px ${
-                c.id === activeCampaignId
+              key={tab}
+              onClick={() => {
+                setCampaignTab(tab);
+                const first = campaigns.find((c) => tab === "active" ? c.status === "active" : c.status !== "active");
+                if (first) setActiveCampaignId(first.id);
+              }}
+              className={`px-4 py-2.5 text-[13px] font-medium transition-colors duration-100 border-b-2 -mb-px capitalize ${
+                campaignTab === tab
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              {c.name}
+              {tab === "active" ? "Active Campaigns" : "Archived"}
             </button>
           ))}
         </div>
+
+        {/* Campaign list */}
+        {visibleCampaigns.length > 0 ? (
+          <>
+            <div className="flex gap-2 mb-5">
+              {visibleCampaigns.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setActiveCampaignId(c.id)}
+                  className={`px-3 py-1.5 text-[12px] font-medium rounded-md transition-all duration-100 ${
+                    c.id === activeCampaignId
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
 
         {/* Header */}
         <CampaignHeader campaign={campaign} />
@@ -78,6 +106,12 @@ const Index = () => {
             </div>
           )}
         </div>
+          </>
+        ) : (
+          <div className="py-20 text-center text-muted-foreground text-sm">
+            No {campaignTab} campaigns found.
+          </div>
+        )}
         </div>
       </main>
     </div>
