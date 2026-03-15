@@ -6,6 +6,7 @@ interface FilterBarProps {
   selectedChannels: Channel[];
   sort: SortOption;
   selectedCount: number;
+  showInsights: boolean;
   onChannelsChange: (channels: Channel[]) => void;
   onSortChange: (s: SortOption) => void;
 }
