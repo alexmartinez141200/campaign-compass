@@ -16,6 +16,16 @@ const Index = () => {
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [channelFilter, setChannelFilter] = useState<ChannelFilter>("all");
   const [sort, setSort] = useState<SortOption>("roas");
+  const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
+
+  const toggleAssetSelection = (id: string) => {
+    setSelectedAssets((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const visibleCampaigns = campaigns.filter((c) =>
     campaignTab === "active" ? c.status === "active" : c.status !== "active"
