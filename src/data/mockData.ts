@@ -161,6 +161,8 @@ export const campaigns: Campaign[] = [
   {
     id: "camp-003",
     name: "Summer Sale 2025",
+    owner: "Sarah Kim",
+    createdAt: "2025-04-28",
     status: "active",
     startDate: "2025-06-01",
     endDate: "2025-08-31",
