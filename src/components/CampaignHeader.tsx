@@ -37,28 +37,26 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
 
   return (
     <div>
-      {/* Campaign title row */}
-      <div className="flex items-center gap-3 mb-4">
-        <h1 className="text-xl font-semibold text-foreground tracking-tight">{campaign.name}</h1>
-        <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${
-          campaign.status === "active" ? "bg-accent/10 text-accent-teal" : "bg-secondary text-muted-foreground"
-        }`}>{campaign.status}</span>
-        <span className="text-xs text-muted-foreground font-mono">{campaign.startDate} → {campaign.endDate}</span>
-      </div>
-
-      {/* Unified block: budget bar + platform table */}
+      {/* Unified block: title + budget + platform table */}
       <div className="rounded-lg border border-border/60 overflow-hidden bg-card">
-        {/* Budget bar row */}
-        <div className="px-4 py-2.5 bg-muted/20 border-b border-border/40 flex items-center gap-4">
-          <div className="flex items-center gap-3 flex-shrink-0">
+        {/* Header strip: title + budget in one row */}
+        <div className="px-4 py-2 bg-muted/20 border-b border-border/40 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h1 className="text-base font-semibold text-foreground tracking-tight">{campaign.name}</h1>
+            <span className={`text-[9px] uppercase font-bold tracking-wider px-1.5 py-px rounded ${
+              campaign.status === "active" ? "bg-accent/10 text-accent-teal" : "bg-secondary text-muted-foreground"
+            }`}>{campaign.status}</span>
+            <span className="text-[11px] text-muted-foreground font-mono">{campaign.startDate} → {campaign.endDate}</span>
+          </div>
+          <div className="flex items-center gap-3">
             <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Budget</span>
             <span className="text-sm font-mono font-bold text-foreground">${totalSpend.toLocaleString()}</span>
             <span className="text-[10px] font-mono text-muted-foreground">/ ${campaign.totalBudget.toLocaleString()}</span>
+            <div className="w-24 h-1.5 bg-muted/40 rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-primary/60 transition-all" style={{ width: `${Math.min(spendPct, 100)}%` }} />
+            </div>
+            <span className="text-[10px] font-mono text-muted-foreground">{spendPct.toFixed(0)}%</span>
           </div>
-          <div className="flex-1 h-2 bg-muted/40 rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-primary/60 transition-all" style={{ width: `${Math.min(spendPct, 100)}%` }} />
-          </div>
-          <span className="text-[10px] font-mono text-muted-foreground flex-shrink-0">{spendPct.toFixed(0)}%</span>
         </div>
 
         {/* Platform table */}
