@@ -296,23 +296,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                   if (range?.to) setCalendarOpen(false);
                 }}
                 numberOfMonths={1}
+                className="p-3 pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
         </div>
       </div>
 
-      {/* Range Summary Cards */}
-      <div className="grid grid-cols-4 gap-2.5 mb-3">
-        <div className="p-3 rounded-md border border-border/60 bg-surface">
-          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Period ROAS</p>
-          <p className="text-xl font-mono font-bold text-foreground mt-0.5">{rangeSummary.roas}x</p>
-          <p className="text-[10px] text-muted-foreground">{presetLabel[datePreset]}</p>
-        </div>
-        <Stat icon={DollarSign} label="Period Spend" value={`$${rangeSummary.spend.toLocaleString()}`} />
-        <Stat icon={TrendingUp} label="Period Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} />
-        <Stat icon={ShoppingCart} label="Period Conversions" value={rangeSummary.conversions.toLocaleString()} />
-      </div>
 
       {/* ROAS Chart */}
       <div className="grid grid-cols-2 gap-3">
