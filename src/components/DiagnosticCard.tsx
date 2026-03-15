@@ -13,6 +13,7 @@ interface DiagnosticCardProps {
   maxRoas: number;
   selected?: boolean;
   showCheckbox?: boolean;
+  campaignName?: string;
   onSelectToggle?: (id: string) => void;
   onClick?: () => void;
 }
