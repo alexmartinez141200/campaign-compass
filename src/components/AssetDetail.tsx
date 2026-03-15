@@ -234,14 +234,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
           </div>
         </div>
-        <div className={`rounded-lg border p-3 w-72 flex-shrink-0 ${verdict.bg}`}>
-          <div className="flex items-center gap-2 mb-0.5">
-            {verdict.label === "Top Performer" ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> :
-             verdict.label === "Underperforming" ? <AlertTriangle className="w-4 h-4 text-destructive" /> :
-             <BarChart3 className="w-4 h-4 text-muted-foreground" />}
-            <span className={`text-sm font-semibold ${verdict.color}`}>{verdict.label}</span>
-          </div>
-          <p className="text-[12px] text-foreground/75">{verdict.desc}</p>
         </div>
       </div>
 
