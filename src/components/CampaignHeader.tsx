@@ -36,23 +36,18 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
   const remaining = campaign.totalBudget - totalSpend;
   const bestRoas = channelBreakdown.length > 0 ? Math.max(...channelBreakdown.map(c => c.roas)) : 0;
 
-  // Max values for inline comparison bars
-  const maxSpend = Math.max(...channelBreakdown.map(c => c.spend), 1);
-  const maxConv = Math.max(...channelBreakdown.map(c => c.conversions), 1);
-  const maxRev = Math.max(...channelBreakdown.map(c => c.revenue), 1);
+
+
 
   const columns = [
-    // Investment
-    { key: "spend", label: "Spend", format: (r: typeof channelBreakdown[0]) => `$${r.spend.toLocaleString()}`, max: maxSpend, val: (r: typeof channelBreakdown[0]) => r.spend, bar: true },
-    // Outcomes
-    { key: "revenue", label: "Revenue", format: (r: typeof channelBreakdown[0]) => `$${r.revenue.toLocaleString()}`, max: maxRev, val: (r: typeof channelBreakdown[0]) => r.revenue, bar: true },
-    { key: "roas", label: "ROAS", format: (r: typeof channelBreakdown[0]) => `${r.roas.toFixed(1)}x`, max: 0, val: () => 0, bar: false, colorFn: (r: typeof channelBreakdown[0]) => r.roas >= 4 ? "text-emerald-600" : r.roas >= 2 ? "text-foreground" : "text-destructive" },
-    { key: "conv", label: "Conv.", format: (r: typeof channelBreakdown[0]) => r.conversions.toLocaleString(), max: maxConv, val: (r: typeof channelBreakdown[0]) => r.conversions, bar: false },
-    // Efficiency
-    { key: "cpa", label: "CPA", format: (r: typeof channelBreakdown[0]) => `$${r.cpa.toFixed(2)}`, max: 0, val: () => 0, bar: false },
-    { key: "ctr", label: "CTR", format: (r: typeof channelBreakdown[0]) => `${r.ctr.toFixed(1)}%`, max: 0, val: () => 0, bar: false },
-    { key: "cpm", label: "CPM", format: (r: typeof channelBreakdown[0]) => `$${r.cpm.toFixed(2)}`, max: 0, val: () => 0, bar: false },
-  ];
+    { key: "spend", label: "Spend", format: (r: typeof channelBreakdown[0]) => `$${r.spend.toLocaleString()}` },
+    { key: "revenue", label: "Revenue", format: (r: typeof channelBreakdown[0]) => `$${r.revenue.toLocaleString()}` },
+    { key: "roas", label: "ROAS", format: (r: typeof channelBreakdown[0]) => `${r.roas.toFixed(1)}x`, colorFn: (r: typeof channelBreakdown[0]) => r.roas >= 4 ? "text-emerald-600" : r.roas >= 2 ? "text-foreground" : "text-destructive" },
+    { key: "conv", label: "Conv.", format: (r: typeof channelBreakdown[0]) => r.conversions.toLocaleString() },
+    { key: "cpa", label: "CPA", format: (r: typeof channelBreakdown[0]) => `$${r.cpa.toFixed(2)}` },
+    { key: "ctr", label: "CTR", format: (r: typeof channelBreakdown[0]) => `${r.ctr.toFixed(1)}%` },
+    { key: "cpm", label: "CPM", format: (r: typeof channelBreakdown[0]) => `$${r.cpm.toFixed(2)}` },
+  ] as { key: string; label: string; format: (r: typeof channelBreakdown[0]) => string; colorFn?: (r: typeof channelBreakdown[0]) => string }[];
 
   return (
     <div>
@@ -95,13 +90,13 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
         </div>
       </div>
 
-      {/* Compact comparison table with inline bars */}
       {channelBreakdown.length > 1 && (
         <div className="rounded-lg border border-border/60 overflow-hidden bg-card">
           <table className="w-full">
             <thead>
               <tr className="bg-muted/30 border-b border-border/40">
-                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-2 text-left w-[140px]">Platform</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-2 text-left w-[160px]">Platform</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2 text-left w-[140px]">Spend vs Revenue</th>
                 {columns.map((col) => (
                   <th key={col.key} className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2 text-right">{col.label}</th>
                 ))}
@@ -111,37 +106,40 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
               {channelBreakdown.map((row) => {
                 const isBest = row.roas === bestRoas;
                 const color = channelConfig[row.channel].color;
+                const maxVal = Math.max(row.spend, row.revenue);
+                const spendW = maxVal > 0 ? (row.spend / maxVal) * 100 : 0;
+                const revW = maxVal > 0 ? (row.revenue / maxVal) * 100 : 0;
                 return (
                   <tr key={row.channel} className="border-b border-border/30 last:border-0 hover:bg-muted/10 transition-colors">
-                    <td className="px-4 py-2.5">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
                         <span className="text-[13px] font-semibold text-foreground">{channelConfig[row.channel].label}</span>
                         {isBest && (
-                          <span className="text-[7px] uppercase tracking-wider font-bold text-emerald-600 bg-emerald-500/10 px-1 py-px rounded leading-tight">
-                            ★
-                          </span>
+                          <span className="text-[7px] uppercase tracking-wider font-bold text-emerald-600 bg-emerald-500/10 px-1 py-px rounded leading-tight">★</span>
                         )}
+                      </div>
+                    </td>
+                    {/* Dual bar: spend (muted) vs revenue (colored) */}
+                    <td className="px-3 py-3">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-full h-[5px] bg-muted/20 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-muted-foreground/20 transition-all" style={{ width: `${spendW}%` }} />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-full h-[5px] bg-muted/20 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full transition-all" style={{ width: `${revW}%`, backgroundColor: color, opacity: 0.55 }} />
+                          </div>
+                        </div>
                       </div>
                     </td>
                     {columns.map((col) => {
                       const textColor = col.colorFn ? col.colorFn(row) : "text-foreground";
-                      const barPct = col.bar ? (col.val(row) / col.max) * 100 : 0;
                       return (
-                        <td key={col.key} className="px-3 py-2.5">
-                          <div className="flex flex-col items-end gap-0.5">
-                            <span className={`text-xs font-mono font-semibold ${textColor} ${col.key === "roas" ? "font-bold" : ""}`}>
-                              {col.format(row)}
-                            </span>
-                            {col.bar && (
-                              <div className="w-full h-[3px] bg-muted/30 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full rounded-full transition-all"
-                                  style={{ width: `${barPct}%`, backgroundColor: color, opacity: 0.4 }}
-                                />
-                              </div>
-                            )}
-                          </div>
+                        <td key={col.key} className="px-3 py-3 text-right">
+                          <span className={`text-xs font-mono font-semibold ${textColor}`}>{col.format(row)}</span>
                         </td>
                       );
                     })}
