@@ -118,6 +118,8 @@ export const campaigns: Campaign[] = [
   {
     id: "camp-002",
     name: "Spring Collection 2025",
+    owner: "James Chen",
+    createdAt: "2025-01-15",
     status: "active",
     startDate: "2025-03-01",
     endDate: "2025-05-31",
