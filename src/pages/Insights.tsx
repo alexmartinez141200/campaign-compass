@@ -446,7 +446,7 @@ const Insights = () => {
                     <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Best</th>
                     <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Worst</th>
                     <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right">ROAS Δ</th>
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Insight</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold pl-12 pr-4 py-2.5 text-left">Insight</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -475,7 +475,7 @@ const Insights = () => {
                             {diff > 0 ? "+" : ""}{diff}%
                           </span>
                         </td>
-                        <td className="px-4 py-2.5">
+                        <td className="pl-12 pr-4 py-2.5">
                           <span className="text-[10px] text-muted-foreground">{card.takeaway || "Similar performance"}</span>
                         </td>
                       </tr>
