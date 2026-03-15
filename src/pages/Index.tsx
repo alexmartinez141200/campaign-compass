@@ -187,9 +187,9 @@ const Index = () => {
                   {/* Sub-filters */}
                   <div className="flex items-center gap-2 mb-4">
                     {([
+                      { key: "all" as CampaignFilter, label: "All" },
                       { key: "active" as CampaignFilter, label: "Active" },
                       { key: "past" as CampaignFilter, label: "Past" },
-                      { key: "all" as CampaignFilter, label: "All" },
                     ]).map(({ key, label }) => (
                       <button
                         key={key}
