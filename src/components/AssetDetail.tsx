@@ -367,11 +367,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             {/* ═══ A. VIDEO PERFORMANCE (TikTok's core — first) ═══ */}
             <SectionHeader title="Video Performance" description="TikTok video metrics — view rate and retention show content quality and hook strength." />
             <div className="grid grid-cols-2 gap-3">
-              <div className="grid grid-cols-2 gap-3">
-                <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} />
-                <KpiCard label="Video View Rate" value={`${asset.videoViewRate || 0}%`} sub="2s+ views / impressions" />
+              <div className="grid grid-cols-3 gap-3">
+                <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} sub="2s+ views" />
+                <KpiCard label="6s Views" value={(asset.videoViews6s || 0).toLocaleString()} sub="Passed the hook" />
+                <KpiCard label="6s View Rate" value={`${asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays * 100).toFixed(1) : 0}%`} sub="Hook strength" />
+                <KpiCard label="Completed Views" value={(asset.completedViews || 0).toLocaleString()} sub="Watched to end" />
                 <KpiCard label="Avg Watch" value={`${asset.avgWatchTime || 0}s`} />
-                <KpiCard label="Completion Rate" value={`${((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} sub="Watched to 95%" />
+                <KpiCard label="Completion Rate" value={`${asset.videoPlays ? ((asset.completedViews || 0) / asset.videoPlays * 100).toFixed(1) : 0}%`} sub="Views to completion" />
               </div>
               <ChartCard title="Retention Curve" height="h-[140px]">
                 <ResponsiveContainer width="100%" height="100%">
