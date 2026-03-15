@@ -92,6 +92,12 @@ const Index = () => {
           {selectedCampaign ? (
             <>
               <button
+                onClick={() => { if (viewingAssetId) { setViewingAssetId(null); } else { setSelectedCampaignId(null); setViewingAssetId(null); } }}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <button
                 onClick={() => { setSelectedCampaignId(null); setViewingAssetId(null); }}
                 className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium"
               >
