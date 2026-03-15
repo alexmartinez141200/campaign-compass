@@ -88,6 +88,12 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
         </div>
       )}
 
+      {/* Number – only in "All" view (no checkbox) */}
+      {!showCheckbox && (
+        <div className="ml-0 w-5 flex-shrink-0 text-center">
+          <span className="text-[11px] font-mono font-medium text-muted-foreground/50">{rank + 1}</span>
+        </div>
+      )}
 
       {/* Thumbnail + Name group – name aligns to top of thumbnail */}
       <div className="ml-2 flex items-start gap-3 min-w-[174px] max-w-[224px] flex-shrink-0">
