@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import type { CreativeAsset } from "@/data/mockData";
+import { Checkbox } from "@/components/ui/checkbox";
 import ChannelIcon from "./ChannelIcon";
 import PerformanceBar from "./PerformanceBar";
 
@@ -10,6 +11,8 @@ interface DiagnosticCardProps {
   asset: CreativeAsset;
   index: number;
   maxRoas: number;
+  selected?: boolean;
+  onSelectToggle?: (id: string) => void;
 }
 
 const DiagnosticCard = ({ asset, index, maxRoas }: DiagnosticCardProps) => {
