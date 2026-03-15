@@ -1,20 +1,23 @@
-import { useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { Channel } from "@/data/mockData";
 
-type AssetFilter = "all" | "video" | "image" | "carousel";
-type SortOption = "roas" | "spend" | "delta";
+type ChannelFilter = "all" | Channel;
+type SortOption = "roas" | "spend";
 
 interface FilterBarProps {
-  filter: AssetFilter;
+  channelFilter: ChannelFilter;
   sort: SortOption;
-  onFilterChange: (f: AssetFilter) => void;
+  onChannelFilterChange: (f: ChannelFilter) => void;
   onSortChange: (s: SortOption) => void;
 }
 
-const filters: { value: AssetFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "video", label: "Video" },
-  { value: "image", label: "Image" },
-  { value: "carousel", label: "Carousel" },
+const channels: { value: ChannelFilter; label: string }[] = [
+  { value: "all", label: "All Channels" },
+  { value: "meta", label: "Meta" },
+  { value: "tiktok", label: "TikTok" },
+  { value: "google", label: "Google Ads" },
+  { value: "linkedin", label: "LinkedIn" },
+  { value: "amazon", label: "Amazon Ads" },
 ];
 
 const sorts: { value: SortOption; label: string }[] = [
@@ -22,25 +25,22 @@ const sorts: { value: SortOption; label: string }[] = [
   { value: "spend", label: "Spend" },
 ];
 
-const FilterBar = ({ filter, sort, onFilterChange, onSortChange }: FilterBarProps) => {
+const FilterBar = ({ channelFilter, sort, onChannelFilterChange, onSortChange }: FilterBarProps) => {
   return (
     <div className="flex items-center justify-between">
-      {/* Type filter */}
-      <div className="flex gap-1 bg-secondary rounded-lg p-0.5">
-        {filters.map((f) => (
-          <button
-            key={f.value}
-            onClick={() => onFilterChange(f.value)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150 ${
-              filter === f.value
-                ? "bg-surface text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
+      {/* Channel dropdown */}
+      <Select value={channelFilter} onValueChange={(v) => onChannelFilterChange(v as ChannelFilter)}>
+        <SelectTrigger className="w-[160px] h-8 text-xs">
+          <SelectValue placeholder="All Channels" />
+        </SelectTrigger>
+        <SelectContent>
+          {channels.map((c) => (
+            <SelectItem key={c.value} value={c.value} className="text-xs">
+              {c.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       {/* Sort */}
       <div className="flex items-center gap-2">

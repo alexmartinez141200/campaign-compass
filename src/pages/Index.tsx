@@ -7,14 +7,14 @@ import DiagnosticCard from "@/components/DiagnosticCard";
 import FilterBar from "@/components/FilterBar";
 import { campaigns } from "@/data/mockData";
 
-type AssetFilter = "all" | "video" | "image" | "carousel";
-type SortOption = "roas" | "spend" | "delta";
+type ChannelFilter = "all" | "meta" | "tiktok" | "google" | "linkedin" | "amazon";
+type SortOption = "roas" | "spend";
 type CampaignTab = "active" | "archived";
 
 const Index = () => {
   const [campaignTab, setCampaignTab] = useState<CampaignTab>("active");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<AssetFilter>("all");
+  const [channelFilter, setChannelFilter] = useState<ChannelFilter>("all");
   const [sort, setSort] = useState<SortOption>("roas");
 
   const visibleCampaigns = campaigns.filter((c) =>
@@ -28,14 +28,14 @@ const Index = () => {
   const filteredAssets = useMemo(() => {
     if (!selectedCampaign) return [];
     let assets = selectedCampaign.assets;
-    if (filter !== "all") assets = assets.filter((a) => a.type === filter);
+    if (channelFilter !== "all") assets = assets.filter((a) => a.channel === channelFilter);
 
     return [...assets].sort((a, b) => {
       if (sort === "roas") return b.roas - a.roas;
       if (sort === "spend") return b.spend - a.spend;
       return 0;
     });
-  }, [selectedCampaign, filter, sort]);
+  }, [selectedCampaign, channelFilter, sort]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -133,7 +133,7 @@ const Index = () => {
               <CampaignHeader campaign={selectedCampaign} />
 
               <div className="mt-5 mb-4">
-                <FilterBar filter={filter} sort={sort} onFilterChange={setFilter} onSortChange={setSort} />
+                <FilterBar channelFilter={channelFilter} sort={sort} onChannelFilterChange={setChannelFilter} onSortChange={setSort} />
               </div>
 
               <div className="space-y-2">
