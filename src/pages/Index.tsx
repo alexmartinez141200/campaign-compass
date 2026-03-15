@@ -31,6 +31,16 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [fromCreativesTab, setFromCreativesTab] = useState(false);
 
+  // Restore campaign selection when navigating back from Insights
+  useEffect(() => {
+    const state = location.state as { returnToCampaignId?: string } | null;
+    if (state?.returnToCampaignId) {
+      setSelectedCampaignId(state.returnToCampaignId);
+      // Clear the state so refreshing doesn't re-trigger
+      window.history.replaceState({}, '');
+    }
+  }, [location.state]);
+
   const handleGetInsights = () => {
     const assets = filteredAssets.filter(a => selectedAssets.has(a.id));
     navigate("/insights", { state: { assets, campaignId: selectedCampaignId, campaignName: selectedCampaign?.name } });
