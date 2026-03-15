@@ -7,18 +7,22 @@ export type Channel = "meta" | "tiktok" | "google" | "linkedin" | "amazon";
 
 export interface DailyMetric {
   date: string;
-  fullDate: string; // ISO date for filtering
+  fullDate: string;
   spend: number;
   impressions: number;
   clicks: number;
   conversions: number;
   purchaseValue: number;
-  roas: number; // daily ROAS (purchaseValue / spend)
+  roas: number;
   cumulativeSpend: number;
   cumulativePurchaseValue: number;
-  cumulativeRoas: number; // running total purchaseValue / running total spend
+  cumulativeRoas: number;
   ctr: number;
   cpm: number;
+  // Funnel metrics
+  landingPageViews: number;
+  addToCart: number;
+  initiateCheckout: number;
 }
 
 export interface CreativeAsset {
