@@ -208,40 +208,41 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   ];
 
   return (
-    <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }} className="max-w-4xl">
+    <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
       {/* Back */}
       <button onClick={onBack} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium mb-5">
         <ArrowLeft className="w-4 h-4" /> Back to assets
       </button>
 
-      {/* ─── HERO + VERDICT ─── */}
-      <div className="flex gap-5 mb-5">
-        <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0">
-          <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">{asset.name}</h2>
-              <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
-              <div className="mt-1.5"><ChannelIcon channel={asset.channel} size="md" /></div>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-mono font-bold text-foreground">#{rank}</p>
-              <p className="text-[10px] text-muted-foreground">of {campaignAssets.length}</p>
+      {/* ─── HERO + VERDICT (side by side for wide screens) ─── */}
+      <div className="flex gap-4 mb-5">
+        <div className="flex gap-4 flex-1 min-w-0">
+          <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0">
+            <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">{asset.name}</h2>
+                <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
+                <div className="mt-1.5"><ChannelIcon channel={asset.channel} size="md" /></div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-mono font-bold text-foreground">#{rank}</p>
+                <p className="text-[10px] text-muted-foreground">of {campaignAssets.length}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <div className={`rounded-lg border p-3 mb-5 ${verdict.bg}`}>
-        <div className="flex items-center gap-2 mb-0.5">
-          {verdict.label === "Top Performer" ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> :
-           verdict.label === "Underperforming" ? <AlertTriangle className="w-4 h-4 text-destructive" /> :
-           <BarChart3 className="w-4 h-4 text-muted-foreground" />}
-          <span className={`text-sm font-semibold ${verdict.color}`}>{verdict.label}</span>
+        <div className={`rounded-lg border p-3 w-72 flex-shrink-0 ${verdict.bg}`}>
+          <div className="flex items-center gap-2 mb-0.5">
+            {verdict.label === "Top Performer" ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> :
+             verdict.label === "Underperforming" ? <AlertTriangle className="w-4 h-4 text-destructive" /> :
+             <BarChart3 className="w-4 h-4 text-muted-foreground" />}
+            <span className={`text-sm font-semibold ${verdict.color}`}>{verdict.label}</span>
+          </div>
+          <p className="text-[12px] text-foreground/75">{verdict.desc}</p>
         </div>
-        <p className="text-[12px] text-foreground/75">{verdict.desc}</p>
       </div>
 
       {/* ─── DATE FILTER (global for all charts) ─── */}
@@ -402,23 +403,26 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           ═══════════════════════════════════════════════════ */}
       <SectionHeader title="Traffic" description="Users clicking through to your site. CTR trends reveal creative effectiveness over time." />
 
-      <div className="grid grid-cols-3 gap-2.5 mb-3">
-        <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
-        <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
-        <KpiCard label="Outbound Clicks" value={asset.outboundClicks.toLocaleString()} sub="Off-platform" />
+      <div className="grid grid-cols-5 gap-3">
+        <div className="col-span-2 grid grid-cols-1 gap-2.5">
+          <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
+          <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
+          <KpiCard label="Outbound Clicks" value={asset.outboundClicks.toLocaleString()} sub="Off-platform" />
+        </div>
+        <div className="col-span-3">
+          <ChartCard title="CTR % Over Time" height="h-[180px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={filteredDaily}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} />
+                <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        </div>
       </div>
-
-      <ChartCard title="CTR % Over Time">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={filteredDaily}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-            <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} />
-            <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
-            <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
-          </LineChart>
-        </ResponsiveContainer>
-      </ChartCard>
 
       {/* ═══════════════════════════════════════════════════
           D. CONVERSIONS & REVENUE
@@ -432,9 +436,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
       </div>
 
-      {/* ROAS over time */}
-      <div className="mb-3">
-        <ChartCard title="ROAS Over Time" height="h-44">
+      {/* ROAS chart + Funnel side by side */}
+      <div className="grid grid-cols-2 gap-3">
+        <ChartCard title="ROAS Over Time" height="h-52">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -459,50 +463,36 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
-      </div>
 
-      {/* Conversion Funnel */}
-      <div className="rounded-lg border border-border/60 bg-card p-5">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Conversion Funnel</p>
-        <div className="flex gap-6">
-          {/* Funnel area chart */}
-          <div className="flex-1 min-w-0 h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={filteredDaily}>
-                <defs>
-                  {funnelSteps.map((step, i) => (
-                    <linearGradient key={i} id={`funnel${i}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={step.color} stopOpacity={0.12} />
-                      <stop offset="95%" stopColor={step.color} stopOpacity={0} />
-                    </linearGradient>
-                  ))}
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-                <Tooltip {...chartTooltipStyle} />
-                <Area type="monotone" dataKey="landingPageViews" name="LPV" stroke={funnelSteps[0].color} fill="url(#funnel0)" strokeWidth={2} dot={false} />
-                <Area type="monotone" dataKey="addToCart" name="Add to Cart" stroke={funnelSteps[1].color} fill="url(#funnel1)" strokeWidth={2} dot={false} />
-                <Area type="monotone" dataKey="initiateCheckout" name="Checkout" stroke={funnelSteps[2].color} fill="url(#funnel2)" strokeWidth={2} dot={false} />
-                <Area type="monotone" dataKey="conversions" name="Purchase" stroke={funnelSteps[3].color} fill="url(#funnel3)" strokeWidth={2} dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-          {/* Funnel legend with drop-off */}
-          <div className="w-40 flex flex-col justify-center gap-1 flex-shrink-0">
+        {/* Conversion Funnel */}
+        <div className="rounded-lg border border-border/60 bg-card p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">Conversion Funnel</p>
+          <div className="space-y-2">
             {funnelSteps.map((step, i, arr) => {
+              const pctOfTop = (step.value / arr[0].value * 100).toFixed(1);
               const dropOff = i > 0 ? (100 - (step.value / arr[i - 1].value * 100)).toFixed(1) : null;
               return (
-                <div key={step.label} className="py-2 px-3 rounded-md hover:bg-muted/40 transition-colors">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <div className="w-3 h-[3px] rounded-full flex-shrink-0" style={{ background: step.color }} />
-                    <p className="text-[10px] text-muted-foreground font-medium">{step.label}</p>
+                <div key={step.label}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: step.color }} />
+                      <span className="text-[11px] text-foreground font-medium">{step.label}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[12px] font-mono font-bold text-foreground">{step.value.toLocaleString()}</span>
+                      {dropOff && <span className="text-[9px] font-mono text-destructive/70">↓{dropOff}%</span>}
+                    </div>
                   </div>
-                  <p className="text-sm font-mono font-bold text-foreground pl-5">{step.value.toLocaleString()}</p>
-                  {dropOff && <p className="text-[9px] pl-5 font-mono text-destructive/70">↓ {dropOff}% drop-off</p>}
+                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${pctOfTop}%`, background: step.color, opacity: 0.7 }} />
+                  </div>
                 </div>
               );
             })}
+          </div>
+          <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground font-medium">LPV → Purchase</span>
+            <span className="text-[12px] font-mono font-bold text-foreground">{(asset.conversions / asset.landingPageViews * 100).toFixed(1)}%</span>
           </div>
         </div>
       </div>
@@ -513,29 +503,31 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       {isVideo && (
         <>
           <SectionHeader title="Video Performance" description="Retention analysis — where viewers drop off reveals content quality." />
-          <div className="grid grid-cols-4 gap-2.5 mb-3">
-            <KpiCard label="Plays" value={(asset.videoPlays || 0).toLocaleString()} />
-            <KpiCard label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} />
-            <KpiCard label="Avg Watch" value={`${asset.avgWatchTime || 0}s`} />
-            <KpiCard label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
+              <KpiCard label="Plays" value={(asset.videoPlays || 0).toLocaleString()} />
+              <KpiCard label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} />
+              <KpiCard label="Avg Watch" value={`${asset.avgWatchTime || 0}s`} />
+              <KpiCard label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
+            </div>
+            <ChartCard title="Retention Curve" height="h-[140px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={videoRetentionData}>
+                  <defs>
+                    <linearGradient id="retentionGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="point" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
+                  <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                  <Area type="monotone" dataKey="pct" name="Retention" stroke="hsl(227, 71%, 55%)" fill="url(#retentionGrad)" strokeWidth={2} dot={{ r: 3 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartCard>
           </div>
-          <ChartCard title="Retention Curve">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={videoRetentionData}>
-                <defs>
-                  <linearGradient id="retentionGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="point" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
-                <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
-                <Area type="monotone" dataKey="pct" name="Retention" stroke="hsl(227, 71%, 55%)" fill="url(#retentionGrad)" strokeWidth={2} dot={{ r: 3 }} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </ChartCard>
         </>
       )}
 
