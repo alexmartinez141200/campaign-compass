@@ -214,32 +214,32 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <ArrowLeft className="w-4 h-4" /> Back to assets
       </button>
 
-      {/* ─── HERO + CREATIVE PROFILE (side by side) ─── */}
-      <div className="flex gap-6 mb-5">
-        {/* Left: asset info */}
-        <div className="flex gap-4 flex-1 min-w-0">
-          <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0">
-            <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">{asset.name}</h2>
-                <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
-                <div className="mt-1.5"><ChannelIcon channel={asset.channel} size="md" /></div>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-mono font-bold text-foreground">#{rank}</p>
-                <p className="text-[10px] text-muted-foreground">of {campaignAssets.length}</p>
-              </div>
-            </div>
-          </div>
+      {/* ─── HERO BAR (thumbnail + info + rank + profile — single unified row) ─── */}
+      <div className="rounded-lg border border-border/60 bg-card p-4 mb-5 flex items-center gap-5">
+        {/* Thumbnail */}
+        <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+          <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
         </div>
 
-        {/* Right: creative profile as compact list */}
-        <div className="w-64 flex-shrink-0 rounded-lg border border-border/60 bg-card px-4 py-3">
-          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Creative Profile</p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+        {/* Name + meta */}
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold text-foreground leading-tight">{asset.name}</h2>
+          <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions}</p>
+          <div className="mt-1"><ChannelIcon channel={asset.channel} size="md" /></div>
+        </div>
+
+        {/* Rank */}
+        <div className="text-center px-4 border-l border-border/40 flex-shrink-0">
+          <p className="text-xl font-mono font-bold text-foreground">#{rank}</p>
+          <p className="text-[9px] text-muted-foreground">of {campaignAssets.length}</p>
+        </div>
+
+        {/* Divider */}
+        <div className="h-12 w-px bg-border/40 flex-shrink-0" />
+
+        {/* Creative profile as inline list */}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap gap-x-5 gap-y-0.5">
             {[
               ["Platform", asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : "Google"],
               ["Format", asset.type.charAt(0).toUpperCase() + asset.type.slice(1)],
@@ -253,9 +253,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               ["CTA", asset.creativeProfile.callToAction],
               ["Product 3s", asset.creativeProfile.productInFirst3s ? "Yes" : "No"],
             ].map(([label, value]) => (
-              <div key={label} className="flex items-center justify-between py-0.5">
-                <span className="text-[10px] text-muted-foreground">{label}</span>
-                <span className="text-[10px] font-medium text-foreground">{value}</span>
+              <div key={label} className="flex items-center gap-1">
+                <span className="text-[9px] text-muted-foreground">{label}</span>
+                <span className="text-[10px] font-semibold text-foreground">{value}</span>
               </div>
             ))}
           </div>
