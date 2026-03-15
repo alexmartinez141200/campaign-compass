@@ -55,9 +55,23 @@ const CampaignList = ({ campaigns, onSelect }: CampaignListProps) => {
                   {campaign.status}
                 </span>
               </div>
-              <p className="text-[11px] text-muted-foreground font-mono mt-0.5">
-                {campaign.startDate} → {campaign.endDate} · {campaign.assets.length} assets
-              </p>
+              <div className="flex items-center gap-4 mt-1">
+                <span className="text-[11px] text-muted-foreground">
+                  by <span className="font-medium text-foreground/70">{campaign.owner}</span>
+                </span>
+                <span className="text-muted-foreground/30">·</span>
+                <span className="text-[11px] text-muted-foreground font-mono">
+                  Created {campaign.createdAt}
+                </span>
+                <span className="text-muted-foreground/30">·</span>
+                <span className="text-[11px] text-muted-foreground font-mono">
+                  Ends {campaign.endDate}
+                </span>
+                <span className="text-muted-foreground/30">·</span>
+                <span className="text-[11px] text-muted-foreground font-mono">
+                  {campaign.assets.length} creatives
+                </span>
+              </div>
             </div>
 
             {/* Stats */}

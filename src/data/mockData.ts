@@ -31,6 +31,8 @@ export interface CreativeAsset {
 export interface Campaign {
   id: string;
   name: string;
+  owner: string;
+  createdAt: string;
   status: "active" | "paused" | "completed";
   startDate: string;
   endDate: string;
@@ -43,6 +45,8 @@ export const campaigns: Campaign[] = [
   {
     id: "camp-001",
     name: "Holiday 2024",
+    owner: "Alexandra Martinez",
+    createdAt: "2024-10-20",
     status: "active",
     startDate: "2024-11-15",
     endDate: "2024-12-31",
@@ -114,6 +118,8 @@ export const campaigns: Campaign[] = [
   {
     id: "camp-002",
     name: "Spring Collection 2025",
+    owner: "James Chen",
+    createdAt: "2025-01-15",
     status: "active",
     startDate: "2025-03-01",
     endDate: "2025-05-31",
@@ -155,6 +161,8 @@ export const campaigns: Campaign[] = [
   {
     id: "camp-003",
     name: "Summer Sale 2025",
+    owner: "Sarah Kim",
+    createdAt: "2025-04-28",
     status: "active",
     startDate: "2025-06-01",
     endDate: "2025-08-31",
@@ -196,6 +204,8 @@ export const campaigns: Campaign[] = [
   {
     id: "camp-004",
     name: "Back to School 2025",
+    owner: "Alexandra Martinez",
+    createdAt: "2025-06-10",
     status: "active",
     startDate: "2025-08-01",
     endDate: "2025-09-30",
@@ -235,6 +245,8 @@ export const campaigns: Campaign[] = [
   {
     id: "camp-005",
     name: "Winter Clearance 2024",
+    owner: "James Chen",
+    createdAt: "2023-12-01",
     status: "completed",
     startDate: "2024-01-10",
     endDate: "2024-02-28",
