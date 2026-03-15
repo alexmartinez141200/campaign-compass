@@ -508,30 +508,63 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
       </div>
 
-      {/* Engagement — social proof signals */}
+      {/* Engagement — pie chart + legend */}
       <SectionTitle>Engagement</SectionTitle>
-      <div className="rounded-lg border border-border/60 bg-surface p-4">
-        <div className="grid grid-cols-4 gap-4">
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Reactions</p>
-            <p className="text-lg font-mono font-bold text-foreground">{asset.postReactions.toLocaleString()}</p>
+      {(() => {
+        const engagementData = [
+          { name: "Reactions", value: asset.postReactions, color: "hsl(227, 71%, 55%)" },
+          { name: "Comments", value: asset.postComments, color: "hsl(174, 100%, 33%)" },
+          { name: "Shares", value: asset.postShares, color: "hsl(45, 93%, 47%)" },
+          { name: "Saves", value: asset.postSaves, color: "hsl(346, 84%, 61%)" },
+        ];
+        const total = engagementData.reduce((s, d) => s + d.value, 0);
+        return (
+          <div className="rounded-lg border border-border/60 bg-surface p-4">
+            <div className="flex items-center gap-6">
+              <div className="w-40 h-40 flex-shrink-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={engagementData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={35}
+                      outerRadius={65}
+                      paddingAngle={3}
+                      dataKey="value"
+                      strokeWidth={0}
+                    >
+                      {engagementData.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      {...chartTooltipStyle}
+                      formatter={(value: number, name: string) => [`${value.toLocaleString()} (${(value / total * 100).toFixed(1)}%)`, name]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex-1 grid grid-cols-2 gap-3">
+                {engagementData.map((item) => (
+                  <div key={item.name} className="flex items-start gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full mt-0.5 flex-shrink-0" style={{ background: item.color }} />
+                    <div>
+                      <p className="text-[10px] text-muted-foreground font-medium">{item.name}</p>
+                      <p className="text-[15px] font-mono font-bold text-foreground leading-tight">{item.value.toLocaleString()}</p>
+                      <p className="text-[9px] text-muted-foreground font-mono">{(item.value / total * 100).toFixed(1)}%</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between">
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Total Engagement</span>
+              <span className="text-[13px] font-mono font-bold text-foreground">{total.toLocaleString()}</span>
+            </div>
           </div>
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Comments</p>
-            <p className="text-lg font-mono font-bold text-foreground">{asset.postComments.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Shares</p>
-            <p className="text-lg font-mono font-bold text-foreground">{asset.postShares.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Saves</p>
-            <p className="text-lg font-mono font-bold text-foreground">{asset.postSaves.toLocaleString()}</p>
-          </div>
-        </div>
-        <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between">
-          <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Total Engagement</span>
-          <span className="text-[13px] font-mono font-bold text-foreground">{(asset.postReactions + asset.postComments + asset.postShares + asset.postSaves).toLocaleString()}</span>
+        );
+      })()}
         </div>
       </div>
 
