@@ -8,12 +8,17 @@ import { campaigns } from "@/data/mockData";
 
 type AssetFilter = "all" | "video" | "image" | "carousel";
 type SortOption = "roas" | "spend" | "delta";
+type CampaignTab = "active" | "archived";
 
 const Index = () => {
+  const [campaignTab, setCampaignTab] = useState<CampaignTab>("active");
   const [activeCampaignId, setActiveCampaignId] = useState(campaigns[0].id);
   const [filter, setFilter] = useState<AssetFilter>("all");
   const [sort, setSort] = useState<SortOption>("roas");
 
+  const visibleCampaigns = campaigns.filter((c) =>
+    campaignTab === "active" ? c.status === "active" : c.status !== "active"
+  );
   const campaign = campaigns.find((c) => c.id === activeCampaignId)!;
 
   const filteredAssets = useMemo(() => {
