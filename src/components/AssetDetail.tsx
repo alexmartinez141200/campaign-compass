@@ -227,13 +227,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
           </div>
           {/* Thumbnail + Name */}
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
               <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-foreground leading-tight">{asset.name}</h2>
-              <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions}</p>
+              <h2 className="text-lg font-semibold text-foreground leading-tight">{asset.name}</h2>
+              <p className="text-xs text-muted-foreground font-mono mt-1">{asset.id} · {asset.dimensions}</p>
             </div>
           </div>
         </div>
