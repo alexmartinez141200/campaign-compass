@@ -214,43 +214,52 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <ArrowLeft className="w-4 h-4" /> Back to assets
       </button>
 
-      {/* ─── HERO ─── */}
-      <div className="flex gap-4 mb-5">
-        <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0">
-          <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">{asset.name}</h2>
-              <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
-              <div className="mt-1.5"><ChannelIcon channel={asset.channel} size="md" /></div>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-mono font-bold text-foreground">#{rank}</p>
-              <p className="text-[10px] text-muted-foreground">of {campaignAssets.length}</p>
+      {/* ─── HERO + CREATIVE PROFILE (side by side) ─── */}
+      <div className="flex gap-6 mb-5">
+        {/* Left: asset info */}
+        <div className="flex gap-4 flex-1 min-w-0">
+          <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0">
+            <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">{asset.name}</h2>
+                <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
+                <div className="mt-1.5"><ChannelIcon channel={asset.channel} size="md" /></div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-mono font-bold text-foreground">#{rank}</p>
+                <p className="text-[10px] text-muted-foreground">of {campaignAssets.length}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* ─── CREATIVE PROFILE (compact inline tags) ─── */}
-      <div className="flex flex-wrap items-center gap-1.5 mb-5">
-        {[
-          asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : asset.channel === "google" ? "Google" : asset.channel,
-          asset.type.charAt(0).toUpperCase() + asset.type.slice(1),
-          ...(asset.creativeProfile.videoDuration ? [`${asset.creativeProfile.videoDuration}s`] : []),
-          asset.creativeProfile.aspectRatio,
-          `${asset.creativeProfile.motionIntensity} motion`,
-          `${asset.creativeProfile.colorContrast} contrast`,
-          `Brand: ${asset.creativeProfile.brandProminence}`,
-          `Consistency: ${asset.creativeProfile.brandConsistency}`,
-          asset.creativeProfile.funnelStage,
-          asset.creativeProfile.callToAction,
-          asset.creativeProfile.productInFirst3s ? "Product in 3s ✓" : "No product in 3s",
-        ].map((tag) => (
-          <span key={tag} className="text-[10px] font-medium text-muted-foreground bg-muted/50 border border-border/40 px-2 py-0.5 rounded-full">{tag}</span>
-        ))}
+        {/* Right: creative profile as compact list */}
+        <div className="w-64 flex-shrink-0 rounded-lg border border-border/60 bg-card px-4 py-3">
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Creative Profile</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+            {[
+              ["Platform", asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : "Google"],
+              ["Format", asset.type.charAt(0).toUpperCase() + asset.type.slice(1)],
+              ...(asset.creativeProfile.videoDuration ? [["Duration", `${asset.creativeProfile.videoDuration}s`]] : []),
+              ["Ratio", asset.creativeProfile.aspectRatio],
+              ["Motion", asset.creativeProfile.motionIntensity],
+              ["Contrast", asset.creativeProfile.colorContrast],
+              ["Brand", asset.creativeProfile.brandProminence],
+              ["Consistency", asset.creativeProfile.brandConsistency],
+              ["Funnel", asset.creativeProfile.funnelStage],
+              ["CTA", asset.creativeProfile.callToAction],
+              ["Product 3s", asset.creativeProfile.productInFirst3s ? "Yes" : "No"],
+            ].map(([label, value]) => (
+              <div key={label} className="flex items-center justify-between py-0.5">
+                <span className="text-[10px] text-muted-foreground">{label}</span>
+                <span className="text-[10px] font-medium text-foreground">{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* ─── DATE FILTER (global for all charts) ─── */}
