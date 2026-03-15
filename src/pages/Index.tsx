@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { FolderOpen } from "lucide-react";
 import AppSidebar from "@/components/AppSidebar";
 import CampaignHeader from "@/components/CampaignHeader";
 import DiagnosticCard from "@/components/DiagnosticCard";
