@@ -23,16 +23,28 @@ interface DiagnosticCardProps {
   onSelectToggle?: (id: string) => void;
 }
 
-const DiagnosticCard = ({ asset, index, maxRoas, selected = false, onSelectToggle }: DiagnosticCardProps) => {
+const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelectToggle }: DiagnosticCardProps) => {
+  const rankInfo = rankConfig[rank];
+  const isTop = rank === 0;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.04, ease: [0.25, 0.1, 0.25, 1] }}
       className={`group flex items-center gap-4 p-3 rounded-lg shadow-card hover:shadow-card-hover transition-all duration-150 border ${
-        selected ? "border-primary bg-primary/5" : "border-border bg-surface"
+        selected ? "border-primary bg-primary/5" : isTop ? "border-yellow-200 bg-yellow-50/50" : "border-border bg-surface"
       }`}
     >
+      {/* Rank badge */}
+      <div className="flex-shrink-0 w-7 flex justify-center">
+        {rankInfo ? (
+          <rankInfo.icon className={`w-4.5 h-4.5 ${rankInfo.color}`} strokeWidth={2} />
+        ) : (
+          <span className="text-[11px] font-mono font-semibold text-muted-foreground/50">#{rank + 1}</span>
+        )}
+      </div>
+
       {/* Checkbox */}
       <Checkbox
         checked={selected}

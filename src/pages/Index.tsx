@@ -149,7 +149,7 @@ const Index = () => {
               <div className="space-y-2">
                 {filteredAssets.length > 0 ? (
                   filteredAssets.map((asset, i) => (
-                    <DiagnosticCard key={asset.id} asset={asset} index={i} maxRoas={Math.max(...filteredAssets.map(a => a.roas))} selected={selectedAssets.has(asset.id)} onSelectToggle={toggleAssetSelection} />
+                    <DiagnosticCard key={asset.id} asset={asset} index={i} rank={i} maxRoas={Math.max(...filteredAssets.map(a => a.roas))} selected={selectedAssets.has(asset.id)} onSelectToggle={toggleAssetSelection} />
                   ))
                 ) : (
                   <div className="py-20 text-center text-muted-foreground text-sm">
