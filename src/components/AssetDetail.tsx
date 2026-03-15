@@ -233,7 +233,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
             <div className="min-w-0">
               <h2 className="text-sm font-semibold text-foreground leading-tight">{asset.name}</h2>
-              <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
+              <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions}</p>
             </div>
           </div>
         </div>
