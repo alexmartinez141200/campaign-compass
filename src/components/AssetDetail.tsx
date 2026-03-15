@@ -32,9 +32,15 @@ const kpiInfo: Record<string, string> = {
   "Revenue": "Total purchase value attributed to this ad within the conversion window.",
   "CPA": "Cost Per Acquisition — how much you pay for each purchase. Lower CPA means more efficient conversion spend.",
   "Plays": "Total number of times the video started playing, including auto-plays in feed.",
-  "ThruPlays": "Number of times the video was played to completion or for at least 15 seconds.",
+  "ThruPlays": "Number of times the video was played to completion or for at least 15 seconds. Meta metric.",
   "Avg Watch": "Average duration a viewer watched the video before scrolling or closing.",
   "ThruPlay Rate": "Percentage of total plays that counted as ThruPlays. Higher rate indicates more engaging content.",
+  "Video Views": "Total 2-second+ video views. TikTok's primary video metric.",
+  "Video View Rate": "Percentage of impressions that resulted in a 2s+ video view. Higher = stronger hook.",
+  "Profile Visits": "Number of times users visited your TikTok profile after seeing this ad.",
+  "Follows": "New followers attributed to this ad. Measures brand-building effectiveness.",
+  "Paid Likes": "Likes from paid impressions only, excluding organic engagement.",
+  "Paid Shares": "Shares from paid impressions only. High shares indicate viral potential.",
 };
 
 // ─── Insights Generator ───
