@@ -87,8 +87,13 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
         </div>
       )}
 
+      {/* Number */}
+      <div className="ml-3 w-5 flex-shrink-0 text-center">
+        <span className="text-[11px] font-mono font-medium text-muted-foreground/50">{rank + 1}</span>
+      </div>
+
       {/* Thumbnail */}
-      <div className="ml-3 w-11 h-11 rounded-md overflow-hidden flex-shrink-0 bg-muted">
+      <div className="ml-2 w-11 h-11 rounded-md overflow-hidden flex-shrink-0 bg-muted">
         <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
       </div>
 
