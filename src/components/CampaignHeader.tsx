@@ -40,37 +40,41 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
       {/* Unified block: title + budget + platform table */}
       <div className="rounded-lg border border-border/60 overflow-hidden bg-card">
         {/* Header strip: title + budget in one row */}
-        <div className="px-4 py-3 bg-muted/20 border-b border-border/40 flex items-start justify-between">
-          <div className="flex flex-col gap-0.5">
+        <div className="px-4 py-3 bg-muted/20 border-b border-border/40">
+          {/* Row 1: Name + Status + Budget */}
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <h1 className="text-base font-semibold text-foreground tracking-tight">{campaign.name}</h1>
               <span className={`text-[9px] uppercase font-bold tracking-wider px-1.5 py-px rounded ${
                 campaign.status === "active" ? "bg-accent/10 text-accent-teal" : "bg-secondary text-muted-foreground"
               }`}>{campaign.status}</span>
             </div>
-            <div className="flex items-center gap-6 mt-0.5">
-              <div className="flex flex-col">
-                <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Owner</span>
-                <span className="text-[12px] font-medium text-foreground/80">{campaign.owner}</span>
+            <div className="flex items-center gap-3">
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Budget</span>
+              <span className="text-sm font-mono font-bold text-foreground">${totalSpend.toLocaleString()}</span>
+              <span className="text-[10px] font-mono text-muted-foreground">/ ${campaign.totalBudget.toLocaleString()}</span>
+              <div className="w-24 h-1.5 bg-muted/40 rounded-full overflow-hidden">
+                <div className="h-full rounded-full bg-primary/60 transition-all" style={{ width: `${Math.min(spendPct, 100)}%` }} />
               </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Start Date</span>
-                <span className="text-[12px] font-mono text-foreground/80">{campaign.startDate}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">End Date</span>
-                <span className="text-[12px] font-mono text-foreground/80">{campaign.endDate}</span>
-              </div>
+              <span className="text-[10px] font-mono text-muted-foreground">{spendPct.toFixed(0)}%</span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Budget</span>
-            <span className="text-sm font-mono font-bold text-foreground">${totalSpend.toLocaleString()}</span>
-            <span className="text-[10px] font-mono text-muted-foreground">/ ${campaign.totalBudget.toLocaleString()}</span>
-            <div className="w-24 h-1.5 bg-muted/40 rounded-full overflow-hidden">
-              <div className="h-full rounded-full bg-primary/60 transition-all" style={{ width: `${Math.min(spendPct, 100)}%` }} />
+          {/* Row 2: Owner, Start, End — inline */}
+          <div className="flex items-baseline gap-5 mt-1.5">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Owner</span>
+              <span className="text-[11px] font-medium text-foreground/80">{campaign.owner}</span>
             </div>
-            <span className="text-[10px] font-mono text-muted-foreground">{spendPct.toFixed(0)}%</span>
+            <span className="text-muted-foreground/20">|</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Start</span>
+              <span className="text-[11px] font-mono text-foreground/80">{campaign.startDate}</span>
+            </div>
+            <span className="text-muted-foreground/20">|</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">End</span>
+              <span className="text-[11px] font-mono text-foreground/80">{campaign.endDate}</span>
+            </div>
           </div>
         </div>
 
