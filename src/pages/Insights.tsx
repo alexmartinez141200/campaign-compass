@@ -475,7 +475,7 @@ const Insights = () => {
                             {diff > 0 ? "+" : ""}{diff}%
                           </span>
                         </td>
-                        <td className="px-4 py-2.5">
+                        <td className="pl-12 pr-4 py-2.5">
                           <span className="text-[10px] text-muted-foreground">{card.takeaway || "Similar performance"}</span>
                         </td>
                       </tr>
