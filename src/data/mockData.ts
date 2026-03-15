@@ -248,6 +248,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
     assets: [
       {
         id: "CRI-3310", name: "Static_Lookbook_01", type: "image", thumbnail: creative2, dimensions: "1200×628", channel: "meta",
+        creativeProfile: { aspectRatio: "16:9", motionIntensity: "None", colorContrast: "High", brandProminence: "Balanced", brandConsistency: "High", funnelStage: "Consideration", callToAction: "Shop Collection", productInFirst3s: true },
         spend: 8400, impressions: 195000, reach: 156000, frequency: 1.25, clicks: 5850, linkClicks: 4680, outboundClicks: 4100,
         postReactions: 2400, postComments: 195, postShares: 410, postSaves: 920,
         conversions: 340, purchaseValue: 31920, addToCart: 1100, initiateCheckout: 620, landingPageViews: 3900,
