@@ -59,14 +59,27 @@ const Index = () => {
           {selectedCampaign ? (
             <>
               <button
-                onClick={() => setSelectedCampaignId(null)}
+                onClick={() => { setSelectedCampaignId(null); setViewingAssetId(null); }}
                 className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Campaigns
               </button>
               <span className="text-muted-foreground/40">/</span>
-              <span className="text-[13px] font-medium text-foreground">{selectedCampaign.name}</span>
+              <button
+                onClick={() => setViewingAssetId(null)}
+                className={`text-[13px] font-medium transition-colors ${viewingAssetId ? "text-muted-foreground hover:text-foreground" : "text-foreground"}`}
+              >
+                {selectedCampaign.name}
+              </button>
+              {viewingAssetId && (
+                <>
+                  <span className="text-muted-foreground/40">/</span>
+                  <span className="text-[13px] font-medium text-foreground">
+                    {selectedCampaign.assets.find(a => a.id === viewingAssetId)?.name}
+                  </span>
+                </>
+              )}
             </>
           ) : (
             <>
