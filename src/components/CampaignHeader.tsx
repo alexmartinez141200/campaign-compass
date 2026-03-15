@@ -6,12 +6,10 @@ interface CampaignHeaderProps {
 }
 
 const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
-  const totalRoas = campaign.assets.length > 0
-    ? (campaign.assets.reduce((sum, a) => sum + a.totalRoas, 0) / campaign.assets.length).toFixed(1)
+  const avgRoas = campaign.assets.length > 0
+    ? (campaign.assets.reduce((sum, a) => sum + a.roas, 0) / campaign.assets.length).toFixed(1)
     : "—";
-  const totalConversions = campaign.assets.reduce(
-    (sum, a) => sum + a.channels.reduce((cs, c) => cs + c.conversions, 0), 0
-  );
+  const totalConversions = campaign.assets.reduce((sum, a) => sum + a.conversions, 0);
 
   return (
     <div className="flex items-start justify-between">
@@ -36,7 +34,7 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
       <div className="flex gap-8">
         <MetricCell label="Budget" value={`$${campaign.totalBudget.toLocaleString()}`} />
         <MetricCell label="Spend" value={`$${campaign.totalSpend.toLocaleString()}`} delta={`${((campaign.totalSpend / campaign.totalBudget) * 100).toFixed(0)}% used`} />
-        <MetricCell label="Avg ROAS" value={`${totalRoas}x`} />
+        <MetricCell label="Avg ROAS" value={`${avgRoas}x`} />
         <MetricCell label="Conversions" value={totalConversions.toLocaleString()} />
       </div>
     </div>
