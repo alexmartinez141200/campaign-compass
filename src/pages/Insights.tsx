@@ -279,61 +279,60 @@ const Insights = () => {
           </div>
         </div>
 
-        {/* ═══ 2. Attribute × Metric Correlation Tables ═══ */}
+        {/* ═══ 2. Attribute × Metric Correlation ═══ */}
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Layers className="w-4 h-4 text-primary" />
             <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Profile × Metric Correlation</h2>
-            <span className="text-[10px] text-muted-foreground">— avg metric per attribute value · <span className="text-emerald-600">■ best</span> · <span className="text-destructive">■ worst</span></span>
+            <span className="text-[10px] text-muted-foreground">— how each creative attribute affects performance</span>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {PROFILE_ATTRS.map(attr => {
-              const attrData = correlationTable.get(attr.key);
-              if (!attrData || attrData.size < 2) return null;
-              
-              const attrValues = [...attrData.keys()].sort();
-              
-              return (
-                <div key={attr.key} className="rounded-lg border border-border overflow-hidden">
-                  <div className="bg-muted/20 px-3 py-1.5 border-b border-border/40">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">{attr.label}</span>
-                    <span className="text-[9px] text-muted-foreground ml-2">({attrValues.length} values)</span>
+            {correlationCards.map(card => (
+              <div key={card.attr.key} className="rounded-lg border border-border overflow-hidden">
+                {/* Card header with takeaway */}
+                <div className="bg-muted/20 px-3 py-2 border-b border-border/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">{card.attr.label}</span>
+                    <span className="text-[9px] text-muted-foreground">{card.rows.length} values</span>
                   </div>
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border/30">
-                        <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-3 py-1 text-left">Value</th>
-                        <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-center w-[28px]">n</th>
-                        {METRICS.map(m => (
-                          <th key={m.key} className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-right">{m.label}</th>
+                  {card.takeaway && (
+                    <p className="text-[10px] text-muted-foreground mt-0.5 italic">{card.takeaway}</p>
+                  )}
+                </div>
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border/30">
+                      <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-3 py-1 text-left">Value</th>
+                      <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-center w-[24px]">n</th>
+                      {METRICS.map(m => (
+                        <th key={m.key} className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-right">{m.label}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {card.rows.map(row => (
+                      <tr key={row.attrValue} className="border-b border-border/15 last:border-0 hover:bg-muted/10 transition-colors">
+                        <td className="px-3 py-1.5 text-[11px] font-semibold text-foreground">{row.attrValue}</td>
+                        <td className="px-2 py-1.5 text-center text-[9px] font-mono text-muted-foreground">{row.count}</td>
+                        {row.metrics.map((mc, mi) => (
+                          <td key={METRICS[mi].key} className={`px-2 py-1.5 text-right ${cellStyles[mc.signal]}`}>
+                            <div className="flex flex-col items-end">
+                              <span className="text-[11px] font-mono font-semibold">{fmt(mc.value, METRICS[mi].format)}</span>
+                              {mc.signal !== "neutral" && (
+                                <span className="text-[8px] font-mono opacity-70">
+                                  {mc.pctVsAvg > 0 ? "▲" : "▼"} {Math.abs(mc.pctVsAvg)}%
+                                </span>
+                              )}
+                            </div>
+                          </td>
                         ))}
                       </tr>
-                    </thead>
-                    <tbody>
-                      {attrValues.map(val => {
-                        const metricMap = attrData.get(val)!;
-                        const count = metricMap.values().next().value?.count || 0;
-                        return (
-                          <tr key={val} className="border-b border-border/15 last:border-0 hover:bg-muted/10 transition-colors">
-                            <td className="px-3 py-1.5 text-[11px] font-semibold text-foreground">{val}</td>
-                            <td className="px-2 py-1.5 text-center text-[9px] font-mono text-muted-foreground">{count}</td>
-                            {METRICS.map(m => {
-                              const cell = metricMap.get(m.key)!;
-                              return (
-                                <td key={m.key} className={`px-2 py-1.5 text-right text-[11px] font-mono font-semibold ${cellBg[cell.signal]}`}>
-                                  {fmt(cell.value, m.format)}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              );
-            })}
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
           </div>
         </div>
 
