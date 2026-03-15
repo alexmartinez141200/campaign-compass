@@ -3,7 +3,7 @@ import creative2 from "@/assets/creative-2.jpg";
 import creative3 from "@/assets/creative-3.jpg";
 import creative4 from "@/assets/creative-4.jpg";
 
-export type Channel = "meta" | "tiktok" | "google";
+export type Channel = "meta" | "tiktok" | "google" | "linkedin" | "amazon";
 
 export interface CreativeAsset {
   id: string;
