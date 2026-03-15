@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, DollarSign, Eye, MousePointerClick, ShoppingCart, Target, BarChart3, Heart, MessageCircle, Share2, Bookmark, Play, Clock, Users, Repeat, ExternalLink, Crosshair, CalendarDays } from "lucide-react";
-import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import type { CreativeAsset, DailyMetric } from "@/data/mockData";
 import ChannelIcon from "./ChannelIcon";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
