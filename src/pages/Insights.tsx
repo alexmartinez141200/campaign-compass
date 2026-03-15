@@ -584,6 +584,7 @@ const Insights = () => {
           </div>
         </div>
       )}
+      </main>
     </div>
   );
 };
