@@ -18,6 +18,7 @@ type CreativeSortKey = "name" | "roas" | "spend" | "conversions";
 
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [topTab, setTopTab] = useState<TopTab>("campaigns");
   const [campaignFilter, setCampaignFilter] = useState<CampaignFilter>("all");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
