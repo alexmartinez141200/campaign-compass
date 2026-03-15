@@ -424,11 +424,8 @@ const Insights = () => {
                         const score = scores?.get(name) ?? 0;
                         return (
                           <td key={name} className="px-3 py-3 text-center">
-                            <button onClick={() => setOpenModal(name)} className="cursor-pointer hover:scale-105 transition-transform inline-flex flex-col items-center gap-1">
+                            <button onClick={() => setOpenModal(name)} className="cursor-pointer hover:scale-105 transition-transform">
                               <span className={`text-[13px] font-bold font-mono leading-none ${scoreColor(score)}`}>{score}</span>
-                              <div className="w-8 h-[3px] bg-muted/40 rounded-full overflow-hidden">
-                                <div className={`h-full rounded-full transition-all ${score >= 70 ? "bg-accent" : score >= 40 ? "bg-amber-500" : "bg-destructive"}`} style={{ width: `${score}%` }} />
-                              </div>
                             </button>
                           </td>
                         );
