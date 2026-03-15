@@ -285,59 +285,45 @@ const Insights = () => {
       <table className="w-full">
         <thead>
           <tr className="bg-muted/30 border-b border-border">
-            <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left min-w-[180px]">Asset</th>
+            <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-5 py-2.5 text-left min-w-[220px]">Asset</th>
             {group.name === "Efficiency" && (
-              <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-3 py-2.5 text-right">Spend</th>
+              <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right">Spend</th>
             )}
             {group.metrics.map(m => (
-              <th key={m.key} className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-3 py-2.5 text-right">{m.label}</th>
+              <th key={m.key} className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right">{m.label}</th>
             ))}
-            {group.name === "Efficiency" && (
-              <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-3 py-2.5 w-[80px]" />
-            )}
           </tr>
         </thead>
         <tbody>
-          {ranked.map((asset) => {
-            const barW = maxRoas > 0 ? (asset.roas / maxRoas) * 100 : 0;
-            const barColor = asset.roas >= 5 ? "bg-accent" : asset.roas >= 3 ? "bg-primary" : "bg-destructive";
-            return (
-              <tr key={asset.id} className="border-b border-border/30 last:border-0 hover:bg-muted/10 transition-colors">
-                <td className="px-4 py-2.5">
-                  <div className="flex items-center gap-2.5">
-                    <img src={asset.thumbnail} alt={asset.name} className="w-7 h-7 rounded-md object-cover flex-shrink-0 border border-border/40" />
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-semibold text-foreground truncate">{asset.name}</p>
-                      <p className="text-[9px] font-mono text-muted-foreground/60">{asset.id}</p>
-                    </div>
+          {ranked.map((asset) => (
+            <tr key={asset.id} className="border-b border-border/30 last:border-0 hover:bg-muted/10 transition-colors">
+              <td className="px-5 py-3.5">
+                <div className="flex items-center gap-3">
+                  <img src={asset.thumbnail} alt={asset.name} className="w-8 h-8 rounded-lg object-cover flex-shrink-0 border border-border/40" />
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-semibold text-foreground truncate">{asset.name}</p>
+                    <p className="text-[10px] font-mono text-muted-foreground/50">{asset.id}</p>
                   </div>
-                </td>
-                {group.name === "Efficiency" && (
-                  <td className="px-3 py-2.5 text-right text-[11px] font-mono text-muted-foreground">${asset.spend.toLocaleString()}</td>
-                )}
-                {group.metrics.map(m => {
-                  const val = m.get(asset);
-                  const avg = assets.reduce((s, a) => s + m.get(a), 0) / assets.length;
-                  const pctDiff = avg > 0 ? ((val - avg) / avg) * 100 : 0;
-                  const isGood = m.higherIsBetter ? pctDiff > 15 : pctDiff < -15;
-                  const isBad = m.higherIsBetter ? pctDiff < -15 : pctDiff > 15;
-                  const color = isGood ? "text-accent" : isBad ? "text-destructive" : "text-foreground";
-                  return (
-                    <td key={m.key} className={`px-3 py-2.5 text-right text-[11px] font-mono font-semibold ${color}`}>
-                      {fmt(val, m.format)}
-                    </td>
-                  );
-                })}
-                {group.name === "Efficiency" && (
-                  <td className="px-3 py-2.5">
-                    <div className="w-full h-1.5 bg-muted/30 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${barColor}`} style={{ width: `${barW}%` }} />
-                    </div>
+                </div>
+              </td>
+              {group.name === "Efficiency" && (
+                <td className="px-4 py-3.5 text-right text-[12px] font-mono text-muted-foreground">${asset.spend.toLocaleString()}</td>
+              )}
+              {group.metrics.map(m => {
+                const val = m.get(asset);
+                const avg = assets.reduce((s, a) => s + m.get(a), 0) / assets.length;
+                const pctDiff = avg > 0 ? ((val - avg) / avg) * 100 : 0;
+                const isGood = m.higherIsBetter ? pctDiff > 15 : pctDiff < -15;
+                const isBad = m.higherIsBetter ? pctDiff < -15 : pctDiff > 15;
+                const color = isGood ? "text-accent" : isBad ? "text-destructive" : "text-foreground";
+                return (
+                  <td key={m.key} className={`px-4 py-3.5 text-right text-[12px] font-mono font-semibold ${color}`}>
+                    {fmt(val, m.format)}
                   </td>
-                )}
-              </tr>
-            );
-          })}
+                );
+              })}
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
@@ -424,11 +410,8 @@ const Insights = () => {
                         const score = scores?.get(name) ?? 0;
                         return (
                           <td key={name} className="px-3 py-3 text-center">
-                            <button onClick={() => setOpenModal(name)} className="cursor-pointer hover:scale-105 transition-transform inline-flex flex-col items-center gap-1">
+                            <button onClick={() => setOpenModal(name)} className="cursor-pointer hover:scale-105 transition-transform">
                               <span className={`text-[13px] font-bold font-mono leading-none ${scoreColor(score)}`}>{score}</span>
-                              <div className="w-8 h-[3px] bg-muted/40 rounded-full overflow-hidden">
-                                <div className={`h-full rounded-full transition-all ${score >= 70 ? "bg-accent" : score >= 40 ? "bg-amber-500" : "bg-destructive"}`} style={{ width: `${score}%` }} />
-                              </div>
                             </button>
                           </td>
                         );
