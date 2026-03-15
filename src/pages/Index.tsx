@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { FolderOpen } from "lucide-react";
 import AppSidebar from "@/components/AppSidebar";
 import CampaignHeader from "@/components/CampaignHeader";
 import DiagnosticCard from "@/components/DiagnosticCard";
@@ -32,7 +33,14 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <AppSidebar />
 
-      <main className="ml-[232px] p-6">
+      <main className="ml-[232px]">
+        {/* Page header */}
+        <div className="px-6 py-5 border-b border-border flex items-center gap-3">
+          <FolderOpen className="w-6 h-6 text-muted-foreground/40" strokeWidth={1.5} />
+          <h1 className="text-lg font-semibold text-foreground">Campaigns</h1>
+        </div>
+
+        <div className="p-6">
         {/* Campaign tabs */}
         <div className="flex gap-1 border-b border-border mb-6">
           {campaigns.map((c) => (
@@ -69,6 +77,7 @@ const Index = () => {
               No creative assets in this campaign yet.
             </div>
           )}
+        </div>
         </div>
       </main>
     </div>
