@@ -16,8 +16,15 @@ interface DiagnosticCardProps {
   onClick?: () => void;
 }
 
+type SortOption = "roas" | "spend";
+
+const sorts: { value: SortOption; label: string }[] = [
+  { value: "roas", label: "ROAS" },
+  { value: "spend", label: "Spend" },
+];
+
 /** Column header row — render once above the list */
-export const DiagnosticHeader = () => (
+export const DiagnosticHeader = ({ sort, onSortChange }: { sort?: SortOption; onSortChange?: (s: SortOption) => void }) => (
   <div className="flex items-center h-8 px-4 text-[9px] uppercase tracking-wider font-semibold text-muted-foreground/60 select-none">
     <div className="w-6 flex-shrink-0" /> {/* rank */}
     <div className="ml-2.5 w-4 flex-shrink-0" /> {/* checkbox */}
