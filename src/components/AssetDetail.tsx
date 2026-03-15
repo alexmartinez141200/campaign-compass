@@ -190,6 +190,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
+      </div>
 
       {/* CTR & CPM trends */}
       <div className="grid grid-cols-2 gap-3 mt-3">
