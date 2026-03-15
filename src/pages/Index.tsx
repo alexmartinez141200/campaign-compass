@@ -281,20 +281,22 @@ const Index = () => {
                           className="pl-8 pr-3 py-1.5 text-[13px] bg-muted/30 border border-border rounded-md w-52 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-colors"
                         />
                       </div>
-                      <button
-                        disabled={selectedAssets.size < 2}
-                        onClick={() => {
-                          const assets = filteredCreatives.filter(r => selectedAssets.has(r.asset.id)).map(r => r.asset);
-                          navigate("/insights", { state: { assets } });
-                        }}
-                        className={`px-5 py-1.5 rounded-lg text-[13px] font-medium transition-colors border whitespace-nowrap ${
-                          selectedAssets.size >= 2
-                            ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
-                            : "border-border text-muted-foreground cursor-not-allowed"
-                        }`}
-                      >
-                        Creative Diagnostics
-                      </button>
+                      {creativeFilterChannel !== "all" && (
+                        <button
+                          disabled={selectedAssets.size < 2}
+                          onClick={() => {
+                            const assets = filteredCreatives.filter(r => selectedAssets.has(r.asset.id)).map(r => r.asset);
+                            navigate("/insights", { state: { assets } });
+                          }}
+                          className={`px-5 py-1.5 rounded-lg text-[13px] font-medium transition-colors border whitespace-nowrap ${
+                            selectedAssets.size >= 2
+                              ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
+                              : "border-border text-muted-foreground cursor-not-allowed"
+                          }`}
+                        >
+                          Creative Diagnostics
+                        </button>
+                      )}
                     </div>
                   </div>
 
