@@ -28,14 +28,14 @@ const Index = () => {
   const filteredAssets = useMemo(() => {
     if (!selectedCampaign) return [];
     let assets = selectedCampaign.assets;
-    if (filter !== "all") assets = assets.filter((a) => a.type === filter);
+    if (channelFilter !== "all") assets = assets.filter((a) => a.channel === channelFilter);
 
     return [...assets].sort((a, b) => {
       if (sort === "roas") return b.roas - a.roas;
       if (sort === "spend") return b.spend - a.spend;
       return 0;
     });
-  }, [selectedCampaign, filter, sort]);
+  }, [selectedCampaign, channelFilter, sort]);
 
   return (
     <div className="min-h-screen bg-background">
