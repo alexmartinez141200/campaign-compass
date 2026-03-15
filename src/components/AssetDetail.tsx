@@ -216,9 +216,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
       {/* ─── ASSET HEADER ─── */}
       <div className="rounded-lg border border-border/60 bg-card mb-5 overflow-hidden flex">
-        {/* Left: Identity */}
-        <div className="flex-1 p-4">
-          {/* Top row: Channel badge + Rank */}
+        {/* Left: Identity — constrained width */}
+        <div className="w-1/3 p-4 flex flex-col justify-between">
+          {/* Channel badge + Rank */}
           <div className="flex items-center justify-between mb-3">
             <ChannelIcon channel={asset.channel} size="md" />
             <div className="text-right">
@@ -226,22 +226,22 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               <p className="text-[9px] text-muted-foreground">of {campaignAssets.length}</p>
             </div>
           </div>
-          {/* Bottom row: Thumbnail + Name */}
-          <div className="flex items-center gap-4">
+          {/* Thumbnail + Name */}
+          <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
               <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-base font-semibold text-foreground leading-tight">{asset.name}</h2>
+              <h2 className="text-sm font-semibold text-foreground leading-tight">{asset.name}</h2>
               <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
             </div>
           </div>
         </div>
 
-        {/* Right: Creative Profile List */}
-        <div className="border-l border-border/40 bg-muted/20 px-4 py-3 w-44 flex-shrink-0">
+        {/* Right: Creative Profile List — takes 2/3 */}
+        <div className="flex-1 border-l border-border/40 bg-muted/20 px-5 py-3">
           <p className="text-[8px] uppercase tracking-wider text-muted-foreground/60 font-semibold mb-2">Creative Profile</p>
-          <div className="space-y-1">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-1">
             {[
               ["Platform", asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : "Google"],
               ["Format", asset.type.charAt(0).toUpperCase() + asset.type.slice(1)],
@@ -255,7 +255,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               ["CTA", asset.creativeProfile.callToAction],
               ["Product 3s", asset.creativeProfile.productInFirst3s ? "Yes" : "No"],
             ].map(([label, value]) => (
-              <div key={label} className="flex items-center justify-between">
+              <div key={label} className="flex items-center justify-between py-0.5">
                 <span className="text-[10px] text-muted-foreground">{label}</span>
                 <span className="text-[11px] font-semibold text-foreground">{value}</span>
               </div>
