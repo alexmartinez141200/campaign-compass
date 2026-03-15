@@ -112,7 +112,7 @@ export interface Campaign {
   assets: CreativeAsset[];
 }
 
-export const campaigns: Campaign[] = [
+const rawCampaigns: Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'dailyMetrics'>[] }[] = [
   {
     id: "camp-001",
     name: "Holiday 2024",
@@ -268,3 +268,12 @@ export const campaigns: Campaign[] = [
     assets: [],
   },
 ];
+
+// Auto-generate dailyMetrics for all assets
+export const campaigns: Campaign[] = rawCampaigns.map(c => ({
+  ...c,
+  assets: c.assets.map(a => ({
+    ...a,
+    dailyMetrics: generateDailyMetrics(a.spend, a.impressions, a.clicks, a.conversions, a.purchaseValue),
+  })),
+}));
