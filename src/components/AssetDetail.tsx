@@ -389,49 +389,110 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
       {/* Conversion Funnel */}
       <SectionTitle>Conversion Funnel</SectionTitle>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg border border-border/60 bg-surface p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Funnel Over Time</p>
-          <p className="text-[9px] text-muted-foreground mb-3">Daily LPV → ATC → Checkout → Purchase</p>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={filteredDaily}>
-                <defs>
-                  <linearGradient id="lpvGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="atcGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="icGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="purchGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
-                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
-                <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
-                <Tooltip {...chartTooltipStyle} />
-                <Legend iconSize={8} wrapperStyle={{ fontSize: '10px' }} />
-                <Area type="monotone" dataKey="landingPageViews" name="LPV" stroke="hsl(227, 71%, 55%)" fill="url(#lpvGrad)" strokeWidth={1.5} dot={false} />
-                <Area type="monotone" dataKey="addToCart" name="ATC" stroke="hsl(174, 100%, 33%)" fill="url(#atcGrad)" strokeWidth={1.5} dot={false} />
-                <Area type="monotone" dataKey="initiateCheckout" name="Checkout" stroke="hsl(45, 93%, 47%)" fill="url(#icGrad)" strokeWidth={1.5} dot={false} />
-                <Area type="monotone" dataKey="conversions" name="Purchase" stroke="hsl(142, 71%, 45%)" fill="url(#purchGrad)" strokeWidth={1.5} dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+
+      {/* Funnel Flow: horizontal step indicators with conversion rates */}
+      <div className="rounded-lg border border-border/60 bg-surface p-5 mb-3">
+        <div className="flex items-center justify-between">
+          {[
+            { label: "Landing Page Views", value: asset.landingPageViews, color: "hsl(227, 71%, 55%)", icon: Eye },
+            { label: "Add to Cart", value: asset.addToCart, color: "hsl(174, 100%, 33%)", icon: ShoppingCart },
+            { label: "Initiate Checkout", value: asset.initiateCheckout, color: "hsl(45, 93%, 47%)", icon: Crosshair },
+            { label: "Purchases", value: asset.conversions, color: "hsl(142, 71%, 45%)", icon: ShoppingCart },
+          ].map((step, i, arr) => {
+            const prevValue = i > 0 ? arr[i - 1].value : step.value;
+            const convRate = i > 0 ? (step.value / prevValue * 100).toFixed(1) : null;
+            const overallRate = (step.value / asset.landingPageViews * 100).toFixed(1);
+            const StepIcon = step.icon;
+            return (
+              <div key={step.label} className="flex items-center flex-1">
+                {i > 0 && (
+                  <div className="flex flex-col items-center mx-2 flex-shrink-0">
+                    <div className="text-[10px] font-mono font-bold" style={{ color: step.color }}>{convRate}%</div>
+                    <div className="flex items-center gap-0.5">
+                      <div className="w-6 h-px" style={{ background: step.color }} />
+                      <div className="w-0 h-0 border-t-[3px] border-b-[3px] border-l-[5px] border-transparent" style={{ borderLeftColor: step.color }} />
+                    </div>
+                    <div className="text-[8px] text-muted-foreground">step conv.</div>
+                  </div>
+                )}
+                <div className="flex-1 text-center">
+                  <div className="w-9 h-9 rounded-lg mx-auto flex items-center justify-center mb-1.5" style={{ background: `${step.color}15`, border: `1px solid ${step.color}30` }}>
+                    <StepIcon className="w-4 h-4" style={{ color: step.color }} />
+                  </div>
+                  <p className="text-xl font-mono font-bold text-foreground leading-tight">{step.value.toLocaleString()}</p>
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium mt-0.5">{step.label}</p>
+                  {i > 0 && <p className="text-[9px] text-muted-foreground mt-0.5">{overallRate}% of total</p>}
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <div className="grid grid-cols-2 gap-2.5 content-start">
-          <Stat icon={Eye} label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} />
-          <Stat icon={ShoppingCart} label="Add to Cart" value={asset.addToCart.toLocaleString()} sub={`${(asset.addToCart / asset.landingPageViews * 100).toFixed(1)}% of LPV`} />
-          <Stat icon={Crosshair} label="Initiate Checkout" value={asset.initiateCheckout.toLocaleString()} sub={`${(asset.initiateCheckout / asset.addToCart * 100).toFixed(1)}% of ATC`} />
-          <Stat icon={ShoppingCart} label="Purchases" value={asset.conversions.toLocaleString()} sub={`${(asset.conversions / asset.initiateCheckout * 100).toFixed(1)}% of IC`} />
+
+        {/* Overall funnel efficiency bar */}
+        <div className="mt-4 pt-3 border-t border-border/40">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Overall Funnel Efficiency</span>
+            <span className="text-[11px] font-mono font-bold text-foreground">
+              {(asset.conversions / asset.landingPageViews * 100).toFixed(1)}% LPV → Purchase
+            </span>
+          </div>
+          <div className="h-2 bg-muted rounded-full overflow-hidden flex">
+            {[
+              { width: 100, color: "hsl(227, 71%, 55%)", opacity: 0.2 },
+              { width: asset.addToCart / asset.landingPageViews * 100, color: "hsl(174, 100%, 33%)", opacity: 0.3 },
+              { width: asset.initiateCheckout / asset.landingPageViews * 100, color: "hsl(45, 93%, 47%)", opacity: 0.4 },
+              { width: asset.conversions / asset.landingPageViews * 100, color: "hsl(142, 71%, 45%)", opacity: 1 },
+            ].map((seg, i) => (
+              <motion.div
+                key={i}
+                className="h-full rounded-full absolute"
+                style={{ background: seg.color, opacity: seg.opacity, left: 0 }}
+                initial={{ width: 0 }}
+                animate={{ width: `${seg.width}%` }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+              />
+            ))}
+          </div>
+          <div className="relative h-2" />
+        </div>
+      </div>
+
+      {/* Funnel Over Time Chart */}
+      <div className="rounded-lg border border-border/60 bg-surface p-4">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Funnel Over Time</p>
+        <p className="text-[9px] text-muted-foreground mb-3">Daily progression: LPV → ATC → Checkout → Purchase</p>
+        <div className="h-52">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={filteredDaily}>
+              <defs>
+                <linearGradient id="lpvGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="atcGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="icGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="purchGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+              <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+              <Tooltip {...chartTooltipStyle} />
+              <Legend iconSize={8} wrapperStyle={{ fontSize: '10px' }} />
+              <Area type="monotone" dataKey="landingPageViews" name="LPV" stroke="hsl(227, 71%, 55%)" fill="url(#lpvGrad)" strokeWidth={1.5} dot={false} />
+              <Area type="monotone" dataKey="addToCart" name="ATC" stroke="hsl(174, 100%, 33%)" fill="url(#atcGrad)" strokeWidth={1.5} dot={false} />
+              <Area type="monotone" dataKey="initiateCheckout" name="Checkout" stroke="hsl(45, 93%, 47%)" fill="url(#icGrad)" strokeWidth={1.5} dot={false} />
+              <Area type="monotone" dataKey="conversions" name="Purchase" stroke="hsl(142, 71%, 45%)" fill="url(#purchGrad)" strokeWidth={1.5} dot={false} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
