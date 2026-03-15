@@ -216,32 +216,21 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
       {/* ─── HERO + VERDICT (side by side for wide screens) ─── */}
       <div className="flex gap-4 mb-5">
-        <div className="flex gap-4 flex-1 min-w-0">
-          <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0">
-            <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">{asset.name}</h2>
-                <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
-                <div className="mt-1.5"><ChannelIcon channel={asset.channel} size="md" /></div>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-mono font-bold text-foreground">#{rank}</p>
-                <p className="text-[10px] text-muted-foreground">of {campaignAssets.length}</p>
-              </div>
+        <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0">
+          <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">{asset.name}</h2>
+              <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
+              <div className="mt-1.5"><ChannelIcon channel={asset.channel} size="md" /></div>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-mono font-bold text-foreground">#{rank}</p>
+              <p className="text-[10px] text-muted-foreground">of {campaignAssets.length}</p>
             </div>
           </div>
-        </div>
-        <div className={`rounded-lg border p-3 w-72 flex-shrink-0 ${verdict.bg}`}>
-          <div className="flex items-center gap-2 mb-0.5">
-            {verdict.label === "Top Performer" ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> :
-             verdict.label === "Underperforming" ? <AlertTriangle className="w-4 h-4 text-destructive" /> :
-             <BarChart3 className="w-4 h-4 text-muted-foreground" />}
-            <span className={`text-sm font-semibold ${verdict.color}`}>{verdict.label}</span>
-          </div>
-          <p className="text-[12px] text-foreground/75">{verdict.desc}</p>
         </div>
       </div>
 
