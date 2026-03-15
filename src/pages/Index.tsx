@@ -272,7 +272,7 @@ const Index = () => {
                 <DiagnosticHeader sort={sort} onSortChange={setSort} showCheckbox={selectedChannels.length > 0} />
                 {filteredAssets.length > 0 ? (
                   filteredAssets.map((asset, i) => (
-                    <DiagnosticCard key={asset.id} asset={asset} index={i} rank={i} maxRoas={Math.max(...filteredAssets.map(a => a.roas))} selected={selectedAssets.has(asset.id)} showCheckbox={selectedChannels.length > 0} onSelectToggle={toggleAssetSelection} onClick={() => setViewingAssetId(asset.id)} />
+                    <DiagnosticCard key={asset.id} asset={asset} index={i} rank={i} maxRoas={Math.max(...filteredAssets.map(a => a.roas))} selected={selectedAssets.has(asset.id)} showCheckbox={selectedChannels.length > 0} campaignName={selectedCampaign.name} onSelectToggle={toggleAssetSelection} onClick={() => setViewingAssetId(asset.id)} />
                   ))
                 ) : (
                   <div className="py-20 text-center text-muted-foreground text-sm">
