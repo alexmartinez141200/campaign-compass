@@ -88,22 +88,22 @@ const Index = () => {
 
       <main className="ml-[232px]">
         {/* Page header */}
-        <div className="px-6 py-5 border-b border-border flex items-center gap-3">
+        <div className="px-6 py-4 border-b border-border flex items-center gap-2.5">
           {selectedCampaign ? (
             <>
               <button
                 onClick={() => { if (viewingAssetId) { setViewingAssetId(null); } else { setSelectedCampaignId(null); setViewingAssetId(null); } }}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors mr-1"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => { setSelectedCampaignId(null); setViewingAssetId(null); }}
-                className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium"
+                className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 Campaigns
               </button>
-              <span className="text-muted-foreground/40">{'>'}</span>
+              <span className="text-muted-foreground/30 text-xs">›</span>
               <button
                 onClick={() => setViewingAssetId(null)}
                 className={`text-[13px] font-medium transition-colors ${viewingAssetId ? "text-muted-foreground hover:text-foreground" : "text-foreground"}`}
@@ -112,7 +112,7 @@ const Index = () => {
               </button>
               {viewingAssetId && (
                 <>
-                  <span className="text-muted-foreground/40">/</span>
+                  <span className="text-muted-foreground/30 text-xs">›</span>
                   <span className="text-[13px] font-medium text-foreground">
                     {selectedCampaign.assets.find(a => a.id === viewingAssetId)?.name}
                   </span>
