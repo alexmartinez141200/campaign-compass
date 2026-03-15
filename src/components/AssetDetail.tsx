@@ -17,35 +17,47 @@ interface AssetDetailProps {
 
 // ─── KPI Definitions (for info tooltips) ───
 const kpiInfo: Record<string, string> = {
+  // Universal
   "Impressions": "Total number of times this ad was displayed on screen. Includes repeat views by the same person.",
-  "CTR": "Click-Through Rate — percentage of impressions that resulted in a link click. Higher CTR indicates more compelling creative.",
-  "Link Clicks": "Clicks on links within the ad that lead to your website or app. Does not include post reactions or comments.",
   "Conversions": "Number of completed purchase events attributed to this ad within the conversion window.",
   "ROAS": "Return on Ad Spend — revenue generated per dollar spent. A 4x ROAS means $4 revenue for every $1 spent.",
   "Reach": "Total unique users who saw this ad at least once. Unlike impressions, each person is counted only once.",
   "Frequency": "Average number of times each unique user saw this ad. Above 3.0 signals potential ad fatigue.",
   "CPM": "Cost Per Mille — cost per 1,000 impressions. Lower CPM means more efficient reach for your budget.",
   "Spend": "Total amount spent delivering this ad during the selected period.",
+  "Revenue": "Total purchase value attributed to this ad within the conversion window.",
+  "CPA": "Cost Per Acquisition — how much you pay for each purchase. Lower CPA means more efficient conversion spend.",
+  "Avg Watch": "Average duration a viewer watched the video before scrolling or closing.",
+  // Meta-specific
+  "CTR": "Click-Through Rate — percentage of impressions that resulted in a link click. Higher CTR indicates more compelling creative.",
+  "Link Clicks": "Clicks on links within the ad that lead to your website or app. Does not include post reactions or comments.",
   "CPC (Link)": "Cost Per Click on links only. Measures the efficiency of driving traffic to your destination.",
   "CPC (All)": "Cost Per Click including all click types — link clicks, post reactions, profile visits, etc.",
   "Outbound Clicks": "Clicks that take users off-platform to your website. Closest metric to actual site visits.",
-  "Website Clicks": "Clicks that take users to your website from TikTok. Equivalent to outbound clicks.",
-  "Revenue": "Total purchase value attributed to this ad within the conversion window.",
-  "CPA": "Cost Per Acquisition — how much you pay for each purchase. Lower CPA means more efficient conversion spend.",
   "Plays": "Total number of times the video started playing, including auto-plays in feed.",
   "ThruPlays": "Number of times the video was played to completion or for at least 15 seconds. Meta-specific metric.",
-  "Completed Views": "Number of times the video was watched to completion. TikTok's equivalent of Meta's ThruPlays.",
-  "Avg Watch": "Average duration a viewer watched the video before scrolling or closing.",
   "ThruPlay Rate": "Percentage of total plays that counted as ThruPlays (15s+ or completion). Meta-specific.",
+  // TikTok-specific
+  "Completed Views": "Number of times the video was watched to completion. TikTok's equivalent of Meta's ThruPlays.",
   "Completion Rate": "Percentage of viewers who watched the video to completion. TikTok's primary content retention metric.",
   "Video Views": "Total 2-second+ video views. TikTok's primary video metric.",
   "Video View Rate": "Percentage of impressions that resulted in a 2s+ video view. Higher = stronger hook.",
   "6s Views": "Video views that reached 6 seconds. TikTok's key hook metric — did your content hold attention past the critical first moments?",
   "6s View Rate": "Percentage of total video views that reached 6 seconds. The definitive measure of hook strength on TikTok.",
+  "Website Clicks": "Clicks that take users to your website from TikTok. Equivalent to outbound clicks.",
   "Profile Visits": "Number of times users visited your TikTok profile after seeing this ad.",
   "Follows": "New followers attributed to this ad. Measures brand-building effectiveness.",
   "Paid Likes": "Likes from paid impressions only, excluding organic engagement.",
   "Paid Shares": "Shares from paid impressions only. High shares indicate viral potential.",
+  // Google Ads-specific
+  "Clicks": "Total clicks on the ad, including clicks to website. Google Ads' primary interaction metric.",
+  "CPC": "Cost Per Click — average cost for each click on your ad. Google Ads' core efficiency metric.",
+  "Interaction Rate": "Percentage of impressions that resulted in an interaction (click, video view, etc.). Google's engagement metric.",
+  "View-Through Conv.": "Conversions from users who saw your ad but didn't click — they converted later. Key for measuring Display ad influence.",
+  "Video Views (Google)": "Views of your video ad. On YouTube, counted when a user watches 30s (or the full ad if shorter) or interacts.",
+  "View Rate": "Percentage of impressions that resulted in a video view. Measures how compelling your video thumbnail/hook is.",
+  "Avg CPV": "Average Cost Per View — what you pay each time someone views your video ad. Core YouTube Ads efficiency metric.",
+  "Video Completion": "Percentage of viewers who watched the video to 100%. Shows full content engagement.",
 };
 
 // ─── Insights Generator ───
@@ -173,6 +185,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const isVideo = asset.type === "video";
   const isTikTok = asset.channel === "tiktok";
   const isMeta = asset.channel === "meta";
+  const isGoogle = asset.channel === "google";
   const daily = asset.dailyMetrics;
 
   // Filter daily metrics
@@ -363,6 +376,14 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
             <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} sub="2s+ views" />
             <KpiCard label="6s View Rate" value={`${asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays * 100).toFixed(1) : 0}%`} sub="Hook strength" />
+            <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
+            <KpiCard label="ROAS" value={`${asset.roas}x`} trend={trends.roas} health={roasHealth} />
+          </div>
+        ) : isGoogle ? (
+          <div className="grid grid-cols-5 gap-3 mb-2">
+            <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
+            <KpiCard label="Clicks" value={asset.clicks.toLocaleString()} trend={trends.clicks} />
+            <KpiCard label="CTR" value={`${asset.ctr}%`} trend={trends.ctr} health={ctrHealth} />
             <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
             <KpiCard label="ROAS" value={`${asset.roas}x`} trend={trends.roas} health={roasHealth} />
           </div>
@@ -569,9 +590,160 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               </div>
             </div>
           </>
+        ) : isGoogle ? (
+          <>
+            {/* ═══════ GOOGLE ADS FLOW ═══════ */}
+            {/* Flow: Delivery → Click Performance → Conversions & Revenue → Video (if applicable) */}
+
+            {/* ═══ A. DELIVERY ═══ */}
+            <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Monitor frequency for fatigue and CPM for cost efficiency." />
+            <div className="grid grid-cols-5 gap-3">
+              <div className="col-span-2 grid grid-cols-2 gap-3">
+                <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
+                <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub={freqHealth === "critical" ? "⚠ Ad fatigue risk" : freqHealth === "warning" ? "Monitor closely" : "Healthy range"} />
+                <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
+                <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total budget used" />
+              </div>
+              <div className="col-span-3">
+                <ChartCard title="CPM Over Time" height="h-[168px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={filteredDaily}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                      <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `$${v}`} />
+                      <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
+                      <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              </div>
+            </div>
+
+            {/* ═══ B. CLICK PERFORMANCE ═══ */}
+            <SectionHeader title="Click Performance" description="How users interact with your ad. CTR and CPC are Google Ads' core performance signals." />
+            <div className="grid grid-cols-4 gap-3 mb-3">
+              <KpiCard label="Clicks" value={asset.clicks.toLocaleString()} trend={trends.clicks} />
+              <KpiCard label="CTR" value={`${asset.ctr}%`} trend={trends.ctr} health={ctrHealth} />
+              <KpiCard label="CPC" value={`$${asset.cpc.toFixed(2)}`} sub="Avg cost per click" />
+              <KpiCard label="Interaction Rate" value={`${asset.interactionRate || 0}%`} sub="Interactions / Impressions" />
+            </div>
+            <ChartCard title="CTR % Over Time" height="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={filteredDaily}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} />
+                  <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                  <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            {/* ═══ C. CONVERSIONS & REVENUE ═══ */}
+            <SectionHeader title="Conversions & Revenue" description="Direct and view-through conversions. View-through measures users who saw your ad but converted later without clicking." />
+            <div className="grid grid-cols-4 gap-3 mb-3">
+              <KpiCard label="Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} sub="Selected period" />
+              <KpiCard label="ROAS" value={`${rangeSummary.roas}x`} health={roasHealth} sub="Revenue ÷ Spend" />
+              <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
+              <KpiCard label="View-Through Conv." value={(asset.viewThroughConversions || 0).toLocaleString()} sub="Saw ad, converted later" />
+            </div>
+            <div className="grid grid-cols-5 gap-3">
+              <div className="col-span-3">
+                <ChartCard title="ROAS Over Time" height="h-52">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                      <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}x`} />
+                      <RechartsTooltip {...chartTooltipStyle}
+                        content={({ active, payload, label }) => {
+                          if (!active || !payload?.length) return null;
+                          const data = payload[0]?.payload;
+                          return (
+                            <div style={chartTooltipStyle.contentStyle} className="p-2.5">
+                              <p className="text-[11px] font-semibold text-foreground mb-1">{label}</p>
+                              <p className="text-[11px]">ROAS: {data.roas}x</p>
+                              <p className="text-[11px]">Spend: ${data.spend.toLocaleString()}</p>
+                              <p className="text-[11px]">Revenue: ${data.purchaseValue.toLocaleString()}</p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <ReferenceLine y={rangeSummary.roas} stroke="hsl(346, 84%, 61%)" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: `Avg ${rangeSummary.roas}x`, position: "right", fontSize: 9, fill: "hsl(346, 84%, 61%)" }} />
+                      <Bar dataKey="roas" name="ROAS" fill="hsl(174, 100%, 33%)" radius={[2, 2, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              </div>
+              <div className="col-span-2 rounded-lg border border-border/60 bg-card p-4">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">Conversion Funnel</p>
+                <div className="space-y-2">
+                  {funnelSteps.map((step, i, arr) => {
+                    const pctOfTop = (step.value / arr[0].value * 100).toFixed(1);
+                    const dropOff = i > 0 ? (100 - (step.value / arr[i - 1].value * 100)).toFixed(1) : null;
+                    return (
+                      <div key={step.label}>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: step.color }} />
+                            <span className="text-[11px] text-foreground font-medium">{step.label}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[12px] font-mono font-bold text-foreground">{step.value.toLocaleString()}</span>
+                            {dropOff && <span className="text-[9px] font-mono text-destructive/70">↓{dropOff}%</span>}
+                          </div>
+                        </div>
+                        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${pctOfTop}%`, background: step.color, opacity: 0.7 }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between">
+                  <span className="text-[10px] text-muted-foreground font-medium">LPV → Purchase</span>
+                  <span className="text-[12px] font-mono font-bold text-foreground">{(asset.conversions / asset.landingPageViews * 100).toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ═══ D. VIDEO PERFORMANCE (Google Video/YouTube — if applicable) ═══ */}
+            {isVideo && (
+              <>
+                <SectionHeader title="Video Performance" description="YouTube/Google Video metrics — view rate measures creative appeal, quartile retention shows where viewers drop off." />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
+                    <KpiCard label="Video Views (Google)" value={(asset.videoPlays || 0).toLocaleString()} sub="30s+ or interaction" />
+                    <KpiCard label="View Rate" value={`${((asset.videoPlays || 0) / (asset.impressions || 1) * 100).toFixed(1)}%`} sub="Views / Impressions" />
+                    <KpiCard label="Avg CPV" value={`$${(asset.avgCpv || 0).toFixed(3)}`} sub="Cost per view" />
+                    <KpiCard label="Avg Watch" value={`${asset.avgWatchTime || 0}s`} />
+                    <KpiCard label="Video Completion" value={`${((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} sub="Watched to 100%" />
+                    <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} sub="Total ad serves" />
+                  </div>
+                  <ChartCard title="Quartile Retention" height="h-[140px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={videoRetentionData}>
+                        <defs>
+                          <linearGradient id="retentionGradGoogle" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="point" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                        <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
+                        <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                        <Area type="monotone" dataKey="pct" name="Retention" stroke="hsl(227, 71%, 55%)" fill="url(#retentionGradGoogle)" strokeWidth={2} dot={{ r: 3 }} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </ChartCard>
+                </div>
+              </>
+            )}
+          </>
         ) : (
           <>
-            {/* ═══════ META / GOOGLE FLOW ═══════ */}
+            {/* ═══════ META FLOW ═══════ */}
 
             {/* ═══ A. DELIVERY ═══ */}
             <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
@@ -629,9 +801,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                   </div>
                 </div>
               </div>
-              {/* Platform quality signals (Meta/Google) */}
+              {/* Meta Ad Relevance Diagnostics */}
               <div className="rounded-lg border border-border/60 bg-card p-4">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Platform Quality Signals</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Ad Relevance Diagnostics</p>
                 <div className="space-y-3">
                   {([
                     ["Quality Ranking", asset.qualityRanking, "Ad creative quality vs competitors"],
@@ -738,7 +910,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               </div>
             </div>
 
-            {/* ═══ E. VIDEO PERFORMANCE (Meta/Google — at the end) ═══ */}
+            {/* ═══ E. VIDEO PERFORMANCE (Meta — at the end) ═══ */}
             {isVideo && (
               <>
                 <SectionHeader title="Video Performance" description="Retention analysis — where viewers drop off reveals content quality." />

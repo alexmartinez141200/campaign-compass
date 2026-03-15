@@ -102,6 +102,10 @@ export interface CreativeAsset {
   paidLikes?: number;
   paidShares?: number;
   videoViewRate?: number; // % of impressions that resulted in 2s+ view
+  // Google Ads-specific metrics
+  viewThroughConversions?: number; // Conversions from users who saw but didn't click
+  avgCpv?: number; // Average Cost Per Video View (Google Video)
+  interactionRate?: number; // Interactions / Impressions (Google)
   // Daily breakdown
   dailyMetrics: DailyMetric[];
 }
@@ -240,6 +244,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 98, purchaseValue: 4082, addToCart: 310, initiateCheckout: 180, landingPageViews: 1800,
         roas: 1.2, ctr: 3.0, ctrAll: 3.5, cpc: 1.27, cpcAll: 1.05, cpm: 38.22, conversionRate: 3.7, costPerResult: 34.71,
         qualityRanking: "below_average", engagementRateRanking: "below_average", conversionRateRanking: "below_average",
+        viewThroughConversions: 42, interactionRate: 3.5,
       },
       {
         id: "CRV-6612", name: "Video_Gift_Unbox", type: "video", thumbnail: creative4, dimensions: "1080×1920", channel: "google",
@@ -250,6 +255,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 134, purchaseValue: 10080, addToCart: 420, initiateCheckout: 240, landingPageViews: 1500,
         roas: 2.4, ctr: 2.0, ctrAll: 3.0, cpc: 1.88, cpcAll: 1.40, cpm: 37.50, conversionRate: 6.0, costPerResult: 31.34,
         qualityRanking: "average", engagementRateRanking: "below_average", conversionRateRanking: "average",
+        viewThroughConversions: 58, avgCpv: 0.043, interactionRate: 3.0,
       },
     ],
   },
@@ -285,6 +291,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 142, purchaseValue: 10140, addToCart: 460, initiateCheckout: 260, landingPageViews: 2000,
         roas: 3.9, ctr: 3.0, ctrAll: 3.6, cpc: 0.88, cpcAll: 0.72, cpm: 26.53, conversionRate: 4.8, costPerResult: 18.31,
         qualityRanking: "average", engagementRateRanking: "average", conversionRateRanking: "average",
+        viewThroughConversions: 64, interactionRate: 3.6,
       },
     ],
   },
@@ -320,6 +327,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 312, purchaseValue: 24940, addToCart: 980, initiateCheckout: 560, landingPageViews: 3400,
         roas: 5.8, ctr: 3.0, ctrAll: 3.9, cpc: 0.87, cpcAll: 0.68, cpm: 26.06, conversionRate: 6.3, costPerResult: 13.78,
         qualityRanking: "average", engagementRateRanking: "average", conversionRateRanking: "above_average",
+        viewThroughConversions: 98, interactionRate: 3.9,
       },
     ],
   },
