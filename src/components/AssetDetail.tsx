@@ -166,6 +166,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const insights = generateInsights(asset, campaignAssets);
   const rank = [...campaignAssets].sort((a, b) => b.roas - a.roas).findIndex(a => a.id === asset.id) + 1;
   const isVideo = asset.type === "video";
+  const isTikTok = asset.channel === "tiktok";
+  const isMeta = asset.channel === "meta";
   const daily = asset.dailyMetrics;
 
   // Filter daily metrics
