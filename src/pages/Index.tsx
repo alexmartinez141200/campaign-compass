@@ -23,6 +23,8 @@ const Index = () => {
   const [sort, setSort] = useState<SortOption>("roas");
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
   const [viewingAssetId, setViewingAssetId] = useState<string | null>(null);
+  const [creativeSortKey, setCreativeSortKey] = useState<CreativeSortKey>("roas");
+  const [creativeFilterChannel, setCreativeFilterChannel] = useState<Channel | "all">("all");
 
   const handleGetInsights = () => {
     const assets = filteredAssets.filter(a => selectedAssets.has(a.id));
