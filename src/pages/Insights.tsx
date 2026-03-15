@@ -55,110 +55,94 @@ interface CorrelationCell {
   signal: "best" | "worst" | "neutral";
 }
 
-interface CorrelationRow {
+interface AssetRow {
+  asset: CreativeAsset;
   attrValue: string;
-  count: number;
   metrics: { value: number; signal: "best" | "worst" | "neutral"; pctVsAvg: number }[];
 }
 
 interface CorrelationCard {
   attr: AttrDef;
-  rows: CorrelationRow[];
-  takeaway: string; // human-readable insight
+  groups: { value: string; assets: AssetRow[] }[];
+  takeaway: string;
 }
 
 function buildCorrelationCards(assets: CreativeAsset[]): CorrelationCard[] {
   const cards: CorrelationCard[] = [];
+  const globalAvgs = METRICS.map(m => assets.reduce((s, a) => s + m.get(a), 0) / assets.length);
 
   for (const attr of PROFILE_ATTRS) {
-    const groups = new Map<string, CreativeAsset[]>();
+    const groupMap = new Map<string, CreativeAsset[]>();
     for (const a of assets) {
       const val = attr.get(a);
-      if (!groups.has(val)) groups.set(val, []);
-      groups.get(val)!.push(a);
+      if (!groupMap.has(val)) groupMap.set(val, []);
+      groupMap.get(val)!.push(a);
     }
-    if (groups.size < 2) continue;
+    if (groupMap.size < 2) continue;
 
-    // Compute averages per group per metric
-    const groupAvgs = new Map<string, number[]>(); // attrVal -> metric averages
-    for (const [val, group] of groups) {
-      const avgs = METRICS.map(m => group.reduce((s, a) => s + m.get(a), 0) / group.length);
-      groupAvgs.set(val, avgs);
-    }
-
-    // Global avg per metric across all selected
-    const globalAvgs = METRICS.map(m => assets.reduce((s, a) => s + m.get(a), 0) / assets.length);
-
-    // Find best/worst per metric
-    const bestKeys: string[] = [];
-    const worstKeys: string[] = [];
+    // Find best/worst per metric across all individual assets
+    const bestIdx: number[] = [];
+    const worstIdx: number[] = [];
     for (let mi = 0; mi < METRICS.length; mi++) {
       const m = METRICS[mi];
       let bestVal = m.higherIsBetter ? -Infinity : Infinity;
       let worstVal = m.higherIsBetter ? Infinity : -Infinity;
-      let bestKey = "", worstKey = "";
-      for (const [val, avgs] of groupAvgs) {
-        const v = avgs[mi];
-        if (m.higherIsBetter) {
-          if (v > bestVal) { bestVal = v; bestKey = val; }
-          if (v < worstVal) { worstVal = v; worstKey = val; }
-        } else {
-          if (v < bestVal) { bestVal = v; bestKey = val; }
-          if (v > worstVal) { worstVal = v; worstKey = val; }
-        }
-      }
+      let bi = 0, wi = 0;
+      assets.forEach((a, i) => {
+        const v = m.get(a);
+        if (m.higherIsBetter ? v > bestVal : v < bestVal) { bestVal = v; bi = i; }
+        if (m.higherIsBetter ? v < worstVal : v > worstVal) { worstVal = v; wi = i; }
+      });
       const spread = (bestVal + worstVal) / 2;
       const pctSpread = spread > 0 ? Math.abs(bestVal - worstVal) / spread : 0;
-      bestKeys.push(pctSpread > 0.1 ? bestKey : "");
-      worstKeys.push(pctSpread > 0.1 ? worstKey : "");
+      bestIdx.push(pctSpread > 0.1 ? bi : -1);
+      worstIdx.push(pctSpread > 0.1 ? wi : -1);
     }
 
-    // Build rows
-    const rows: CorrelationRow[] = [];
-    for (const [val, avgs] of groupAvgs) {
-      rows.push({
-        attrValue: val,
-        count: groups.get(val)!.length,
-        metrics: avgs.map((v, mi) => ({
-          value: v,
-          signal: bestKeys[mi] === val ? "best" : worstKeys[mi] === val ? "worst" : "neutral",
-          pctVsAvg: globalAvgs[mi] > 0 ? Math.round(((v - globalAvgs[mi]) / globalAvgs[mi]) * 100) : 0,
-        })),
-      });
-    }
-    // Sort rows by ROAS (first metric) descending
-    rows.sort((a, b) => b.metrics[0].value - a.metrics[0].value);
+    // Build grouped rows
+    const groups: { value: string; assets: AssetRow[] }[] = [];
+    // Sort groups by avg ROAS descending
+    const sortedGroups = [...groupMap.entries()].sort((a, b) => {
+      const avgA = a[1].reduce((s, x) => s + x.roas, 0) / a[1].length;
+      const avgB = b[1].reduce((s, x) => s + x.roas, 0) / b[1].length;
+      return avgB - avgA;
+    });
 
-    // Generate takeaway: find the most impactful difference
+    for (const [val, group] of sortedGroups) {
+      const assetRows: AssetRow[] = group
+        .sort((a, b) => b.roas - a.roas)
+        .map(asset => ({
+          asset,
+          attrValue: val,
+          metrics: METRICS.map((m, mi) => {
+            const v = m.get(asset);
+            const ai = assets.indexOf(asset);
+            return {
+              value: v,
+              signal: bestIdx[mi] === ai ? "best" as const : worstIdx[mi] === ai ? "worst" as const : "neutral" as const,
+              pctVsAvg: globalAvgs[mi] > 0 ? Math.round(((v - globalAvgs[mi]) / globalAvgs[mi]) * 100) : 0,
+            };
+          }),
+        }));
+      groups.push({ value: val, assets: assetRows });
+    }
+
+    // Takeaway
     let takeaway = "";
-    const roasIdx = 0;
-    if (rows.length >= 2) {
-      const topRow = rows[0];
-      const botRow = rows[rows.length - 1];
-      const roasDiff = Math.round(((topRow.metrics[roasIdx].value - botRow.metrics[roasIdx].value) / botRow.metrics[roasIdx].value) * 100);
-      
-      // Find which other metrics differ most
-      let biggestDiffMetric = "";
-      let biggestDiffPct = 0;
-      for (let mi = 1; mi < METRICS.length; mi++) {
-        const diff = Math.abs(topRow.metrics[mi].pctVsAvg - botRow.metrics[mi].pctVsAvg);
-        if (diff > biggestDiffPct) {
-          biggestDiffPct = diff;
-          biggestDiffMetric = METRICS[mi].label;
-        }
-      }
-      
-      if (roasDiff > 5) {
-        takeaway = `${topRow.attrValue} delivers ${roasDiff}% higher ROAS than ${botRow.attrValue}`;
-        if (biggestDiffMetric && biggestDiffPct > 15) {
-          takeaway += `, driven by ${biggestDiffMetric}`;
-        }
+    if (sortedGroups.length >= 2) {
+      const topGroup = sortedGroups[0];
+      const botGroup = sortedGroups[sortedGroups.length - 1];
+      const topAvgRoas = topGroup[1].reduce((s, a) => s + a.roas, 0) / topGroup[1].length;
+      const botAvgRoas = botGroup[1].reduce((s, a) => s + a.roas, 0) / botGroup[1].length;
+      const diff = botAvgRoas > 0 ? Math.round(((topAvgRoas - botAvgRoas) / botAvgRoas) * 100) : 0;
+      if (diff > 5) {
+        takeaway = `${topGroup[0]} outperforms ${botGroup[0]} by ${diff}% on ROAS`;
       } else {
-        takeaway = `No significant ROAS difference between ${attr.label.toLowerCase()} values`;
+        takeaway = `Similar performance across ${attr.label.toLowerCase()} values`;
       }
     }
 
-    cards.push({ attr, rows, takeaway });
+    cards.push({ attr, groups, takeaway });
   }
 
   return cards;
