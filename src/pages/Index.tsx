@@ -5,6 +5,7 @@ import AppSidebar from "@/components/AppSidebar";
 import CampaignHeader from "@/components/CampaignHeader";
 import CampaignList from "@/components/CampaignList";
 import DiagnosticCard, { DiagnosticHeader } from "@/components/DiagnosticCard";
+import AssetDetail from "@/components/AssetDetail";
 import FilterBar from "@/components/FilterBar";
 import { campaigns } from "@/data/mockData";
 
