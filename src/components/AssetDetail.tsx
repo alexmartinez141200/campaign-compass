@@ -271,8 +271,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       <div className="flex gap-2.5 mb-2">
         <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
         <KpiCard label="Reach" value={asset.reach.toLocaleString()} />
-        <KpiCard label="Link Clicks" value={asset.linkClicks.toLocaleString()} trend={trends.linkClicks} />
-        <KpiCard label="CPC" value={`$${asset.cpc.toFixed(2)}`} trend={trends.cpc} trendInverse />
+        <KpiCard label="Link Clicks" value={asset.linkClicks.toLocaleString()} trend={trends.clicks} />
+        <KpiCard label="CPC" value={`$${asset.cpc.toFixed(2)}`} trendInverse />
         <KpiCard label="ROAS" value={`${asset.roas}x`} trend={trends.roas} health={roasHealth} />
       </div>
 
