@@ -54,16 +54,18 @@ const FilterBar = ({ selectedChannels, sort, selectedCount, showInsights, onChan
       </div>
 
       {/* Get Insights */}
-      <button
-        disabled={selectedCount < 2}
-        className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-          selectedCount >= 2
-            ? "bg-primary text-primary-foreground hover:bg-primary/90"
-            : "bg-muted text-muted-foreground cursor-not-allowed"
-        }`}
-      >
-        Get Insights
-      </button>
+      {showInsights && (
+        <button
+          disabled={selectedCount < 2}
+          className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+            selectedCount >= 2
+              ? "bg-primary text-primary-foreground hover:bg-primary/90"
+              : "bg-muted text-muted-foreground cursor-not-allowed"
+          }`}
+        >
+          Get Insights
+        </button>
+      )}
     </div>
   );
 };
