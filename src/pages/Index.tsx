@@ -148,7 +148,7 @@ const Index = () => {
                         : "border-transparent text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {tab === "active" ? "Active Campaigns" : "Archived"}
+                    {tab === "active" ? "Active Campaigns" : "Past Campaigns"}
                   </button>
                 ))}
               </div>
