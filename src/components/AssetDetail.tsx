@@ -303,60 +303,35 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
       </div>
 
-
       {/* ROAS Chart */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg border border-border/60 bg-surface p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Daily ROAS</p>
-          <p className="text-[9px] text-muted-foreground mb-3">Purchase conversion value ÷ ad spend per day</p>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
-                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
-                <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}x`} />
-                <Tooltip
-                  {...chartTooltipStyle}
-                  content={({ active, payload, label }) => {
-                    if (!active || !payload?.length) return null;
-                    const data = payload[0]?.payload;
-                    return (
-                      <div style={chartTooltipStyle.contentStyle} className="p-2.5">
-                        <p className="text-[11px] font-semibold text-foreground mb-1.5">{label}</p>
-                        <p className="text-[11px]" style={{ color: "hsl(174, 100%, 33%)" }}>ROAS: {data.roas}x</p>
-                        <p className="text-[11px]" style={{ color: "hsl(227, 71%, 55%)" }}>Spend: ${data.spend.toLocaleString()}</p>
-                        <p className="text-[11px]" style={{ color: "hsl(142, 71%, 45%)" }}>Revenue: ${data.purchaseValue.toLocaleString()}</p>
-                      </div>
-                    );
-                  }}
-                />
-                <ReferenceLine y={rangeSummary.roas} stroke="hsl(346, 84%, 61%)" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: `Avg ${rangeSummary.roas}x`, position: "right", fontSize: 9, fill: "hsl(346, 84%, 61%)" }} />
-                <Bar dataKey="roas" name="roas" fill="hsl(174, 100%, 33%)" radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-border/60 bg-surface p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Cumulative ROAS</p>
-          <p className="text-[9px] text-muted-foreground mb-3">Running total revenue ÷ running total spend</p>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={filteredDaily}>
-                <defs>
-                  <linearGradient id="cumRoasGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
-                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
-                <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}x`} />
-                <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}x`} />
-                <Area type="monotone" dataKey="cumulativeRoas" name="Cumulative ROAS" stroke="hsl(227, 71%, 55%)" fill="url(#cumRoasGradient)" strokeWidth={2} dot={{ r: 2 }} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+      <div className="rounded-lg border border-border/60 bg-surface p-4">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">ROAS</p>
+        <p className="text-[9px] text-muted-foreground mb-3">Purchase conversion value ÷ ad spend per day</p>
+        <div className="h-48">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+              <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}x`} />
+              <Tooltip
+                {...chartTooltipStyle}
+                content={({ active, payload, label }) => {
+                  if (!active || !payload?.length) return null;
+                  const data = payload[0]?.payload;
+                  return (
+                    <div style={chartTooltipStyle.contentStyle} className="p-2.5">
+                      <p className="text-[11px] font-semibold text-foreground mb-1.5">{label}</p>
+                      <p className="text-[11px]" style={{ color: "hsl(174, 100%, 33%)" }}>ROAS: {data.roas}x</p>
+                      <p className="text-[11px]" style={{ color: "hsl(227, 71%, 55%)" }}>Spend: ${data.spend.toLocaleString()}</p>
+                      <p className="text-[11px]" style={{ color: "hsl(142, 71%, 45%)" }}>Revenue: ${data.purchaseValue.toLocaleString()}</p>
+                    </div>
+                  );
+                }}
+              />
+              <ReferenceLine y={rangeSummary.roas} stroke="hsl(346, 84%, 61%)" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: `Avg ${rangeSummary.roas}x`, position: "right", fontSize: 9, fill: "hsl(346, 84%, 61%)" }} />
+              <Bar dataKey="roas" name="roas" fill="hsl(174, 100%, 33%)" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
