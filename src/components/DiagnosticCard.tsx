@@ -25,10 +25,10 @@ const sorts: { value: SortOption; label: string }[] = [
 ];
 
 /** Column header row — render once above the list */
-export const DiagnosticHeader = ({ sort, onSortChange }: { sort?: SortOption; onSortChange?: (s: SortOption) => void }) => (
+export const DiagnosticHeader = ({ sort, onSortChange, showCheckbox = true }: { sort?: SortOption; onSortChange?: (s: SortOption) => void; showCheckbox?: boolean }) => (
   <div className="flex items-center h-8 px-4 text-[9px] uppercase tracking-wider font-semibold text-muted-foreground/60 select-none">
     <div className="w-6 flex-shrink-0" /> {/* rank */}
-    <div className="ml-2.5 w-4 flex-shrink-0" /> {/* checkbox */}
+    {showCheckbox && <div className="ml-2.5 w-4 flex-shrink-0" />} {/* checkbox */}
     <div className="ml-3 w-11 flex-shrink-0" /> {/* thumbnail */}
     <div className="ml-3 min-w-[130px] max-w-[180px] flex-shrink-0">Creative Asset</div>
     <div className="ml-3 min-w-[60px] flex-shrink-0">Channel</div>
