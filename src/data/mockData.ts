@@ -89,10 +89,16 @@ export interface CreativeAsset {
   cpm: number;
   conversionRate: number;
   costPerResult: number;
-  // Quality (Meta Ad Relevance Diagnostics)
+  // Quality (Meta Ad Relevance Diagnostics — Meta only)
   qualityRanking: "above_average" | "average" | "below_average";
   engagementRateRanking: "above_average" | "average" | "below_average";
   conversionRateRanking: "above_average" | "average" | "below_average";
+  // TikTok-specific metrics
+  profileVisits?: number;
+  follows?: number;
+  paidLikes?: number;
+  paidShares?: number;
+  videoViewRate?: number; // % of impressions that resulted in 2s+ view
   // Daily breakdown
   dailyMetrics: DailyMetric[];
 }
