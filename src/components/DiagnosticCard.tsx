@@ -40,7 +40,7 @@ export const DiagnosticHeader = () => (
   </div>
 );
 
-const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelectToggle }: DiagnosticCardProps) => {
+const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelectToggle, onClick }: DiagnosticCardProps) => {
   const isTop = rank === 0;
   const roasPercent = Math.min((asset.roas / maxRoas) * 100, 100);
 
