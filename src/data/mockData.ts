@@ -282,6 +282,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
     assets: [
       {
         id: "CRC-6601", name: "Carousel_Flash_Deals", type: "carousel", thumbnail: creative3, dimensions: "1080×1080", channel: "meta",
+        creativeProfile: { aspectRatio: "1:1", motionIntensity: "Subtle", colorContrast: "High", brandProminence: "Dominant", brandConsistency: "High", funnelStage: "Conversion", callToAction: "Shop Sale", productInFirst3s: true },
         spend: 12400, impressions: 520000, reach: 410000, frequency: 1.27, clicks: 15600, linkClicks: 12480, outboundClicks: 10920,
         postReactions: 7200, postComments: 680, postShares: 1800, postSaves: 4200,
         conversions: 1120, purchaseValue: 91760, addToCart: 3600, initiateCheckout: 2100, landingPageViews: 10500,
