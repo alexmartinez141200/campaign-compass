@@ -70,10 +70,12 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
           : "border-transparent bg-surface hover:bg-muted/30"
       }`}
     >
-      {/* Rank */}
-      <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold font-mono flex-shrink-0 ${rankStyle}`}>
-        {rank + 1}
-      </div>
+      {/* Rank - only in All view */}
+      {!showCheckbox && (
+        <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold font-mono flex-shrink-0 ${rankStyle}`}>
+          {rank + 1}
+        </div>
+      )}
 
       {/* Checkbox */}
       {showCheckbox && (
