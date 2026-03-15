@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { Trophy, Medal, Award } from "lucide-react";
 import type { CreativeAsset } from "@/data/mockData";
 import { Checkbox } from "@/components/ui/checkbox";
 import ChannelIcon from "./ChannelIcon";
@@ -8,10 +7,10 @@ import PerformanceBar from "./PerformanceBar";
 const formatCurrency = (n: number) => `$${n.toLocaleString()}`;
 const channelVariant = (ch: string) => ch === "meta" ? "blue" : ch === "tiktok" ? "teal" : "rose";
 
-const rankConfig: Record<number, { icon: typeof Trophy; color: string; bg: string; label: string }> = {
-  0: { icon: Trophy, color: "text-yellow-500", bg: "bg-yellow-50 border-yellow-200", label: "Top Performer" },
-  1: { icon: Medal, color: "text-gray-400", bg: "bg-gray-50 border-gray-200", label: "#2" },
-  2: { icon: Award, color: "text-amber-600", bg: "bg-orange-50 border-orange-200", label: "#3" },
+const rankColors: Record<number, string> = {
+  0: "text-yellow-500",
+  1: "text-muted-foreground/70",
+  2: "text-amber-600",
 };
 
 interface DiagnosticCardProps {
@@ -24,7 +23,6 @@ interface DiagnosticCardProps {
 }
 
 const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelectToggle }: DiagnosticCardProps) => {
-  const rankInfo = rankConfig[rank];
   const isTop = rank === 0;
 
   return (
@@ -36,14 +34,10 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
         selected ? "border-primary bg-primary/5" : isTop ? "border-yellow-200 bg-yellow-50/50" : "border-border bg-surface"
       }`}
     >
-      {/* Rank badge */}
-      <div className="flex-shrink-0 w-7 flex justify-center">
-        {rankInfo ? (
-          <rankInfo.icon className={`w-4.5 h-4.5 ${rankInfo.color}`} strokeWidth={2} />
-        ) : (
-          <span className="text-[11px] font-mono font-semibold text-muted-foreground/50">#{rank + 1}</span>
-        )}
-      </div>
+      {/* Rank number */}
+      <span className={`flex-shrink-0 w-5 text-center text-sm font-semibold font-mono ${rankColors[rank] || "text-muted-foreground/40"}`}>
+        {rank + 1}
+      </span>
 
       {/* Checkbox */}
       <Checkbox
