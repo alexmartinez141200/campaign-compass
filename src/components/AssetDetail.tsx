@@ -239,10 +239,10 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       {/* Revenue Summary */}
       <SectionTitle>Revenue Summary</SectionTitle>
       <div className="grid grid-cols-4 gap-2.5">
-        <Stat icon={DollarSign} label="Total Spend" value={`$${asset.spend.toLocaleString()}`} sub="Input budget" />
-        <Stat icon={TrendingUp} label="Purchase Value" value={`$${asset.purchaseValue.toLocaleString()}`} sub={`${asset.roas}x return`} />
-        <Stat icon={ShoppingCart} label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% conv. rate`} />
-        <Stat icon={Target} label="Cost / Result" value={`$${asset.costPerResult.toFixed(2)}`} sub="Per conversion" />
+        <Stat label="Total Spend" value={`$${asset.spend.toLocaleString()}`} sub="Input budget" />
+        <Stat label="Purchase Value" value={`$${asset.purchaseValue.toLocaleString()}`} sub={`${asset.roas}x return`} />
+        <Stat label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% conv. rate`} />
+        <Stat label="Cost / Result" value={`$${asset.costPerResult.toFixed(2)}`} sub="Per conversion" />
       </div>
 
       {/* ROAS Section with Date Filter */}
