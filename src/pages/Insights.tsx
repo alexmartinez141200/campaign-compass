@@ -411,13 +411,13 @@ const Insights = () => {
                         return (
                           <td key={name} className="px-3 py-4 text-center">
                             <button onClick={() => setOpenModal(name)} className="cursor-pointer hover:scale-105 transition-transform">
-                              <span className={`text-[15px] font-semibold font-mono leading-none ${scoreColor(score)}`}>{score}</span>
+                              <span className={`text-[12px] font-semibold font-mono leading-none ${scoreColor(score)}`}>{score}</span>
                             </button>
                           </td>
                         );
                       })}
                       <td className="px-3 py-4 text-center bg-muted/5">
-                        <span className={`text-[15px] font-semibold font-mono leading-none ${scoreColor(overall)}`}>{overall}</span>
+                        <span className={`text-[12px] font-semibold font-mono leading-none ${scoreColor(overall)}`}>{overall}</span>
                       </td>
                     </tr>
                   );
