@@ -215,9 +215,34 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       </button>
 
       {/* ─── ASSET HEADER ─── */}
-      <div className="rounded-lg border border-border/60 bg-card mb-5 overflow-hidden">
-        {/* Top: Identity */}
-        <div className="flex items-center gap-4 p-4 pb-3">
+      <div className="rounded-lg border border-border/60 bg-card mb-5 overflow-hidden flex">
+        {/* Left: Creative Profile List */}
+        <div className="border-r border-border/40 bg-muted/20 px-4 py-3 w-44 flex-shrink-0">
+          <p className="text-[8px] uppercase tracking-wider text-muted-foreground/60 font-semibold mb-2">Creative Profile</p>
+          <div className="space-y-1">
+            {[
+              ["Platform", asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : "Google"],
+              ["Format", asset.type.charAt(0).toUpperCase() + asset.type.slice(1)],
+              ...(asset.creativeProfile.videoDuration ? [["Duration", `${asset.creativeProfile.videoDuration}s`]] : []),
+              ["Ratio", asset.creativeProfile.aspectRatio],
+              ["Motion", asset.creativeProfile.motionIntensity],
+              ["Contrast", asset.creativeProfile.colorContrast],
+              ["Brand", asset.creativeProfile.brandProminence],
+              ["Consistency", asset.creativeProfile.brandConsistency],
+              ["Funnel", asset.creativeProfile.funnelStage],
+              ["CTA", asset.creativeProfile.callToAction],
+              ["Product 3s", asset.creativeProfile.productInFirst3s ? "Yes" : "No"],
+            ].map(([label, value]) => (
+              <div key={label} className="flex items-center justify-between">
+                <span className="text-[10px] text-muted-foreground">{label}</span>
+                <span className="text-[11px] font-semibold text-foreground">{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Identity */}
+        <div className="flex-1 flex items-center gap-4 p-4">
           <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
             <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
           </div>
@@ -232,30 +257,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               <p className="text-lg font-mono font-bold text-foreground leading-none">#{rank}</p>
               <p className="text-[9px] text-muted-foreground mt-0.5">of {campaignAssets.length}</p>
             </div>
-          </div>
-        </div>
-
-        {/* Creative profile list */}
-        <div className="border-t border-border/40 bg-muted/20 px-5 py-3">
-          <div className="grid grid-cols-5 gap-x-6 gap-y-1.5">
-            {[
-              ["Platform", asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : "Google"],
-              ["Format", asset.type.charAt(0).toUpperCase() + asset.type.slice(1)],
-              ...(asset.creativeProfile.videoDuration ? [["Duration", `${asset.creativeProfile.videoDuration}s`]] : []),
-              ["Ratio", asset.creativeProfile.aspectRatio],
-              ["Motion", asset.creativeProfile.motionIntensity],
-              ["Contrast", asset.creativeProfile.colorContrast],
-              ["Brand", asset.creativeProfile.brandProminence],
-              ["Consistency", asset.creativeProfile.brandConsistency],
-              ["Funnel", asset.creativeProfile.funnelStage],
-              ["CTA", asset.creativeProfile.callToAction],
-              ["Product 3s", asset.creativeProfile.productInFirst3s ? "Yes" : "No"],
-            ].map(([label, value]) => (
-              <div key={label} className="flex items-center justify-between py-0.5">
-                <span className="text-[10px] text-muted-foreground font-medium">{label}</span>
-                <span className="text-[11px] font-semibold text-foreground">{value}</span>
-              </div>
-            ))}
           </div>
         </div>
       </div>
