@@ -245,6 +245,8 @@ export const campaigns: Campaign[] = [
   {
     id: "camp-005",
     name: "Winter Clearance 2024",
+    owner: "James Chen",
+    createdAt: "2023-12-01",
     status: "completed",
     startDate: "2024-01-10",
     endDate: "2024-02-28",
