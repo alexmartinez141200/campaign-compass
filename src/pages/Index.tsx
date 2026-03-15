@@ -9,9 +9,11 @@ import DiagnosticCard, { DiagnosticHeader } from "@/components/DiagnosticCard";
 import AssetDetail from "@/components/AssetDetail";
 import FilterBar from "@/components/FilterBar";
 import { campaigns } from "@/data/mockData";
+import { channelConfig } from "@/components/ChannelIcon";
 
 type SortOption = "roas" | "spend";
-type CampaignTab = "active" | "archived";
+type CampaignTab = "active" | "archived" | "creatives";
+type CreativeSortKey = "name" | "roas" | "spend" | "conversions";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -21,6 +23,8 @@ const Index = () => {
   const [sort, setSort] = useState<SortOption>("roas");
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
   const [viewingAssetId, setViewingAssetId] = useState<string | null>(null);
+  const [creativeSortKey, setCreativeSortKey] = useState<CreativeSortKey>("roas");
+  const [creativeFilterChannel, setCreativeFilterChannel] = useState<Channel | "all">("all");
 
   const handleGetInsights = () => {
     const assets = filteredAssets.filter(a => selectedAssets.has(a.id));
@@ -55,6 +59,26 @@ const Index = () => {
       return 0;
     });
   }, [selectedCampaign, selectedChannels, sort]);
+
+  // All creatives flat list
+  const allCreativeAssets = useMemo(() => {
+    const list: { campaignName: string; asset: (typeof campaigns)[0]["assets"][0] }[] = [];
+    for (const c of campaigns) {
+      for (const a of c.assets) list.push({ campaignName: c.name, asset: a });
+    }
+    return list;
+  }, []);
+
+  const filteredCreatives = useMemo(() => {
+    let list = allCreativeAssets;
+    if (creativeFilterChannel !== "all") list = list.filter(r => r.asset.channel === creativeFilterChannel);
+    return [...list].sort((a, b) => {
+      if (creativeSortKey === "name") return a.asset.name.localeCompare(b.asset.name);
+      if (creativeSortKey === "roas") return b.asset.roas - a.asset.roas;
+      if (creativeSortKey === "spend") return b.asset.spend - a.asset.spend;
+      return b.asset.conversions - a.asset.conversions;
+    });
+  }, [allCreativeAssets, creativeFilterChannel, creativeSortKey]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -136,28 +160,105 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* Active / Archived tabs */}
+              {/* Tabs */}
               <div className="flex gap-1 border-b border-border mb-5">
-                {(["active", "archived"] as CampaignTab[]).map((tab) => (
+                {([
+                  { key: "active" as CampaignTab, label: "Active Campaigns" },
+                  { key: "archived" as CampaignTab, label: "Past Campaigns" },
+                  { key: "creatives" as CampaignTab, label: "All Creative Assets" },
+                ]).map(({ key, label }) => (
                   <button
-                    key={tab}
-                    onClick={() => setCampaignTab(tab)}
+                    key={key}
+                    onClick={() => setCampaignTab(key)}
                     className={`px-4 py-2.5 text-[13px] font-medium transition-colors duration-100 border-b-2 -mb-px ${
-                      campaignTab === tab
+                      campaignTab === key
                         ? "border-primary text-primary"
                         : "border-transparent text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {tab === "active" ? "Active Campaigns" : "Past Campaigns"}
+                    {label}
                   </button>
                 ))}
               </div>
 
-              {/* Campaign list */}
-              <CampaignList
-                campaigns={visibleCampaigns}
-                onSelect={(id) => setSelectedCampaignId(id)}
-              />
+              {/* Tab content */}
+              {campaignTab !== "creatives" ? (
+                <CampaignList
+                  campaigns={visibleCampaigns}
+                  onSelect={(id) => setSelectedCampaignId(id)}
+                />
+              ) : (
+                <>
+                  {/* Channel filters */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <button
+                      onClick={() => setCreativeFilterChannel("all")}
+                      className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${creativeFilterChannel === "all" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      All
+                    </button>
+                    {(["meta", "tiktok", "google"] as Channel[]).map(ch => {
+                      const cfg = channelConfig[ch];
+                      if (!cfg) return null;
+                      return (
+                        <button
+                          key={ch}
+                          onClick={() => setCreativeFilterChannel(ch)}
+                          className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${creativeFilterChannel === ch ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                        >
+                          {cfg.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Creatives table */}
+                  <div className="rounded-lg border border-border overflow-hidden shadow-[var(--shadow-card)]">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-muted/30 border-b border-border">
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left cursor-pointer hover:text-foreground transition-colors" style={{ minWidth: 200 }} onClick={() => setCreativeSortKey("name")}>Asset</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Campaign</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Channel</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Type</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => setCreativeSortKey("spend")}>Spend</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => setCreativeSortKey("roas")}>ROAS</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => setCreativeSortKey("conversions")}>Conv.</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right">CTR</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right">CPA</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredCreatives.map(({ campaignName, asset }) => (
+                          <tr key={asset.id} className="border-b border-border/30 last:border-0 hover:bg-muted/10 transition-colors cursor-pointer">
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <img src={asset.thumbnail} alt={asset.name} className="w-8 h-8 rounded-lg object-cover flex-shrink-0 border border-border/40" />
+                                <div className="min-w-0">
+                                  <p className="text-[12px] font-semibold text-foreground truncate">{asset.name}</p>
+                                  <p className="text-[10px] font-mono text-muted-foreground/50">{asset.id}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-[11px] text-muted-foreground">{campaignName}</td>
+                            <td className="px-4 py-3">
+                              <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${channelConfig[asset.channel]?.bgClass}`}>
+                                {channelConfig[asset.channel]?.label}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-[11px] text-muted-foreground capitalize">{asset.type}</td>
+                            <td className="px-4 py-3 text-right text-[12px] font-mono text-foreground">${asset.spend.toLocaleString()}</td>
+                            <td className="px-4 py-3 text-right text-[12px] font-mono font-semibold text-accent">{asset.roas.toFixed(1)}x</td>
+                            <td className="px-4 py-3 text-right text-[12px] font-mono text-foreground">{asset.conversions.toLocaleString()}</td>
+                            <td className="px-4 py-3 text-right text-[12px] font-mono text-foreground">{asset.ctr.toFixed(1)}%</td>
+                            <td className="px-4 py-3 text-right text-[12px] font-mono text-foreground">${asset.costPerResult.toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
             </>
           ) : viewingAssetId && selectedCampaign ? (
             <AssetDetail
