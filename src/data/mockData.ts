@@ -76,25 +76,41 @@ export interface CreativeAsset {
 function generateDailyMetrics(totalSpend: number, totalImpressions: number, totalClicks: number, totalConversions: number, totalPurchaseValue: number, days: number = 30): DailyMetric[] {
   const metrics: DailyMetric[] = [];
   const now = new Date();
-  let remainSpend = totalSpend, remainImpr = totalImpressions, remainClicks = totalClicks, remainConv = totalConversions, remainPV = totalPurchaseValue;
   let cumSpend = 0, cumPV = 0;
-  
-  for (let i = days - 1; i >= 0; i--) {
+
+  // Spend is relatively flat; revenue grows over time (learning phase → optimization)
+  const avgDailySpend = totalSpend / days;
+  const avgDailyPV = totalPurchaseValue / days;
+  const avgDailyImpr = totalImpressions / days;
+  const avgDailyClicks = totalClicks / days;
+  const avgDailyConv = totalConversions / days;
+
+  // Seeded pseudo-random for deterministic results
+  let seed = totalSpend * 7 + totalConversions * 13;
+  const seededRandom = () => { seed = (seed * 16807 + 0) % 2147483647; return (seed - 1) / 2147483646; };
+
+  for (let i = 0; i < days; i++) {
     const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    const weight = 0.6 + Math.random() * 0.8; // more variance for realistic data
-    const daySpend = i === 0 ? remainSpend : Math.round(totalSpend / days * weight);
-    const dayImpr = i === 0 ? remainImpr : Math.round(totalImpressions / days * weight);
-    const dayClicks = i === 0 ? remainClicks : Math.round(totalClicks / days * weight);
-    const dayConv = i === 0 ? remainConv : Math.round(totalConversions / days * weight);
-    const dayPV = i === 0 ? remainPV : Math.round(totalPurchaseValue / days * weight);
-    remainSpend -= daySpend; remainImpr -= dayImpr; remainClicks -= dayClicks; remainConv -= dayConv; remainPV -= dayPV;
-    
-    const s = Math.max(0, daySpend);
+    d.setDate(d.getDate() - (days - 1 - i));
+
+    // Progress 0→1 over the campaign
+    const progress = i / (days - 1);
+    // ROAS multiplier: starts low (~0.4x of avg), ramps up to ~1.6x by end
+    const roasMultiplier = 0.4 + progress * 1.2;
+    // Add small noise
+    const noise = 0.85 + seededRandom() * 0.3;
+
+    const daySpend = Math.round(avgDailySpend * (0.9 + seededRandom() * 0.2)); // spend stays ~flat
+    const dayPV = Math.round(avgDailyPV * roasMultiplier * noise);
+    const dayImpr = Math.round(avgDailyImpr * (0.8 + progress * 0.4) * (0.9 + seededRandom() * 0.2));
+    const dayClicks = Math.round(avgDailyClicks * (0.7 + progress * 0.6) * (0.9 + seededRandom() * 0.2));
+    const dayConv = Math.round(avgDailyConv * roasMultiplier * noise);
+
+    const s = Math.max(1, daySpend);
     const pv = Math.max(0, dayPV);
     cumSpend += s;
     cumPV += pv;
-    
+
     metrics.push({
       date: `${d.getMonth() + 1}/${d.getDate()}`,
       fullDate: d.toISOString().split('T')[0],
@@ -103,10 +119,10 @@ function generateDailyMetrics(totalSpend: number, totalImpressions: number, tota
       clicks: Math.max(0, dayClicks),
       conversions: Math.max(0, dayConv),
       purchaseValue: pv,
-      roas: s > 0 ? Math.round(pv / s * 10) / 10 : 0,
+      roas: Math.round(pv / s * 10) / 10,
       cumulativeSpend: cumSpend,
       cumulativePurchaseValue: cumPV,
-      cumulativeRoas: cumSpend > 0 ? Math.round(cumPV / cumSpend * 100) / 100 : 0,
+      cumulativeRoas: Math.round(cumPV / cumSpend * 100) / 100,
       ctr: dayImpr > 0 ? Math.round(dayClicks / dayImpr * 10000) / 100 : 0,
       cpm: dayImpr > 0 ? Math.round(s / dayImpr * 100000) / 100 : 0,
     });
