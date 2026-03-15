@@ -272,6 +272,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 492, purchaseValue: 35360, addToCart: 1580, initiateCheckout: 840, landingPageViews: 8200,
         roas: 5.2, ctr: 3.0, ctrAll: 4.4, cpc: 0.55, cpcAll: 0.42, cpm: 16.59, conversionRate: 4.0, costPerResult: 13.82,
         qualityRanking: "above_average", engagementRateRanking: "above_average", conversionRateRanking: "average",
+        profileVisits: 9800, follows: 810, paidLikes: 4200, paidShares: 1050, videoViewRate: 89.1,
       },
       {
         id: "CRI-3311", name: "Static_Lookbook_02", type: "image", thumbnail: creative3, dimensions: "1200×628", channel: "google",
