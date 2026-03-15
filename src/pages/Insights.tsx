@@ -372,9 +372,9 @@ const Insights = () => {
 
         {/* ═══ SUMMARY SCORECARD TABLE ═══ */}
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="mb-2">
             <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Performance Summary</h2>
-            <span className="text-[9px] text-muted-foreground italic">Click a score to see the rationale</span>
+            <p className="text-[10px] text-muted-foreground mt-1">Click on a column header (e.g. Efficiency, Delivery) to open a detailed breakdown of how each asset scores in that category.</p>
           </div>
           <div className="rounded-lg border border-border overflow-auto">
             <table className="w-full">
