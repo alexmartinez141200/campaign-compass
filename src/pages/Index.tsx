@@ -3,7 +3,7 @@ import { FolderOpen, ArrowLeft } from "lucide-react";
 import AppSidebar from "@/components/AppSidebar";
 import CampaignHeader from "@/components/CampaignHeader";
 import CampaignList from "@/components/CampaignList";
-import DiagnosticCard from "@/components/DiagnosticCard";
+import DiagnosticCard, { DiagnosticHeader } from "@/components/DiagnosticCard";
 import FilterBar from "@/components/FilterBar";
 import { campaigns } from "@/data/mockData";
 
