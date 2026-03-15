@@ -185,6 +185,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const isVideo = asset.type === "video";
   const isTikTok = asset.channel === "tiktok";
   const isMeta = asset.channel === "meta";
+  const isGoogle = asset.channel === "google";
   const daily = asset.dailyMetrics;
 
   // Filter daily metrics
