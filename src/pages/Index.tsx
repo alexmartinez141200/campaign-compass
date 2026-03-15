@@ -22,7 +22,6 @@ const Index = () => {
     return [...assets].sort((a, b) => {
       if (sort === "roas") return b.totalRoas - a.totalRoas;
       if (sort === "spend") return b.totalSpend - a.totalSpend;
-      // delta: biggest gap between best and worst channel
       const deltaA = Math.max(...a.channels.map((c) => c.roas)) - Math.min(...a.channels.map((c) => c.roas));
       const deltaB = Math.max(...b.channels.map((c) => c.roas)) - Math.min(...b.channels.map((c) => c.roas));
       return deltaB - deltaA;
@@ -33,17 +32,17 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <AppSidebar />
 
-      <main className="ml-60 p-8">
+      <main className="ml-[232px] p-6">
         {/* Campaign tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-1 border-b border-border mb-6">
           {campaigns.map((c) => (
             <button
               key={c.id}
               onClick={() => setActiveCampaignId(c.id)}
-              className={`px-4 py-2 text-xs font-medium rounded-lg transition-all duration-150 ${
+              className={`px-4 py-2.5 text-[13px] font-medium transition-colors duration-100 border-b-2 -mb-px ${
                 c.id === activeCampaignId
-                  ? "bg-surface text-foreground shadow-card"
-                  : "text-muted-foreground hover:text-foreground hover:bg-surface/50"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               {c.name}
@@ -55,12 +54,12 @@ const Index = () => {
         <CampaignHeader campaign={campaign} />
 
         {/* Filters */}
-        <div className="mt-6 mb-4">
+        <div className="mt-5 mb-4">
           <FilterBar filter={filter} sort={sort} onFilterChange={setFilter} onSortChange={setSort} />
         </div>
 
         {/* Diagnostic rows */}
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {filteredAssets.length > 0 ? (
             filteredAssets.map((asset, i) => (
               <DiagnosticCard key={asset.id} asset={asset} index={i} />
