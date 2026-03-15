@@ -86,6 +86,7 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
                         <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
                         <span className="text-xs font-semibold text-foreground">{channelConfig[row.channel].label}</span>
                         {isBest && <span className="text-[7px] font-bold text-emerald-600">★</span>}
+                        <span className="text-[10px] font-mono text-muted-foreground/60">{row.assets}</span>
                       </div>
                     </td>
                     <td className="px-3 py-1.5 text-right text-xs font-mono text-muted-foreground">${row.spend.toLocaleString()}</td>
