@@ -390,22 +390,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       {/* Conversion Funnel */}
       <SectionTitle>Conversion Funnel</SectionTitle>
       <div className="grid grid-cols-2 gap-3">
-        <ChartCard title="Funnel Drop-off (Totals)">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={funnelData} layout="vertical" barSize={24}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
-              <XAxis type="number" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => v.toLocaleString()} />
-              <YAxis dataKey="step" type="category" tick={{ fontSize: 10, fontWeight: 600 }} stroke="hsl(228 10% 52%)" width={55} />
-              <Tooltip {...chartTooltipStyle} formatter={(value: number) => value.toLocaleString()} />
-              <Bar dataKey="value" name="Count" radius={[0, 4, 4, 0]}>
-                {funnelData.map((entry, index) => (
-                  <rect key={index} fill={entry.fill} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
         <div className="rounded-lg border border-border/60 bg-surface p-4">
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Funnel Over Time</p>
           <p className="text-[9px] text-muted-foreground mb-3">Daily LPV → ATC → Checkout → Purchase</p>
@@ -443,14 +427,12 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </ResponsiveContainer>
           </div>
         </div>
-      </div>
-
-      {/* Funnel Stats */}
-      <div className="grid grid-cols-4 gap-2.5 mt-2.5">
-        <Stat icon={Eye} label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} />
-        <Stat icon={ShoppingCart} label="Add to Cart" value={asset.addToCart.toLocaleString()} sub={`${(asset.addToCart / asset.landingPageViews * 100).toFixed(1)}% of LPV`} />
-        <Stat icon={Crosshair} label="Initiate Checkout" value={asset.initiateCheckout.toLocaleString()} sub={`${(asset.initiateCheckout / asset.addToCart * 100).toFixed(1)}% of ATC`} />
-        <Stat icon={ShoppingCart} label="Purchases" value={asset.conversions.toLocaleString()} sub={`${(asset.conversions / asset.initiateCheckout * 100).toFixed(1)}% of IC`} />
+        <div className="grid grid-cols-2 gap-2.5 content-start">
+          <Stat icon={Eye} label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} />
+          <Stat icon={ShoppingCart} label="Add to Cart" value={asset.addToCart.toLocaleString()} sub={`${(asset.addToCart / asset.landingPageViews * 100).toFixed(1)}% of LPV`} />
+          <Stat icon={Crosshair} label="Initiate Checkout" value={asset.initiateCheckout.toLocaleString()} sub={`${(asset.initiateCheckout / asset.addToCart * 100).toFixed(1)}% of ATC`} />
+          <Stat icon={ShoppingCart} label="Purchases" value={asset.conversions.toLocaleString()} sub={`${(asset.conversions / asset.initiateCheckout * 100).toFixed(1)}% of IC`} />
+        </div>
       </div>
 
       {/* Delivery */}
