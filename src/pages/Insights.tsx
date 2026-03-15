@@ -368,7 +368,7 @@ const Insights = () => {
             <table className="w-full">
               <thead>
                 <tr className="bg-muted/30 border-b border-border">
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left min-w-[180px]">Asset</th>
+                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-5 py-2.5 text-left min-w-[220px]">Asset</th>
                   {groupNames.map(name => {
                     const Icon = groupIcons[name] || BarChart3;
                     return (
