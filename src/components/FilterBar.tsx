@@ -65,7 +65,7 @@ const FilterBar = ({ selectedChannels, sort, selectedCount, showInsights, onChan
               : "bg-muted text-muted-foreground cursor-not-allowed"
           }`}
         >
-          Get Insights
+          Creative Diagnostics
         </button>
       )}
     </div>
