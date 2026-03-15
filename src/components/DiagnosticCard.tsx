@@ -100,6 +100,11 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
         <p className="text-[13px] font-mono text-muted-foreground font-medium">${asset.spend.toLocaleString()}</p>
       </div>
 
+      {/* Revenue */}
+      <div className="mr-4 text-right min-w-[70px] flex-shrink-0">
+        <p className="text-[13px] font-mono text-foreground font-semibold">${asset.purchaseValue.toLocaleString()}</p>
+      </div>
+
       {/* Divider */}
       <div className="w-px h-8 bg-border/60 mr-5 flex-shrink-0" />
 
