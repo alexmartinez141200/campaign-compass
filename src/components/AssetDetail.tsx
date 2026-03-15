@@ -436,9 +436,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
       </div>
 
-      {/* ROAS over time */}
-      <div className="mb-3">
-        <ChartCard title="ROAS Over Time" height="h-44">
+      {/* ROAS chart + Funnel side by side */}
+      <div className="grid grid-cols-2 gap-3">
+        <ChartCard title="ROAS Over Time" height="h-52">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -463,50 +463,36 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
-      </div>
 
-      {/* Conversion Funnel */}
-      <div className="rounded-lg border border-border/60 bg-card p-5">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Conversion Funnel</p>
-        <div className="flex gap-6">
-          {/* Funnel area chart */}
-          <div className="flex-1 min-w-0 h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={filteredDaily}>
-                <defs>
-                  {funnelSteps.map((step, i) => (
-                    <linearGradient key={i} id={`funnel${i}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={step.color} stopOpacity={0.12} />
-                      <stop offset="95%" stopColor={step.color} stopOpacity={0} />
-                    </linearGradient>
-                  ))}
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-                <Tooltip {...chartTooltipStyle} />
-                <Area type="monotone" dataKey="landingPageViews" name="LPV" stroke={funnelSteps[0].color} fill="url(#funnel0)" strokeWidth={2} dot={false} />
-                <Area type="monotone" dataKey="addToCart" name="Add to Cart" stroke={funnelSteps[1].color} fill="url(#funnel1)" strokeWidth={2} dot={false} />
-                <Area type="monotone" dataKey="initiateCheckout" name="Checkout" stroke={funnelSteps[2].color} fill="url(#funnel2)" strokeWidth={2} dot={false} />
-                <Area type="monotone" dataKey="conversions" name="Purchase" stroke={funnelSteps[3].color} fill="url(#funnel3)" strokeWidth={2} dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-          {/* Funnel legend with drop-off */}
-          <div className="w-40 flex flex-col justify-center gap-1 flex-shrink-0">
+        {/* Conversion Funnel */}
+        <div className="rounded-lg border border-border/60 bg-card p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">Conversion Funnel</p>
+          <div className="space-y-2">
             {funnelSteps.map((step, i, arr) => {
+              const pctOfTop = (step.value / arr[0].value * 100).toFixed(1);
               const dropOff = i > 0 ? (100 - (step.value / arr[i - 1].value * 100)).toFixed(1) : null;
               return (
-                <div key={step.label} className="py-2 px-3 rounded-md hover:bg-muted/40 transition-colors">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <div className="w-3 h-[3px] rounded-full flex-shrink-0" style={{ background: step.color }} />
-                    <p className="text-[10px] text-muted-foreground font-medium">{step.label}</p>
+                <div key={step.label}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: step.color }} />
+                      <span className="text-[11px] text-foreground font-medium">{step.label}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[12px] font-mono font-bold text-foreground">{step.value.toLocaleString()}</span>
+                      {dropOff && <span className="text-[9px] font-mono text-destructive/70">↓{dropOff}%</span>}
+                    </div>
                   </div>
-                  <p className="text-sm font-mono font-bold text-foreground pl-5">{step.value.toLocaleString()}</p>
-                  {dropOff && <p className="text-[9px] pl-5 font-mono text-destructive/70">↓ {dropOff}% drop-off</p>}
+                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${pctOfTop}%`, background: step.color, opacity: 0.7 }} />
+                  </div>
                 </div>
               );
             })}
+          </div>
+          <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground font-medium">LPV → Purchase</span>
+            <span className="text-[12px] font-mono font-bold text-foreground">{(asset.conversions / asset.landingPageViews * 100).toFixed(1)}%</span>
           </div>
         </div>
       </div>
