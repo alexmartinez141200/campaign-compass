@@ -54,9 +54,20 @@ interface CorrelationCell {
   signal: "best" | "worst" | "neutral";
 }
 
-function buildCorrelationTable(assets: CreativeAsset[]) {
-  // For each attribute, group assets by attribute value, compute average of each metric
-  const table: Map<string, Map<string, Map<string, CorrelationCell>>> = new Map(); // attr -> attrVal -> metric -> cell
+interface CorrelationRow {
+  attrValue: string;
+  count: number;
+  metrics: { value: number; signal: "best" | "worst" | "neutral"; pctVsAvg: number }[];
+}
+
+interface CorrelationCard {
+  attr: AttrDef;
+  rows: CorrelationRow[];
+  takeaway: string; // human-readable insight
+}
+
+function buildCorrelationCards(assets: CreativeAsset[]): CorrelationCard[] {
+  const cards: CorrelationCard[] = [];
 
   for (const attr of PROFILE_ATTRS) {
     const groups = new Map<string, CreativeAsset[]>();
@@ -65,49 +76,94 @@ function buildCorrelationTable(assets: CreativeAsset[]) {
       if (!groups.has(val)) groups.set(val, []);
       groups.get(val)!.push(a);
     }
-    
-    const attrMap = new Map<string, Map<string, CorrelationCell>>();
-    
+    if (groups.size < 2) continue;
+
+    // Compute averages per group per metric
+    const groupAvgs = new Map<string, number[]>(); // attrVal -> metric averages
     for (const [val, group] of groups) {
-      const metricMap = new Map<string, CorrelationCell>();
-      for (const m of METRICS) {
-        const avg = group.reduce((s, a) => s + m.get(a), 0) / group.length;
-        metricMap.set(m.key, { value: avg, count: group.length, signal: "neutral" });
-      }
-      attrMap.set(val, metricMap);
+      const avgs = METRICS.map(m => group.reduce((s, a) => s + m.get(a), 0) / group.length);
+      groupAvgs.set(val, avgs);
     }
 
-    // Mark best/worst per metric
-    for (const m of METRICS) {
-      const entries = [...attrMap.entries()];
-      if (entries.length < 2) continue;
-      
-      let bestVal = -Infinity, worstVal = Infinity, bestKey = "", worstKey = "";
-      for (const [val, metricMap] of entries) {
-        const v = metricMap.get(m.key)!.value;
+    // Global avg per metric across all selected
+    const globalAvgs = METRICS.map(m => assets.reduce((s, a) => s + m.get(a), 0) / assets.length);
+
+    // Find best/worst per metric
+    const bestKeys: string[] = [];
+    const worstKeys: string[] = [];
+    for (let mi = 0; mi < METRICS.length; mi++) {
+      const m = METRICS[mi];
+      let bestVal = m.higherIsBetter ? -Infinity : Infinity;
+      let worstVal = m.higherIsBetter ? Infinity : -Infinity;
+      let bestKey = "", worstKey = "";
+      for (const [val, avgs] of groupAvgs) {
+        const v = avgs[mi];
         if (m.higherIsBetter) {
           if (v > bestVal) { bestVal = v; bestKey = val; }
           if (v < worstVal) { worstVal = v; worstKey = val; }
         } else {
-          if (v < bestVal || bestVal === -Infinity) { bestVal = v; bestKey = val; }
-          if (v > worstVal || worstVal === Infinity) { worstVal = v; worstKey = val; }
+          if (v < bestVal) { bestVal = v; bestKey = val; }
+          if (v > worstVal) { worstVal = v; worstKey = val; }
         }
       }
-      // Only mark if difference is > 10%
-      const spread = Math.abs(bestVal - worstVal) / ((bestVal + worstVal) / 2);
-      if (spread > 0.1 && bestKey !== worstKey) {
-        attrMap.get(bestKey)!.get(m.key)!.signal = "best";
-        attrMap.get(worstKey)!.get(m.key)!.signal = "worst";
+      const spread = (bestVal + worstVal) / 2;
+      const pctSpread = spread > 0 ? Math.abs(bestVal - worstVal) / spread : 0;
+      bestKeys.push(pctSpread > 0.1 ? bestKey : "");
+      worstKeys.push(pctSpread > 0.1 ? worstKey : "");
+    }
+
+    // Build rows
+    const rows: CorrelationRow[] = [];
+    for (const [val, avgs] of groupAvgs) {
+      rows.push({
+        attrValue: val,
+        count: groups.get(val)!.length,
+        metrics: avgs.map((v, mi) => ({
+          value: v,
+          signal: bestKeys[mi] === val ? "best" : worstKeys[mi] === val ? "worst" : "neutral",
+          pctVsAvg: globalAvgs[mi] > 0 ? Math.round(((v - globalAvgs[mi]) / globalAvgs[mi]) * 100) : 0,
+        })),
+      });
+    }
+    // Sort rows by ROAS (first metric) descending
+    rows.sort((a, b) => b.metrics[0].value - a.metrics[0].value);
+
+    // Generate takeaway: find the most impactful difference
+    let takeaway = "";
+    const roasIdx = 0;
+    if (rows.length >= 2) {
+      const topRow = rows[0];
+      const botRow = rows[rows.length - 1];
+      const roasDiff = Math.round(((topRow.metrics[roasIdx].value - botRow.metrics[roasIdx].value) / botRow.metrics[roasIdx].value) * 100);
+      
+      // Find which other metrics differ most
+      let biggestDiffMetric = "";
+      let biggestDiffPct = 0;
+      for (let mi = 1; mi < METRICS.length; mi++) {
+        const diff = Math.abs(topRow.metrics[mi].pctVsAvg - botRow.metrics[mi].pctVsAvg);
+        if (diff > biggestDiffPct) {
+          biggestDiffPct = diff;
+          biggestDiffMetric = METRICS[mi].label;
+        }
+      }
+      
+      if (roasDiff > 5) {
+        takeaway = `${topRow.attrValue} delivers ${roasDiff}% higher ROAS than ${botRow.attrValue}`;
+        if (biggestDiffMetric && biggestDiffPct > 15) {
+          takeaway += `, driven by ${biggestDiffMetric}`;
+        }
+      } else {
+        takeaway = `No significant ROAS difference between ${attr.label.toLowerCase()} values`;
       }
     }
-    
-    table.set(attr.key, attrMap);
+
+    cards.push({ attr, rows, takeaway });
   }
-  
-  return table;
+
+  return cards;
 }
 
-const cellBg: Record<string, string> = {
+const cellStyles: Record<string, string> = {
   best: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
   worst: "bg-destructive/10 text-destructive",
   neutral: "text-foreground",
