@@ -31,11 +31,9 @@ const Index = () => {
     if (filter !== "all") assets = assets.filter((a) => a.type === filter);
 
     return [...assets].sort((a, b) => {
-      if (sort === "roas") return b.totalRoas - a.totalRoas;
-      if (sort === "spend") return b.totalSpend - a.totalSpend;
-      const deltaA = Math.max(...a.channels.map((c) => c.roas)) - Math.min(...a.channels.map((c) => c.roas));
-      const deltaB = Math.max(...b.channels.map((c) => c.roas)) - Math.min(...b.channels.map((c) => c.roas));
-      return deltaB - deltaA;
+      if (sort === "roas") return b.roas - a.roas;
+      if (sort === "spend") return b.spend - a.spend;
+      return 0;
     });
   }, [selectedCampaign, filter, sort]);
 
