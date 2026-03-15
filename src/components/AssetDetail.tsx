@@ -325,6 +325,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
 
         {/* CPM trend chart */}
+        <div className="col-span-3">
         <ChartCard title="CPM Over Time" height="h-36">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={filteredDaily}>
