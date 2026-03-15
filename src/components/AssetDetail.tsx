@@ -384,7 +384,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           <div>
             <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPC</p>
             <p className="text-lg font-mono font-bold text-foreground">${asset.cpc.toFixed(2)}</p>
-            <TrendArrow value={trends.cpc} suffix="%" inverse />
+            <p className="text-[9px] text-muted-foreground">Spend ÷ Link Clicks</p>
           </div>
           <div>
             <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">All Clicks</p>
