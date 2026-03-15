@@ -7,14 +7,13 @@ import DiagnosticCard, { DiagnosticHeader } from "@/components/DiagnosticCard";
 import FilterBar from "@/components/FilterBar";
 import { campaigns } from "@/data/mockData";
 
-type ChannelFilter = "all" | "meta" | "tiktok" | "google" | "linkedin" | "amazon";
 type SortOption = "roas" | "spend";
 type CampaignTab = "active" | "archived";
 
 const Index = () => {
   const [campaignTab, setCampaignTab] = useState<CampaignTab>("active");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
-  const [channelFilter, setChannelFilter] = useState<ChannelFilter>("all");
+  const [selectedChannels, setSelectedChannels] = useState<Channel[]>([]);
   const [sort, setSort] = useState<SortOption>("roas");
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
 
