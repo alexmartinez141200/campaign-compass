@@ -346,12 +346,15 @@ const Insights = () => {
       <AppSidebar />
       <main className="ml-[232px]">
       <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium">
-            <ArrowLeft className="w-4 h-4" /> Back
+        <div className="flex items-center gap-2.5">
+          <button onClick={() => navigate(-1)} className="flex items-center text-muted-foreground hover:text-foreground transition-colors mr-1">
+            <ArrowLeft className="w-4 h-4" />
           </button>
-          <span className="text-muted-foreground/40">/</span>
-          <h1 className="text-base font-semibold text-foreground">Creative Diagnostics</h1>
+          <button onClick={() => navigate("/")} className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Campaigns
+          </button>
+          <span className="text-muted-foreground/30 text-xs">›</span>
+          <h1 className="text-[13px] font-medium text-foreground">Creative Diagnostics</h1>
         </div>
         <div className="flex items-center gap-2">
           <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${channelConfig[channel!]?.bgClass}`}>
