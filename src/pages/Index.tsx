@@ -69,6 +69,41 @@ const Index = () => {
         <div className="p-6">
           {!selectedCampaign ? (
             <>
+              {/* Annual budget overview */}
+              <div className="flex items-center gap-8 mb-6 p-5 bg-surface rounded-lg border border-border shadow-card">
+                <div>
+                  <span className="block text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">2026 Annual Budget</span>
+                  <span className="text-xl font-mono font-semibold text-foreground">$350,000</span>
+                </div>
+                <div className="h-10 w-px bg-border" />
+                <div>
+                  <span className="block text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Spent YTD</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xl font-mono font-semibold text-foreground">
+                      ${campaigns.filter(c => c.status === "active").reduce((s, c) => s + c.totalSpend, 0).toLocaleString()}
+                    </span>
+                    <span className="text-xs font-mono text-accent-teal">
+                      {((campaigns.filter(c => c.status === "active").reduce((s, c) => s + c.totalSpend, 0) / 350000) * 100).toFixed(0)}% of annual
+                    </span>
+                  </div>
+                </div>
+                <div className="h-10 w-px bg-border" />
+                <div>
+                  <span className="block text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Remaining</span>
+                  <span className="text-xl font-mono font-semibold text-foreground">
+                    ${(350000 - campaigns.filter(c => c.status === "active").reduce((s, c) => s + c.totalSpend, 0)).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex-1">
+                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-300"
+                      style={{ width: `${(campaigns.filter(c => c.status === "active").reduce((s, c) => s + c.totalSpend, 0) / 350000) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Active / Archived tabs */}
               <div className="flex gap-1 border-b border-border mb-5">
                 {(["active", "archived"] as CampaignTab[]).map((tab) => (
