@@ -5,6 +5,7 @@ type SortOption = "roas" | "spend";
 interface FilterBarProps {
   selectedChannels: Channel[];
   sort: SortOption;
+  selectedCount: number;
   onChannelsChange: (channels: Channel[]) => void;
   onSortChange: (s: SortOption) => void;
 }
