@@ -62,18 +62,11 @@ function getVerdict(asset: CreativeAsset, all: CreativeAsset[]) {
 const rankingLabel = (r: string) => r === "above_average" ? "Above Average" : r === "average" ? "Average" : "Below Average";
 const rankingColor = (r: string) => r === "above_average" ? "text-emerald-600 bg-emerald-50" : r === "average" ? "text-yellow-700 bg-yellow-50" : "text-destructive bg-red-50";
 
-const Stat = ({ label, value, sub, icon: Icon }: { label: string; value: string; sub?: string; icon?: typeof DollarSign }) => (
-  <div className="flex items-start gap-2.5 p-3 rounded-md border border-border/60 bg-surface">
-    {Icon && (
-      <div className="w-7 h-7 rounded bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
-        <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-      </div>
-    )}
-    <div className="min-w-0">
-      <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
-      <p className="text-[15px] font-mono font-bold text-foreground mt-0.5 leading-tight">{value}</p>
-      {sub && <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>}
-    </div>
+const Stat = ({ label, value, sub }: { label: string; value: string; sub?: string }) => (
+  <div className="p-3 rounded-md border border-border/60 bg-surface">
+    <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
+    <p className="text-[15px] font-mono font-bold text-foreground mt-0.5 leading-tight">{value}</p>
+    {sub && <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>}
   </div>
 );
 
@@ -246,10 +239,10 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       {/* Revenue Summary */}
       <SectionTitle>Revenue Summary</SectionTitle>
       <div className="grid grid-cols-4 gap-2.5">
-        <Stat icon={DollarSign} label="Total Spend" value={`$${asset.spend.toLocaleString()}`} sub="Input budget" />
-        <Stat icon={TrendingUp} label="Purchase Value" value={`$${asset.purchaseValue.toLocaleString()}`} sub={`${asset.roas}x return`} />
-        <Stat icon={ShoppingCart} label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% conv. rate`} />
-        <Stat icon={Target} label="Cost / Result" value={`$${asset.costPerResult.toFixed(2)}`} sub="Per conversion" />
+        <Stat label="Total Spend" value={`$${asset.spend.toLocaleString()}`} sub="Input budget" />
+        <Stat label="Purchase Value" value={`$${asset.purchaseValue.toLocaleString()}`} sub={`${asset.roas}x return`} />
+        <Stat label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% conv. rate`} />
+        <Stat label="Cost / Result" value={`$${asset.costPerResult.toFixed(2)}`} sub="Per conversion" />
       </div>
 
       {/* ROAS Section with Date Filter */}
@@ -453,33 +446,80 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
       </div>
 
-      {/* Delivery */}
-      <SectionTitle>Delivery</SectionTitle>
-      <div className="grid grid-cols-4 gap-2.5">
-        <Stat icon={Eye} label="Impressions" value={asset.impressions.toLocaleString()} />
-        <Stat icon={Users} label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
-        <Stat icon={Repeat} label="Frequency" value={asset.frequency.toFixed(2)} sub="Avg. per user" />
-        <Stat icon={DollarSign} label="CPM" value={`$${asset.cpm.toFixed(2)}`} sub="Cost per 1K impr." />
+      {/* Delivery & Traffic — tells the story: how many people saw it → clicked → landed */}
+      <SectionTitle>Delivery & Traffic</SectionTitle>
+      <div className="rounded-lg border border-border/60 bg-surface p-4">
+        <div className="grid grid-cols-5 gap-4">
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Impressions</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.impressions.toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Reach</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.reach.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground">Freq: {asset.frequency.toFixed(2)}</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPM</p>
+            <p className="text-lg font-mono font-bold text-foreground">${asset.cpm.toFixed(2)}</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Link Clicks</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.linkClicks.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground">CTR: {asset.ctr}%</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPC</p>
+            <p className="text-lg font-mono font-bold text-foreground">${asset.cpc.toFixed(2)}</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-5 gap-4 mt-3 pt-3 border-t border-border/30">
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">All Clicks</p>
+            <p className="text-[13px] font-mono font-semibold text-foreground">{asset.clicks.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground">CTR: {asset.ctrAll}%</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Outbound Clicks</p>
+            <p className="text-[13px] font-mono font-semibold text-foreground">{asset.outboundClicks.toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Landing Page Views</p>
+            <p className="text-[13px] font-mono font-semibold text-foreground">{asset.landingPageViews.toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPC (All)</p>
+            <p className="text-[13px] font-mono font-semibold text-foreground">${asset.cpcAll.toFixed(2)}</p>
+          </div>
+          <div />
+        </div>
       </div>
 
-      {/* Clicks & Traffic */}
-      <SectionTitle>Clicks & Traffic</SectionTitle>
-      <div className="grid grid-cols-4 gap-2.5">
-        <Stat icon={MousePointerClick} label="Clicks (All)" value={asset.clicks.toLocaleString()} sub={`CTR: ${asset.ctrAll}%`} />
-        <Stat icon={MousePointerClick} label="Link Clicks" value={asset.linkClicks.toLocaleString()} sub={`CTR: ${asset.ctr}%`} />
-        <Stat icon={ExternalLink} label="Outbound Clicks" value={asset.outboundClicks.toLocaleString()} />
-        <Stat icon={Eye} label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} />
-        <Stat icon={DollarSign} label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} />
-        <Stat icon={DollarSign} label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} />
-      </div>
-
-      {/* Engagement */}
+      {/* Engagement — social proof signals */}
       <SectionTitle>Engagement</SectionTitle>
-      <div className="grid grid-cols-4 gap-2.5">
-        <Stat icon={Heart} label="Reactions" value={asset.postReactions.toLocaleString()} />
-        <Stat icon={MessageCircle} label="Comments" value={asset.postComments.toLocaleString()} />
-        <Stat icon={Share2} label="Shares" value={asset.postShares.toLocaleString()} />
-        <Stat icon={Bookmark} label="Saves" value={asset.postSaves.toLocaleString()} />
+      <div className="rounded-lg border border-border/60 bg-surface p-4">
+        <div className="grid grid-cols-4 gap-4">
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Reactions</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.postReactions.toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Comments</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.postComments.toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Shares</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.postShares.toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Saves</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.postSaves.toLocaleString()}</p>
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between">
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Total Engagement</span>
+          <span className="text-[13px] font-mono font-bold text-foreground">{(asset.postReactions + asset.postComments + asset.postShares + asset.postSaves).toLocaleString()}</span>
+        </div>
       </div>
 
       {/* Video Metrics with Retention Chart */}
@@ -487,10 +527,10 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <>
           <SectionTitle>Video Performance</SectionTitle>
           <div className="grid grid-cols-4 gap-2.5">
-            <Stat icon={Play} label="Video Plays" value={(asset.videoPlays || 0).toLocaleString()} />
-            <Stat icon={Play} label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} sub="15s+ or complete" />
-            <Stat icon={Clock} label="Avg. Watch Time" value={`${asset.avgWatchTime || 0}s`} />
-            <Stat icon={Eye} label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
+            <Stat label="Video Plays" value={(asset.videoPlays || 0).toLocaleString()} />
+            <Stat label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} sub="15s+ or complete" />
+            <Stat label="Avg. Watch Time" value={`${asset.avgWatchTime || 0}s`} />
+            <Stat label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
           </div>
           <div className="mt-3">
             <ChartCard title="Video Retention Curve">
