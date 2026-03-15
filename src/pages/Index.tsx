@@ -18,6 +18,7 @@ const Index = () => {
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>([]);
   const [sort, setSort] = useState<SortOption>("roas");
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
+  const [viewingAssetId, setViewingAssetId] = useState<string | null>(null);
 
   const toggleAssetSelection = (id: string) => {
     setSelectedAssets((prev) => {
