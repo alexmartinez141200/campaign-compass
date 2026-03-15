@@ -93,8 +93,9 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
           <table className="w-full">
             <thead>
               <tr className="bg-muted/30 border-b border-border/40">
-                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-2 text-left w-[160px]">Platform</th>
-                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2 text-left w-[140px]">Spend vs Revenue</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-2 text-left w-[130px]">Platform</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2 text-right">Spend</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2 text-right">Revenue</th>
                 {columns.map((col) => (
                   <th key={col.key} className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2 text-right">{col.label}</th>
                 ))}
@@ -104,12 +105,9 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
               {channelBreakdown.map((row) => {
                 const isBest = row.roas === bestRoas;
                 const color = channelConfig[row.channel].color;
-                const maxVal = Math.max(row.spend, row.revenue);
-                const spendW = maxVal > 0 ? (row.spend / maxVal) * 100 : 0;
-                const revW = maxVal > 0 ? (row.revenue / maxVal) * 100 : 0;
                 return (
                   <tr key={row.channel} className="border-b border-border/30 last:border-0 hover:bg-muted/10 transition-colors">
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
                         <span className="text-[13px] font-semibold text-foreground">{channelConfig[row.channel].label}</span>
@@ -118,22 +116,11 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
                         )}
                       </div>
                     </td>
-                    {/* Dual bar: spend (muted) vs revenue (colored) */}
-                    <td className="px-3 py-3">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-[5px] bg-muted/20 rounded-full overflow-hidden">
-                            <div className="h-full rounded-full bg-muted-foreground/20 transition-all" style={{ width: `${spendW}%` }} />
-                          </div>
-                          <span className="text-[10px] font-mono text-muted-foreground w-[60px] text-right">${row.spend.toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-[5px] bg-muted/20 rounded-full overflow-hidden">
-                            <div className="h-full rounded-full transition-all" style={{ width: `${revW}%`, backgroundColor: color, opacity: 0.55 }} />
-                          </div>
-                          <span className="text-[10px] font-mono text-foreground font-medium w-[60px] text-right">${row.revenue.toLocaleString()}</span>
-                        </div>
-                      </div>
+                    <td className="px-3 py-2 text-right">
+                      <span className="text-xs font-mono font-medium text-muted-foreground">${row.spend.toLocaleString()}</span>
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <span className="text-xs font-mono font-semibold text-foreground">${row.revenue.toLocaleString()}</span>
                     </td>
                     {columns.map((col) => {
                       const textColor = col.colorFn ? col.colorFn(row) : "text-foreground";
