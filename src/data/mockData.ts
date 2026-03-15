@@ -112,7 +112,7 @@ export interface Campaign {
   assets: CreativeAsset[];
 }
 
-const rawCampaigns: Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'dailyMetrics'>[] }[] = [
+const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'dailyMetrics'>[] })[] = [
   {
     id: "camp-001",
     name: "Holiday 2024",
