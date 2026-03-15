@@ -38,14 +38,14 @@ const Index = () => {
   const filteredAssets = useMemo(() => {
     if (!selectedCampaign) return [];
     let assets = selectedCampaign.assets;
-    if (channelFilter !== "all") assets = assets.filter((a) => a.channel === channelFilter);
+    if (selectedChannels.length > 0) assets = assets.filter((a) => selectedChannels.includes(a.channel));
 
     return [...assets].sort((a, b) => {
       if (sort === "roas") return b.roas - a.roas;
       if (sort === "spend") return b.spend - a.spend;
       return 0;
     });
-  }, [selectedCampaign, channelFilter, sort]);
+  }, [selectedCampaign, selectedChannels, sort]);
 
   return (
     <div className="min-h-screen bg-background">
