@@ -415,26 +415,22 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         {/* ═══ C. TRAFFIC ═══ */}
         <SectionHeader title="Traffic" description="Users clicking through to your site. CTR trends reveal creative effectiveness over time." />
 
-        <div className="grid grid-cols-5 gap-3">
-          <div className="col-span-2 grid grid-cols-3 gap-3">
-            <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
-            <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
-            <KpiCard label="Outbound Clicks" value={asset.outboundClicks.toLocaleString()} sub="Off-platform" />
-          </div>
-          <div className="col-span-3">
-            <ChartCard title="CTR % Over Time" height="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={filteredDaily}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} />
-                  <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
-                  <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartCard>
-          </div>
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
+          <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
+          <KpiCard label="Outbound Clicks" value={asset.outboundClicks.toLocaleString()} sub="Off-platform" />
         </div>
+        <ChartCard title="CTR % Over Time" height="h-[200px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={filteredDaily}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+              <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} />
+              <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+              <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartCard>
 
         {/* ═══ D. CONVERSIONS & REVENUE ═══ */}
         <SectionHeader title="Conversions & Revenue" description="The bottom line — from landing page through purchase, and your return on ad spend." />
