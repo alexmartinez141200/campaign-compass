@@ -262,11 +262,14 @@ const Insights = () => {
 
   if (assets.length === 0) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium">
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
-        <p className="text-muted-foreground text-sm mt-4">No assets selected.</p>
+      <div className="min-h-screen bg-background">
+        <AppSidebar />
+        <main className="ml-[232px] p-6">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium">
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+          <p className="text-muted-foreground text-sm mt-4">No assets selected.</p>
+        </main>
       </div>
     );
   }
