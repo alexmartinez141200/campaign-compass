@@ -278,13 +278,6 @@ const Insights = () => {
   }
 
   const maxRoas = Math.max(...assets.map(a => a.roas));
-  const toggleSection = (key: string) => {
-    setExpandedSections(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key); else next.add(key);
-      return next;
-    });
-  };
 
   const scoreColor = (s: number) =>
     s >= 70 ? "text-emerald-600 dark:text-emerald-400" : s >= 40 ? "text-amber-600 dark:text-amber-400" : "text-destructive";
