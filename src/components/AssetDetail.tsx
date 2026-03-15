@@ -190,7 +190,19 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       default: filtered = daily;
     }
     let cumSpend = 0, cumPV = 0;
-    return filtered.map(d => { cumSpend += d.spend; cumPV += d.purchaseValue; return { ...d, cumulativeRoas: cumSpend > 0 ? Math.round(cumPV / cumSpend * 100) / 100 : 0 }; });
+    return filtered.map(d => {
+      cumSpend += d.spend;
+      cumPV += d.purchaseValue;
+      // For TikTok, compute daily video view rate (simulated: base rate + noise from CTR variation)
+      const baseVvr = asset.videoViewRate || 88;
+      const vvrNoise = (d.ctr - (asset.ctr || 3)) * 2; // correlate slightly with CTR variance
+      const videoViewRate = Math.round((baseVvr + vvrNoise) * 10) / 10;
+      return {
+        ...d,
+        cumulativeRoas: cumSpend > 0 ? Math.round(cumPV / cumSpend * 100) / 100 : 0,
+        videoViewRate: Math.max(60, Math.min(99, videoViewRate)),
+      };
+    });
   }, [daily, datePreset, customRange]);
 
   // Trend calculations
