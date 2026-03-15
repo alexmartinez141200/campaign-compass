@@ -58,9 +58,7 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
       className={`group flex items-center h-[68px] px-4 rounded-lg cursor-pointer transition-all duration-100 border ${
         selected
           ? "border-primary/25 bg-primary/[0.02]"
-          : isTop
-            ? "border-yellow-300/30 bg-yellow-50/30"
-            : "border-transparent bg-surface hover:bg-muted/30"
+          : "border-transparent bg-surface hover:bg-muted/30"
       }`}
     >
       {/* Rank */}
