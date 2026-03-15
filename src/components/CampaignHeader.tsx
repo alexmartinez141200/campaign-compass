@@ -40,8 +40,6 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
 
 
   const columns = [
-    { key: "spend", label: "Spend", format: (r: typeof channelBreakdown[0]) => `$${r.spend.toLocaleString()}` },
-    { key: "revenue", label: "Revenue", format: (r: typeof channelBreakdown[0]) => `$${r.revenue.toLocaleString()}` },
     { key: "roas", label: "ROAS", format: (r: typeof channelBreakdown[0]) => `${r.roas.toFixed(1)}x`, colorFn: (r: typeof channelBreakdown[0]) => r.roas >= 4 ? "text-emerald-600" : r.roas >= 2 ? "text-foreground" : "text-destructive" },
     { key: "conv", label: "Conv.", format: (r: typeof channelBreakdown[0]) => r.conversions.toLocaleString() },
     { key: "cpa", label: "CPA", format: (r: typeof channelBreakdown[0]) => `$${r.cpa.toFixed(2)}` },
