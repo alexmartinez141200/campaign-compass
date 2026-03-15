@@ -335,246 +335,40 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        {/* ─── TOP-LINE KPIs ─── */}
-        <div className="grid grid-cols-5 gap-3 mb-2">
-          <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
-          <KpiCard label="CTR" value={`${asset.ctr}%`} trend={trends.ctr} health={ctrHealth} />
-          <KpiCard label="Link Clicks" value={asset.linkClicks.toLocaleString()} trend={trends.clicks} />
-          <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
-          <KpiCard label="ROAS" value={`${asset.roas}x`} trend={trends.roas} health={roasHealth} />
-        </div>
-
-        {/* ═══ A. DELIVERY ═══ */}
-        <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
-
-        <div className="grid grid-cols-5 gap-3">
-          <div className="col-span-2 grid grid-cols-2 gap-3">
-            <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
-            <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub={freqHealth === "critical" ? "⚠ Ad fatigue risk" : freqHealth === "warning" ? "Monitor closely" : "Healthy range"} />
-            <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
-            <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total budget used" />
+        {/* ─── TOP-LINE KPIs (platform-aware) ─── */}
+        {isTikTok ? (
+          <div className="grid grid-cols-5 gap-3 mb-2">
+            <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
+            <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} />
+            <KpiCard label="Video View Rate" value={`${asset.videoViewRate || 0}%`} sub="2s+ views / impressions" />
+            <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
+            <KpiCard label="ROAS" value={`${asset.roas}x`} trend={trends.roas} health={roasHealth} />
           </div>
-          <div className="col-span-3">
-            <ChartCard title="CPM Over Time" height="h-[168px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={filteredDaily}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `$${v}`} />
-                  <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
-                  <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartCard>
+        ) : (
+          <div className="grid grid-cols-5 gap-3 mb-2">
+            <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
+            <KpiCard label="CTR" value={`${asset.ctr}%`} trend={trends.ctr} health={ctrHealth} />
+            <KpiCard label="Link Clicks" value={asset.linkClicks.toLocaleString()} trend={trends.clicks} />
+            <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
+            <KpiCard label="ROAS" value={`${asset.roas}x`} trend={trends.roas} health={roasHealth} />
           </div>
-        </div>
+        )}
 
-        {/* ═══ B. ENGAGEMENT ═══ */}
-        <SectionHeader title="Engagement" description="On-platform signals showing how users respond to the creative before clicking through." />
+        {/* ═══════════════════════════════════════════════════
+            TIKTOK FLOW: Video → Engagement & Growth → Delivery → Traffic → Conversions → Insights
+            META/OTHER FLOW: Delivery → Engagement → Traffic → Conversions → Video → Insights
+            ═══════════════════════════════════════════════════ */}
 
-        <div className="grid grid-cols-2 gap-3">
-          {/* Engagement donut */}
-          <div className="rounded-lg border border-border/60 bg-card p-4">
-            <div className="flex items-center gap-5">
-              <div className="w-28 h-28 flex-shrink-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={engagementData} cx="50%" cy="50%" innerRadius={26} outerRadius={50} paddingAngle={3} dataKey="value" strokeWidth={0}>
-                      {engagementData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-                    </Pie>
-                    <RechartsTooltip {...chartTooltipStyle} formatter={(value: number, name: string) => [`${value.toLocaleString()} (${(value / engagementTotal * 100).toFixed(1)}%)`, name]} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex-1 space-y-2">
-                {engagementData.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.color }} />
-                      <span className="text-[11px] text-muted-foreground">{item.name}</span>
-                    </div>
-                    <span className="text-[12px] font-mono font-bold text-foreground">{item.value.toLocaleString()}</span>
-                  </div>
-                ))}
-                <div className="pt-2 border-t border-border/30 flex items-center justify-between">
-                  <span className="text-[10px] text-muted-foreground font-medium">Total</span>
-                  <span className="text-[13px] font-mono font-bold text-foreground">{engagementTotal.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right panel — platform-specific */}
-          {isMeta ? (
-            <div className="rounded-lg border border-border/60 bg-card p-4">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Platform Quality Signals</p>
-              <div className="space-y-3">
-                {([
-                  ["Quality Ranking", asset.qualityRanking, "Ad creative quality vs competitors"],
-                  ["Engagement Ranking", asset.engagementRateRanking, "Expected engagement vs competitors"],
-                  ["Conversion Ranking", asset.conversionRateRanking, "Expected conversion vs competitors"],
-                ] as const).map(([label, val, desc]) => (
-                  <div key={label} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[11px] font-medium text-foreground">{label}</p>
-                      <p className="text-[9px] text-muted-foreground">{desc}</p>
-                    </div>
-                    <span className={`px-2.5 py-1 rounded-md text-[11px] font-semibold ${rankingColor(val)}`}>
-                      {rankingLabel(val)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : isTikTok ? (
-            <div className="rounded-lg border border-border/60 bg-card p-4">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">TikTok Growth Signals</p>
-              <div className="grid grid-cols-2 gap-3">
-                <KpiCard label="Profile Visits" value={(asset.profileVisits || 0).toLocaleString()} sub="From this ad" />
-                <KpiCard label="Follows" value={(asset.follows || 0).toLocaleString()} sub="New followers" />
-                <KpiCard label="Paid Likes" value={(asset.paidLikes || 0).toLocaleString()} sub="From paid reach" />
-                <KpiCard label="Paid Shares" value={(asset.paidShares || 0).toLocaleString()} sub="Viral potential" />
-              </div>
-              {asset.videoViewRate && (
-                <div className="mt-3 pt-3 border-t border-border/30">
-                  <KpiCard label="Video View Rate" value={`${asset.videoViewRate}%`} sub="2s+ views / impressions" />
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-lg border border-border/60 bg-card p-4">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Platform Quality Signals</p>
-              <div className="space-y-3">
-                {([
-                  ["Quality Ranking", asset.qualityRanking, "Ad creative quality vs competitors"],
-                  ["Engagement Ranking", asset.engagementRateRanking, "Expected engagement vs competitors"],
-                  ["Conversion Ranking", asset.conversionRateRanking, "Expected conversion vs competitors"],
-                ] as const).map(([label, val, desc]) => (
-                  <div key={label} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[11px] font-medium text-foreground">{label}</p>
-                      <p className="text-[9px] text-muted-foreground">{desc}</p>
-                    </div>
-                    <span className={`px-2.5 py-1 rounded-md text-[11px] font-semibold ${rankingColor(val)}`}>
-                      {rankingLabel(val)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ═══ C. TRAFFIC ═══ */}
-        <SectionHeader title="Traffic" description="Users clicking through to your site. CTR trends reveal creative effectiveness over time." />
-
-        <div className="grid grid-cols-3 gap-3 mb-3">
-          <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
-          <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
-          <KpiCard label="Outbound Clicks" value={asset.outboundClicks.toLocaleString()} sub="Off-platform" />
-        </div>
-        <ChartCard title="CTR % Over Time" height="h-[200px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={filteredDaily}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-              <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} />
-              <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
-              <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        {/* ═══ D. CONVERSIONS & REVENUE ═══ */}
-        <SectionHeader title="Conversions & Revenue" description="The bottom line — from landing page through purchase, and your return on ad spend." />
-
-        <div className="grid grid-cols-3 gap-3 mb-3">
-          <KpiCard label="Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} sub="Selected period" />
-          <KpiCard label="ROAS" value={`${rangeSummary.roas}x`} health={roasHealth} sub="Revenue ÷ Spend" />
-          <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
-        </div>
-
-        {/* ROAS chart + Funnel side by side */}
-        <div className="grid grid-cols-5 gap-3">
-          <div className="col-span-3">
-          <ChartCard title="ROAS Over Time" height="h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}x`} />
-                <RechartsTooltip {...chartTooltipStyle}
-                  content={({ active, payload, label }) => {
-                    if (!active || !payload?.length) return null;
-                    const data = payload[0]?.payload;
-                    return (
-                      <div style={chartTooltipStyle.contentStyle} className="p-2.5">
-                        <p className="text-[11px] font-semibold text-foreground mb-1">{label}</p>
-                        <p className="text-[11px]">ROAS: {data.roas}x</p>
-                        <p className="text-[11px]">Spend: ${data.spend.toLocaleString()}</p>
-                        <p className="text-[11px]">Revenue: ${data.purchaseValue.toLocaleString()}</p>
-                      </div>
-                    );
-                  }}
-                />
-                <ReferenceLine y={rangeSummary.roas} stroke="hsl(346, 84%, 61%)" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: `Avg ${rangeSummary.roas}x`, position: "right", fontSize: 9, fill: "hsl(346, 84%, 61%)" }} />
-                <Bar dataKey="roas" name="ROAS" fill="hsl(174, 100%, 33%)" radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
-          </div>
-
-          {/* Conversion Funnel */}
-          <div className="col-span-2 rounded-lg border border-border/60 bg-card p-4">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">Conversion Funnel</p>
-            <div className="space-y-2">
-              {funnelSteps.map((step, i, arr) => {
-                const pctOfTop = (step.value / arr[0].value * 100).toFixed(1);
-                const dropOff = i > 0 ? (100 - (step.value / arr[i - 1].value * 100)).toFixed(1) : null;
-                return (
-                  <div key={step.label}>
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: step.color }} />
-                        <span className="text-[11px] text-foreground font-medium">{step.label}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-[12px] font-mono font-bold text-foreground">{step.value.toLocaleString()}</span>
-                        {dropOff && <span className="text-[9px] font-mono text-destructive/70">↓{dropOff}%</span>}
-                      </div>
-                    </div>
-                    <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${pctOfTop}%`, background: step.color, opacity: 0.7 }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground font-medium">LPV → Purchase</span>
-              <span className="text-[12px] font-mono font-bold text-foreground">{(asset.conversions / asset.landingPageViews * 100).toFixed(1)}%</span>
-            </div>
-          </div>
-        </div>
-
-        {/* ═══ E. VIDEO PERFORMANCE (conditional) ═══ */}
-        {isVideo && (
+        {isTikTok ? (
           <>
-            <SectionHeader title="Video Performance" description={isTikTok ? "TikTok video metrics — view rate and retention show content quality and hook strength." : "Retention analysis — where viewers drop off reveals content quality."} />
+            {/* ═══ A. VIDEO PERFORMANCE (TikTok's core — first) ═══ */}
+            <SectionHeader title="Video Performance" description="TikTok video metrics — view rate and retention show content quality and hook strength." />
             <div className="grid grid-cols-2 gap-3">
               <div className="grid grid-cols-2 gap-3">
-                <KpiCard label={isTikTok ? "Video Views" : "Plays"} value={(asset.videoPlays || 0).toLocaleString()} />
-                {isTikTok ? (
-                  <KpiCard label="Video View Rate" value={`${asset.videoViewRate || 0}%`} sub="2s+ views / impressions" />
-                ) : (
-                  <KpiCard label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} />
-                )}
+                <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} />
+                <KpiCard label="Video View Rate" value={`${asset.videoViewRate || 0}%`} sub="2s+ views / impressions" />
                 <KpiCard label="Avg Watch" value={`${asset.avgWatchTime || 0}s`} />
-                {isTikTok ? (
-                  <KpiCard label="Completion Rate" value={`${((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} sub="Watched to 95%" />
-                ) : (
-                  <KpiCard label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
-                )}
+                <KpiCard label="Completion Rate" value={`${((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} sub="Watched to 95%" />
               </div>
               <ChartCard title="Retention Curve" height="h-[140px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -594,10 +388,367 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                 </ResponsiveContainer>
               </ChartCard>
             </div>
+
+            {/* ═══ B. ENGAGEMENT & GROWTH ═══ */}
+            <SectionHeader title="Engagement & Growth" description="On-platform signals — likes, shares, and profile actions that drive organic reach and brand building." />
+            <div className="grid grid-cols-2 gap-3">
+              {/* Engagement donut */}
+              <div className="rounded-lg border border-border/60 bg-card p-4">
+                <div className="flex items-center gap-5">
+                  <div className="w-28 h-28 flex-shrink-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={engagementData} cx="50%" cy="50%" innerRadius={26} outerRadius={50} paddingAngle={3} dataKey="value" strokeWidth={0}>
+                          {engagementData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                        </Pie>
+                        <RechartsTooltip {...chartTooltipStyle} formatter={(value: number, name: string) => [`${value.toLocaleString()} (${(value / engagementTotal * 100).toFixed(1)}%)`, name]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    {engagementData.map((item) => (
+                      <div key={item.name} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.color }} />
+                          <span className="text-[11px] text-muted-foreground">{item.name}</span>
+                        </div>
+                        <span className="text-[12px] font-mono font-bold text-foreground">{item.value.toLocaleString()}</span>
+                      </div>
+                    ))}
+                    <div className="pt-2 border-t border-border/30 flex items-center justify-between">
+                      <span className="text-[10px] text-muted-foreground font-medium">Total</span>
+                      <span className="text-[13px] font-mono font-bold text-foreground">{engagementTotal.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* TikTok Growth Signals */}
+              <div className="rounded-lg border border-border/60 bg-card p-4">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">TikTok Growth Signals</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <KpiCard label="Profile Visits" value={(asset.profileVisits || 0).toLocaleString()} sub="From this ad" />
+                  <KpiCard label="Follows" value={(asset.follows || 0).toLocaleString()} sub="New followers" />
+                  <KpiCard label="Paid Likes" value={(asset.paidLikes || 0).toLocaleString()} sub="From paid reach" />
+                  <KpiCard label="Paid Shares" value={(asset.paidShares || 0).toLocaleString()} sub="Viral potential" />
+                </div>
+              </div>
+            </div>
+
+            {/* ═══ C. DELIVERY ═══ */}
+            <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
+            <div className="grid grid-cols-5 gap-3">
+              <div className="col-span-2 grid grid-cols-2 gap-3">
+                <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
+                <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub={freqHealth === "critical" ? "⚠ Ad fatigue risk" : freqHealth === "warning" ? "Monitor closely" : "Healthy range"} />
+                <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
+                <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total budget used" />
+              </div>
+              <div className="col-span-3">
+                <ChartCard title="CPM Over Time" height="h-[168px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={filteredDaily}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                      <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `$${v}`} />
+                      <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
+                      <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              </div>
+            </div>
+
+            {/* ═══ D. TRAFFIC ═══ */}
+            <SectionHeader title="Traffic" description="Users clicking through to your site. CTR trends reveal creative effectiveness over time." />
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
+              <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
+              <KpiCard label="Website Clicks" value={asset.outboundClicks.toLocaleString()} sub="To your site" />
+            </div>
+            <ChartCard title="CTR % Over Time" height="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={filteredDaily}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} />
+                  <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                  <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            {/* ═══ E. CONVERSIONS & REVENUE ═══ */}
+            <SectionHeader title="Conversions & Revenue" description="The bottom line — from click-through to purchase, and your return on ad spend." />
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              <KpiCard label="Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} sub="Selected period" />
+              <KpiCard label="ROAS" value={`${rangeSummary.roas}x`} health={roasHealth} sub="Revenue ÷ Spend" />
+              <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
+            </div>
+            <div className="grid grid-cols-5 gap-3">
+              <div className="col-span-3">
+                <ChartCard title="ROAS Over Time" height="h-52">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                      <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}x`} />
+                      <RechartsTooltip {...chartTooltipStyle}
+                        content={({ active, payload, label }) => {
+                          if (!active || !payload?.length) return null;
+                          const data = payload[0]?.payload;
+                          return (
+                            <div style={chartTooltipStyle.contentStyle} className="p-2.5">
+                              <p className="text-[11px] font-semibold text-foreground mb-1">{label}</p>
+                              <p className="text-[11px]">ROAS: {data.roas}x</p>
+                              <p className="text-[11px]">Spend: ${data.spend.toLocaleString()}</p>
+                              <p className="text-[11px]">Revenue: ${data.purchaseValue.toLocaleString()}</p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <ReferenceLine y={rangeSummary.roas} stroke="hsl(346, 84%, 61%)" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: `Avg ${rangeSummary.roas}x`, position: "right", fontSize: 9, fill: "hsl(346, 84%, 61%)" }} />
+                      <Bar dataKey="roas" name="ROAS" fill="hsl(174, 100%, 33%)" radius={[2, 2, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              </div>
+              <div className="col-span-2 rounded-lg border border-border/60 bg-card p-4">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">Conversion Funnel</p>
+                <div className="space-y-2">
+                  {funnelSteps.map((step, i, arr) => {
+                    const pctOfTop = (step.value / arr[0].value * 100).toFixed(1);
+                    const dropOff = i > 0 ? (100 - (step.value / arr[i - 1].value * 100)).toFixed(1) : null;
+                    return (
+                      <div key={step.label}>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: step.color }} />
+                            <span className="text-[11px] text-foreground font-medium">{step.label}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[12px] font-mono font-bold text-foreground">{step.value.toLocaleString()}</span>
+                            {dropOff && <span className="text-[9px] font-mono text-destructive/70">↓{dropOff}%</span>}
+                          </div>
+                        </div>
+                        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${pctOfTop}%`, background: step.color, opacity: 0.7 }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between">
+                  <span className="text-[10px] text-muted-foreground font-medium">LPV → Purchase</span>
+                  <span className="text-[12px] font-mono font-bold text-foreground">{(asset.conversions / asset.landingPageViews * 100).toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* ═══════ META / GOOGLE FLOW ═══════ */}
+
+            {/* ═══ A. DELIVERY ═══ */}
+            <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
+            <div className="grid grid-cols-5 gap-3">
+              <div className="col-span-2 grid grid-cols-2 gap-3">
+                <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
+                <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub={freqHealth === "critical" ? "⚠ Ad fatigue risk" : freqHealth === "warning" ? "Monitor closely" : "Healthy range"} />
+                <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
+                <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total budget used" />
+              </div>
+              <div className="col-span-3">
+                <ChartCard title="CPM Over Time" height="h-[168px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={filteredDaily}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                      <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `$${v}`} />
+                      <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
+                      <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              </div>
+            </div>
+
+            {/* ═══ B. ENGAGEMENT ═══ */}
+            <SectionHeader title="Engagement" description="On-platform signals showing how users respond to the creative before clicking through." />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg border border-border/60 bg-card p-4">
+                <div className="flex items-center gap-5">
+                  <div className="w-28 h-28 flex-shrink-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={engagementData} cx="50%" cy="50%" innerRadius={26} outerRadius={50} paddingAngle={3} dataKey="value" strokeWidth={0}>
+                          {engagementData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                        </Pie>
+                        <RechartsTooltip {...chartTooltipStyle} formatter={(value: number, name: string) => [`${value.toLocaleString()} (${(value / engagementTotal * 100).toFixed(1)}%)`, name]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    {engagementData.map((item) => (
+                      <div key={item.name} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.color }} />
+                          <span className="text-[11px] text-muted-foreground">{item.name}</span>
+                        </div>
+                        <span className="text-[12px] font-mono font-bold text-foreground">{item.value.toLocaleString()}</span>
+                      </div>
+                    ))}
+                    <div className="pt-2 border-t border-border/30 flex items-center justify-between">
+                      <span className="text-[10px] text-muted-foreground font-medium">Total</span>
+                      <span className="text-[13px] font-mono font-bold text-foreground">{engagementTotal.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Platform quality signals (Meta/Google) */}
+              <div className="rounded-lg border border-border/60 bg-card p-4">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Platform Quality Signals</p>
+                <div className="space-y-3">
+                  {([
+                    ["Quality Ranking", asset.qualityRanking, "Ad creative quality vs competitors"],
+                    ["Engagement Ranking", asset.engagementRateRanking, "Expected engagement vs competitors"],
+                    ["Conversion Ranking", asset.conversionRateRanking, "Expected conversion vs competitors"],
+                  ] as const).map(([label, val, desc]) => (
+                    <div key={label} className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[11px] font-medium text-foreground">{label}</p>
+                        <p className="text-[9px] text-muted-foreground">{desc}</p>
+                      </div>
+                      <span className={`px-2.5 py-1 rounded-md text-[11px] font-semibold ${rankingColor(val)}`}>
+                        {rankingLabel(val)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* ═══ C. TRAFFIC ═══ */}
+            <SectionHeader title="Traffic" description="Users clicking through to your site. CTR trends reveal creative effectiveness over time." />
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
+              <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
+              <KpiCard label="Outbound Clicks" value={asset.outboundClicks.toLocaleString()} sub="Off-platform" />
+            </div>
+            <ChartCard title="CTR % Over Time" height="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={filteredDaily}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} />
+                  <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                  <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            {/* ═══ D. CONVERSIONS & REVENUE ═══ */}
+            <SectionHeader title="Conversions & Revenue" description="The bottom line — from landing page through purchase, and your return on ad spend." />
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              <KpiCard label="Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} sub="Selected period" />
+              <KpiCard label="ROAS" value={`${rangeSummary.roas}x`} health={roasHealth} sub="Revenue ÷ Spend" />
+              <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
+            </div>
+            <div className="grid grid-cols-5 gap-3">
+              <div className="col-span-3">
+                <ChartCard title="ROAS Over Time" height="h-52">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                      <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}x`} />
+                      <RechartsTooltip {...chartTooltipStyle}
+                        content={({ active, payload, label }) => {
+                          if (!active || !payload?.length) return null;
+                          const data = payload[0]?.payload;
+                          return (
+                            <div style={chartTooltipStyle.contentStyle} className="p-2.5">
+                              <p className="text-[11px] font-semibold text-foreground mb-1">{label}</p>
+                              <p className="text-[11px]">ROAS: {data.roas}x</p>
+                              <p className="text-[11px]">Spend: ${data.spend.toLocaleString()}</p>
+                              <p className="text-[11px]">Revenue: ${data.purchaseValue.toLocaleString()}</p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <ReferenceLine y={rangeSummary.roas} stroke="hsl(346, 84%, 61%)" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: `Avg ${rangeSummary.roas}x`, position: "right", fontSize: 9, fill: "hsl(346, 84%, 61%)" }} />
+                      <Bar dataKey="roas" name="ROAS" fill="hsl(174, 100%, 33%)" radius={[2, 2, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              </div>
+              <div className="col-span-2 rounded-lg border border-border/60 bg-card p-4">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">Conversion Funnel</p>
+                <div className="space-y-2">
+                  {funnelSteps.map((step, i, arr) => {
+                    const pctOfTop = (step.value / arr[0].value * 100).toFixed(1);
+                    const dropOff = i > 0 ? (100 - (step.value / arr[i - 1].value * 100)).toFixed(1) : null;
+                    return (
+                      <div key={step.label}>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: step.color }} />
+                            <span className="text-[11px] text-foreground font-medium">{step.label}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[12px] font-mono font-bold text-foreground">{step.value.toLocaleString()}</span>
+                            {dropOff && <span className="text-[9px] font-mono text-destructive/70">↓{dropOff}%</span>}
+                          </div>
+                        </div>
+                        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${pctOfTop}%`, background: step.color, opacity: 0.7 }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between">
+                  <span className="text-[10px] text-muted-foreground font-medium">LPV → Purchase</span>
+                  <span className="text-[12px] font-mono font-bold text-foreground">{(asset.conversions / asset.landingPageViews * 100).toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ═══ E. VIDEO PERFORMANCE (Meta/Google — at the end) ═══ */}
+            {isVideo && (
+              <>
+                <SectionHeader title="Video Performance" description="Retention analysis — where viewers drop off reveals content quality." />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <KpiCard label="Plays" value={(asset.videoPlays || 0).toLocaleString()} />
+                    <KpiCard label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} />
+                    <KpiCard label="Avg Watch" value={`${asset.avgWatchTime || 0}s`} />
+                    <KpiCard label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
+                  </div>
+                  <ChartCard title="Retention Curve" height="h-[140px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={videoRetentionData}>
+                        <defs>
+                          <linearGradient id="retentionGradMeta" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="point" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                        <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
+                        <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                        <Area type="monotone" dataKey="pct" name="Retention" stroke="hsl(227, 71%, 55%)" fill="url(#retentionGradMeta)" strokeWidth={2} dot={{ r: 3 }} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </ChartCard>
+                </div>
+              </>
+            )}
           </>
         )}
 
-        {/* ═══ F. INSIGHTS & RECOMMENDATIONS ═══ */}
+        {/* ═══ INSIGHTS & RECOMMENDATIONS (always last) ═══ */}
         <SectionHeader title="Insights" description="AI-generated analysis comparing this creative against others in your campaign." />
         <div className="space-y-1.5 mb-8">
           {insights.map((insight, i) => (
