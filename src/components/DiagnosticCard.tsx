@@ -12,6 +12,7 @@ interface DiagnosticCardProps {
   rank: number;
   maxRoas: number;
   selected?: boolean;
+  showCheckbox?: boolean;
   onSelectToggle?: (id: string) => void;
   onClick?: () => void;
 }
@@ -24,10 +25,10 @@ const sorts: { value: SortOption; label: string }[] = [
 ];
 
 /** Column header row — render once above the list */
-export const DiagnosticHeader = ({ sort, onSortChange }: { sort?: SortOption; onSortChange?: (s: SortOption) => void }) => (
+export const DiagnosticHeader = ({ sort, onSortChange, showCheckbox = true }: { sort?: SortOption; onSortChange?: (s: SortOption) => void; showCheckbox?: boolean }) => (
   <div className="flex items-center h-8 px-4 text-[9px] uppercase tracking-wider font-semibold text-muted-foreground/60 select-none">
     <div className="w-6 flex-shrink-0" /> {/* rank */}
-    <div className="ml-2.5 w-4 flex-shrink-0" /> {/* checkbox */}
+    {showCheckbox && <div className="ml-2.5 w-4 flex-shrink-0" />} {/* checkbox */}
     <div className="ml-3 w-11 flex-shrink-0" /> {/* thumbnail */}
     <div className="ml-3 min-w-[130px] max-w-[180px] flex-shrink-0">Creative Asset</div>
     <div className="ml-3 min-w-[60px] flex-shrink-0">Channel</div>
@@ -44,7 +45,7 @@ export const DiagnosticHeader = ({ sort, onSortChange }: { sort?: SortOption; on
   </div>
 );
 
-const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelectToggle, onClick }: DiagnosticCardProps) => {
+const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showCheckbox = true, onSelectToggle, onClick }: DiagnosticCardProps) => {
   const roasPercent = Math.min((asset.roas / maxRoas) * 100, 100);
 
   const roasColor =
@@ -75,13 +76,15 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
       </div>
 
       {/* Checkbox */}
-      <div className="ml-2.5 flex-shrink-0">
-        <Checkbox
-          checked={selected}
-          onCheckedChange={() => onSelectToggle?.(asset.id)}
-          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-        />
-      </div>
+      {showCheckbox && (
+        <div className="ml-2.5 flex-shrink-0">
+          <Checkbox
+            checked={selected}
+            onCheckedChange={() => onSelectToggle?.(asset.id)}
+            className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+          />
+        </div>
+      )}
 
       {/* Thumbnail */}
       <div className="ml-3 w-11 h-11 rounded-md overflow-hidden flex-shrink-0 bg-muted">
