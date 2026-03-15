@@ -62,9 +62,7 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
       }`}
     >
       {/* Rank */}
-      <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold font-mono flex-shrink-0 ${
-        rankStyles[rank] || "text-muted-foreground/40"
-      }`}>
+      <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold font-mono flex-shrink-0 ${rankStyle}`}>
         {rank + 1}
       </div>
 
