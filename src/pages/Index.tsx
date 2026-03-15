@@ -152,7 +152,13 @@ const Index = () => {
                 onSelect={(id) => setSelectedCampaignId(id)}
               />
             </>
-          ) : (
+          ) : viewingAssetId && selectedCampaign ? (
+            <AssetDetail
+              asset={selectedCampaign.assets.find(a => a.id === viewingAssetId)!}
+              campaignAssets={selectedCampaign.assets}
+              onBack={() => setViewingAssetId(null)}
+            />
+          ) : selectedCampaign ? (
             <>
               {/* Campaign detail view */}
               <CampaignHeader campaign={selectedCampaign} />
@@ -165,7 +171,7 @@ const Index = () => {
                 <DiagnosticHeader />
                 {filteredAssets.length > 0 ? (
                   filteredAssets.map((asset, i) => (
-                    <DiagnosticCard key={asset.id} asset={asset} index={i} rank={i} maxRoas={Math.max(...filteredAssets.map(a => a.roas))} selected={selectedAssets.has(asset.id)} onSelectToggle={toggleAssetSelection} />
+                    <DiagnosticCard key={asset.id} asset={asset} index={i} rank={i} maxRoas={Math.max(...filteredAssets.map(a => a.roas))} selected={selectedAssets.has(asset.id)} onSelectToggle={toggleAssetSelection} onClick={() => setViewingAssetId(asset.id)} />
                   ))
                 ) : (
                   <div className="py-20 text-center text-muted-foreground text-sm">
