@@ -287,9 +287,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           ═══════════════════════════════════════════════════ */}
       <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
 
-      <div className="grid grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-5 gap-3 mb-3">
         {/* Delivery stats */}
-        <div className="rounded-lg border border-border/60 bg-card p-4">
+        <div className="col-span-2 rounded-lg border border-border/60 bg-card p-4">
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -325,6 +325,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
 
         {/* CPM trend chart */}
+        <div className="col-span-3">
         <ChartCard title="CPM Over Time" height="h-36">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={filteredDaily}>
@@ -336,6 +337,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </LineChart>
           </ResponsiveContainer>
         </ChartCard>
+        </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════
