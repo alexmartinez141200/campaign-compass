@@ -217,20 +217,23 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       {/* ─── ASSET HEADER ─── */}
       <div className="rounded-lg border border-border/60 bg-card mb-5 overflow-hidden flex">
         {/* Left: Identity */}
-        <div className="flex-1 flex items-center gap-4 p-4">
-          <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-            <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-base font-semibold text-foreground leading-tight">{asset.name}</h2>
-            <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
-          </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex-1 p-4">
+          {/* Top row: Channel badge + Rank */}
+          <div className="flex items-center justify-between mb-3">
             <ChannelIcon channel={asset.channel} size="md" />
-            <div className="h-8 w-px bg-border/40" />
-            <div className="text-center">
+            <div className="text-right">
               <p className="text-lg font-mono font-bold text-foreground leading-none">#{rank}</p>
-              <p className="text-[9px] text-muted-foreground mt-0.5">of {campaignAssets.length}</p>
+              <p className="text-[9px] text-muted-foreground">of {campaignAssets.length}</p>
+            </div>
+          </div>
+          {/* Bottom row: Thumbnail + Name */}
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+              <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-base font-semibold text-foreground leading-tight">{asset.name}</h2>
+              <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
             </div>
           </div>
         </div>
