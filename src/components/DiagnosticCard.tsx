@@ -33,7 +33,7 @@ export const DiagnosticHeader = ({ sort, onSortChange, showCheckbox = true }: { 
     ) : (
       <div className="w-0 flex-shrink-0" />
     )}
-    <div className={`${showCheckbox ? "ml-3" : "ml-0"} min-w-[174px] max-w-[224px] flex-shrink-0`}>Creative Asset</div>
+    <div className={`${showCheckbox ? "ml-3" : "ml-7"} min-w-[174px] max-w-[224px] flex-shrink-0`}>Creative Asset</div>
     <div className="ml-3 min-w-[60px] flex-shrink-0">Channel</div>
     <div className="flex-1" />
     <div className="mr-6 min-w-[70px] text-right flex-shrink-0">Spend</div>
