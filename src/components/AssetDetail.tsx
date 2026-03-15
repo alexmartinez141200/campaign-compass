@@ -219,8 +219,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const ctrHealth: "good" | "warning" | "critical" = asset.ctr > ctrAvg * 1.1 ? "good" : asset.ctr < ctrAvg * 0.8 ? "critical" : "warning";
   const roasHealth: "good" | "warning" | "critical" = asset.roas > 2 ? "good" : asset.roas > 1 ? "warning" : "critical";
 
-  // Engagement data
-  const engagementData = [
+  // Engagement data — platform-aware labels
+  const engagementData = isTikTok ? [
+    { name: "Likes", value: asset.postReactions, color: "hsl(227, 71%, 55%)" },
+    { name: "Comments", value: asset.postComments, color: "hsl(174, 100%, 33%)" },
+    { name: "Shares", value: asset.postShares, color: "hsl(45, 93%, 47%)" },
+    { name: "Favorites", value: asset.postSaves, color: "hsl(346, 84%, 61%)" },
+  ] : [
     { name: "Reactions", value: asset.postReactions, color: "hsl(227, 71%, 55%)" },
     { name: "Comments", value: asset.postComments, color: "hsl(174, 100%, 33%)" },
     { name: "Shares", value: asset.postShares, color: "hsl(45, 93%, 47%)" },
