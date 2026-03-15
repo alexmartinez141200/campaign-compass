@@ -262,7 +262,7 @@ const Index = () => {
                         return (
                           <button
                             key={ch}
-                            onClick={() => setCreativeFilterChannel(ch)}
+                            onClick={() => { setCreativeFilterChannel(ch); setSelectedAssets(new Set()); }}
                             className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${creativeFilterChannel === ch ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
                           >
                             {cfg.label}
