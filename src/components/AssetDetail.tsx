@@ -279,9 +279,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     { point: "95%", pct: Math.round((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100) },
   ]) : [];
 
-  // Funnel steps
+  // Funnel steps — platform-aware labels
   const funnelSteps = [
-    { label: "Landing Page Views", value: asset.landingPageViews, color: "hsl(227, 71%, 55%)" },
+    { label: isGoogle ? "Website Visits" : "Landing Page Views", value: asset.landingPageViews, color: "hsl(227, 71%, 55%)" },
     { label: "Add to Cart", value: asset.addToCart, color: "hsl(174, 100%, 33%)" },
     { label: "Checkout", value: asset.initiateCheckout, color: "hsl(45, 93%, 47%)" },
     { label: "Purchase", value: asset.conversions, color: "hsl(142, 71%, 45%)" },
