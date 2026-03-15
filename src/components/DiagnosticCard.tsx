@@ -102,6 +102,7 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
       <div className="ml-3 min-w-[130px] max-w-[180px] flex-shrink-0">
         <p className="text-[13px] font-medium text-foreground truncate leading-tight">{asset.name}</p>
         <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate">{asset.id}</p>
+        {campaignName && <p className="text-[9px] text-muted-foreground/60 mt-0.5 truncate">{campaignName}</p>}
       </div>
 
       {/* Channel */}
