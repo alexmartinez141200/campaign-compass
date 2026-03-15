@@ -416,13 +416,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <SectionHeader title="Traffic" description="Users clicking through to your site. CTR trends reveal creative effectiveness over time." />
 
         <div className="grid grid-cols-5 gap-3">
-          <div className="col-span-2 grid grid-cols-1 gap-3">
+          <div className="col-span-2 grid grid-cols-3 gap-3">
             <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
             <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
             <KpiCard label="Outbound Clicks" value={asset.outboundClicks.toLocaleString()} sub="Off-platform" />
           </div>
           <div className="col-span-3">
-            <ChartCard title="CTR % Over Time" height="h-[180px]">
+            <ChartCard title="CTR % Over Time" height="h-[220px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={filteredDaily}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
