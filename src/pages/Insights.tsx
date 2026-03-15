@@ -1,6 +1,7 @@
 /* refreshed */
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, BarChart3, Layers, TrendingUp, MousePointerClick, ShoppingCart, Eye, Zap, Video, X, Rocket, Paintbrush } from "lucide-react";
+import AppSidebar from "@/components/AppSidebar";
 import type { CreativeAsset, Channel } from "@/data/mockData";
 import { channelConfig } from "@/components/ChannelIcon";
 import { useMemo, useRef, useCallback, useState } from "react";
@@ -261,11 +262,14 @@ const Insights = () => {
 
   if (assets.length === 0) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium">
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
-        <p className="text-muted-foreground text-sm mt-4">No assets selected.</p>
+      <div className="min-h-screen bg-background">
+        <AppSidebar />
+        <main className="ml-[232px] p-6">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium">
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+          <p className="text-muted-foreground text-sm mt-4">No assets selected.</p>
+        </main>
       </div>
     );
   }
@@ -339,7 +343,8 @@ const Insights = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      <AppSidebar />
+      <main className="ml-[232px]">
       <div className="px-6 py-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium">
@@ -582,6 +587,7 @@ const Insights = () => {
           </div>
         </div>
       )}
+      </main>
     </div>
   );
 };
