@@ -33,105 +33,77 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
 
   const totalSpend = campaign.totalSpend;
   const spendPct = ((totalSpend / campaign.totalBudget) * 100);
-  const remaining = campaign.totalBudget - totalSpend;
   const bestRoas = channelBreakdown.length > 0 ? Math.max(...channelBreakdown.map(c => c.roas)) : 0;
-
-
-
-
-  const columns = [
-    { key: "roas", label: "ROAS", format: (r: typeof channelBreakdown[0]) => `${r.roas.toFixed(1)}x`, colorFn: (r: typeof channelBreakdown[0]) => r.roas >= 4 ? "text-emerald-600" : r.roas >= 2 ? "text-foreground" : "text-destructive" },
-    { key: "conv", label: "Conv.", format: (r: typeof channelBreakdown[0]) => r.conversions.toLocaleString() },
-    { key: "cpa", label: "CPA", format: (r: typeof channelBreakdown[0]) => `$${r.cpa.toFixed(2)}` },
-    { key: "ctr", label: "CTR", format: (r: typeof channelBreakdown[0]) => `${r.ctr.toFixed(1)}%` },
-    { key: "cpm", label: "CPM", format: (r: typeof channelBreakdown[0]) => `$${r.cpm.toFixed(2)}` },
-  ] as { key: string; label: string; format: (r: typeof channelBreakdown[0]) => string; colorFn?: (r: typeof channelBreakdown[0]) => string }[];
 
   return (
     <div>
-      {/* Top row */}
-      <div className="flex items-start justify-between mb-5">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-foreground tracking-tight">{campaign.name}</h1>
-            <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${
-              campaign.status === "active" ? "bg-accent/10 text-accent-teal" : "bg-secondary text-muted-foreground"
-            }`}>{campaign.status}</span>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1 font-mono">
-            {campaign.startDate} → {campaign.endDate} · {campaign.assets.length} assets
-          </p>
-        </div>
-        <div className="px-5 py-3.5 rounded-lg border border-border/60 bg-card min-w-[360px]">
-          {/* Labels + values row */}
-          <div className="flex justify-between items-end mb-2">
-            <div>
-              <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Spent</p>
-              <p className="text-lg font-mono font-bold text-foreground leading-none">${totalSpend.toLocaleString()}</p>
-            </div>
-            <p className="text-[11px] font-mono font-medium text-accent-teal">{spendPct.toFixed(0)}% used</p>
-            <div className="text-right">
-              <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Budget</p>
-              <p className="text-lg font-mono font-bold text-foreground leading-none">${campaign.totalBudget.toLocaleString()}</p>
-            </div>
-          </div>
-          {/* Single budget bar */}
-          <div className="w-full h-3 bg-muted/40 rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-primary/70 transition-all" style={{ width: `${Math.min(spendPct, 100)}%` }} />
-          </div>
-          <p className="text-[10px] font-mono text-muted-foreground mt-1.5 text-right">${remaining.toLocaleString()} remaining</p>
-        </div>
+      {/* Campaign title row */}
+      <div className="flex items-center gap-3 mb-4">
+        <h1 className="text-xl font-semibold text-foreground tracking-tight">{campaign.name}</h1>
+        <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${
+          campaign.status === "active" ? "bg-accent/10 text-accent-teal" : "bg-secondary text-muted-foreground"
+        }`}>{campaign.status}</span>
+        <span className="text-xs text-muted-foreground font-mono">{campaign.startDate} → {campaign.endDate}</span>
       </div>
 
-      {channelBreakdown.length > 1 && (
-        <div className="rounded-lg border border-border/60 overflow-hidden bg-card">
+      {/* Unified block: budget bar + platform table */}
+      <div className="rounded-lg border border-border/60 overflow-hidden bg-card">
+        {/* Budget bar row */}
+        <div className="px-4 py-2.5 bg-muted/20 border-b border-border/40 flex items-center gap-4">
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Budget</span>
+            <span className="text-sm font-mono font-bold text-foreground">${totalSpend.toLocaleString()}</span>
+            <span className="text-[10px] font-mono text-muted-foreground">/ ${campaign.totalBudget.toLocaleString()}</span>
+          </div>
+          <div className="flex-1 h-2 bg-muted/40 rounded-full overflow-hidden">
+            <div className="h-full rounded-full bg-primary/60 transition-all" style={{ width: `${Math.min(spendPct, 100)}%` }} />
+          </div>
+          <span className="text-[10px] font-mono text-muted-foreground flex-shrink-0">{spendPct.toFixed(0)}%</span>
+        </div>
+
+        {/* Platform table */}
+        {channelBreakdown.length > 1 && (
           <table className="w-full">
             <thead>
-              <tr className="bg-muted/30 border-b border-border/40">
-                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-2 text-left w-[130px]">Platform</th>
-                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2 text-right">Spend</th>
-                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2 text-right">Revenue</th>
-                {columns.map((col) => (
-                  <th key={col.key} className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2 text-right">{col.label}</th>
-                ))}
+              <tr className="border-b border-border/40">
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-1.5 text-left">Platform</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-1.5 text-right">Spend</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-1.5 text-right">Revenue</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-1.5 text-right">ROAS</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-1.5 text-right">Conv.</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-1.5 text-right">CPA</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-1.5 text-right">CTR</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-1.5 text-right">CPM</th>
               </tr>
             </thead>
             <tbody>
               {channelBreakdown.map((row) => {
                 const isBest = row.roas === bestRoas;
                 const color = channelConfig[row.channel].color;
+                const roasColor = row.roas >= 4 ? "text-emerald-600" : row.roas >= 2 ? "text-foreground" : "text-destructive";
                 return (
-                  <tr key={row.channel} className="border-b border-border/30 last:border-0 hover:bg-muted/10 transition-colors">
-                    <td className="px-4 py-2">
+                  <tr key={row.channel} className="border-b border-border/20 last:border-0 hover:bg-muted/10 transition-colors">
+                    <td className="px-4 py-1.5">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-                        <span className="text-[13px] font-semibold text-foreground">{channelConfig[row.channel].label}</span>
-                        {isBest && (
-                          <span className="text-[7px] uppercase tracking-wider font-bold text-emerald-600 bg-emerald-500/10 px-1 py-px rounded leading-tight">★</span>
-                        )}
+                        <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                        <span className="text-xs font-semibold text-foreground">{channelConfig[row.channel].label}</span>
+                        {isBest && <span className="text-[7px] font-bold text-emerald-600">★</span>}
                       </div>
                     </td>
-                    <td className="px-3 py-2 text-right">
-                      <span className="text-xs font-mono font-medium text-muted-foreground">${row.spend.toLocaleString()}</span>
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      <span className="text-xs font-mono font-semibold text-foreground">${row.revenue.toLocaleString()}</span>
-                    </td>
-                    {columns.map((col) => {
-                      const textColor = col.colorFn ? col.colorFn(row) : "text-foreground";
-                      return (
-                        <td key={col.key} className="px-3 py-3 text-right">
-                          <span className={`text-xs font-mono font-semibold ${textColor}`}>{col.format(row)}</span>
-                        </td>
-                      );
-                    })}
+                    <td className="px-3 py-1.5 text-right text-xs font-mono text-muted-foreground">${row.spend.toLocaleString()}</td>
+                    <td className="px-3 py-1.5 text-right text-xs font-mono font-medium text-foreground">${row.revenue.toLocaleString()}</td>
+                    <td className={`px-3 py-1.5 text-right text-xs font-mono font-bold ${roasColor}`}>{row.roas.toFixed(1)}x</td>
+                    <td className="px-3 py-1.5 text-right text-xs font-mono text-foreground">{row.conversions.toLocaleString()}</td>
+                    <td className="px-3 py-1.5 text-right text-xs font-mono text-foreground">${row.cpa.toFixed(2)}</td>
+                    <td className="px-3 py-1.5 text-right text-xs font-mono text-foreground">{row.ctr.toFixed(1)}%</td>
+                    <td className="px-3 py-1.5 text-right text-xs font-mono text-foreground">${row.cpm.toFixed(2)}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
