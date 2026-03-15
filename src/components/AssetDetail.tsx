@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, DollarSign, Eye, MousePointerClick, ShoppingCart, Target, BarChart3, Heart, MessageCircle, Share2, Bookmark, Play, Clock, Users, Repeat, ExternalLink, Crosshair } from "lucide-react";
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import type { CreativeAsset } from "@/data/mockData";
 import ChannelIcon from "./ChannelIcon";
 
@@ -38,7 +39,6 @@ function generateInsights(asset: CreativeAsset, all: CreativeAsset[]) {
   if (profit > 0) insights.push({ type: "positive", text: `Estimated profit: $${profit.toLocaleString()} on $${asset.spend.toLocaleString()} spend` });
   else insights.push({ type: "negative", text: `Negative ROI — spending $${asset.spend.toLocaleString()} to generate $${asset.purchaseValue.toLocaleString()}` });
 
-  // Quality rankings
   if (asset.qualityRanking === "below_average") insights.push({ type: "negative", text: "Quality ranking is below average — creative quality needs improvement" });
   if (asset.engagementRateRanking === "below_average") insights.push({ type: "warning", text: "Engagement rate ranking is below average — try a more compelling hook" });
   if (asset.conversionRateRanking === "below_average") insights.push({ type: "warning", text: "Conversion rate ranking is below average — review landing page experience" });
@@ -80,11 +80,48 @@ const SectionTitle = ({ children }: { children: string }) => (
   </h3>
 );
 
+const ChartCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <div className="rounded-lg border border-border/60 bg-surface p-4">
+    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">{title}</p>
+    <div className="h-48">
+      {children}
+    </div>
+  </div>
+);
+
+const chartTooltipStyle = {
+  contentStyle: {
+    background: 'hsl(0 0% 100%)',
+    border: '1px solid hsl(228 14% 93%)',
+    borderRadius: '8px',
+    fontSize: '11px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+  },
+};
+
 const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const verdict = getVerdict(asset, campaignAssets);
   const insights = generateInsights(asset, campaignAssets);
   const rank = [...campaignAssets].sort((a, b) => b.roas - a.roas).findIndex(a => a.id === asset.id) + 1;
   const isVideo = asset.type === "video";
+  const daily = asset.dailyMetrics;
+
+  // Funnel data for bar chart
+  const funnelData = [
+    { step: "LPV", value: asset.landingPageViews, fill: "hsl(227, 71%, 55%)" },
+    { step: "ATC", value: asset.addToCart, fill: "hsl(174, 100%, 33%)" },
+    { step: "IC", value: asset.initiateCheckout, fill: "hsl(45, 93%, 47%)" },
+    { step: "Purchase", value: asset.conversions, fill: "hsl(142, 71%, 45%)" },
+  ];
+
+  // Video retention data
+  const videoRetentionData = isVideo ? [
+    { point: "Start", pct: 100 },
+    { point: "25%", pct: Math.round((asset.videoWatched25 || 0) / (asset.videoPlays || 1) * 100) },
+    { point: "50%", pct: Math.round((asset.videoWatched50 || 0) / (asset.videoPlays || 1) * 100) },
+    { point: "75%", pct: Math.round((asset.videoWatched75 || 0) / (asset.videoPlays || 1) * 100) },
+    { point: "95%", pct: Math.round((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100) },
+  ] : [];
 
   return (
     <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
@@ -133,6 +170,95 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <Stat icon={Target} label="Cost / Result" value={`$${asset.costPerResult.toFixed(2)}`} sub="Per conversion" />
       </div>
 
+      {/* Charts: Spend vs Revenue + ROAS Trend */}
+      <SectionTitle>Performance Trends (14 Days)</SectionTitle>
+      <div className="grid grid-cols-2 gap-3">
+        <ChartCard title="Daily Spend vs Revenue">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={daily} barGap={0} barSize={8}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+              <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `$${v}`} />
+              <Tooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toLocaleString()}`} />
+              <Legend iconSize={8} wrapperStyle={{ fontSize: '10px' }} />
+              <Bar dataKey="spend" name="Spend" fill="hsl(227, 71%, 55%)" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="purchaseValue" name="Revenue" fill="hsl(174, 100%, 33%)" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
+
+        <ChartCard title="ROAS Over Time">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={daily}>
+              <defs>
+                <linearGradient id="roasGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+              <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}x`} />
+              <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}x`} />
+              <Area type="monotone" dataKey="roas" name="ROAS" stroke="hsl(174, 100%, 33%)" fill="url(#roasGradient)" strokeWidth={2} dot={{ r: 2 }} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </ChartCard>
+      </div>
+
+      {/* CTR & CPM trends */}
+      <div className="grid grid-cols-2 gap-3 mt-3">
+        <ChartCard title="CTR % Over Time">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={daily}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+              <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}%`} />
+              <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+              <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={{ r: 2 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartCard>
+
+        <ChartCard title="CPM Over Time">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={daily}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+              <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `$${v}`} />
+              <Tooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
+              <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={{ r: 2 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartCard>
+      </div>
+
+      {/* Conversion Funnel Chart */}
+      <SectionTitle>Conversion Funnel</SectionTitle>
+      <div className="grid grid-cols-2 gap-3">
+        <ChartCard title="Funnel Drop-off">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={funnelData} layout="vertical" barSize={24}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+              <XAxis type="number" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => v.toLocaleString()} />
+              <YAxis dataKey="step" type="category" tick={{ fontSize: 10, fontWeight: 600 }} stroke="hsl(228 10% 52%)" width={55} />
+              <Tooltip {...chartTooltipStyle} formatter={(value: number) => value.toLocaleString()} />
+              <Bar dataKey="value" name="Count" radius={[0, 4, 4, 0]}>
+                {funnelData.map((entry, index) => (
+                  <rect key={index} fill={entry.fill} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
+        <div className="grid grid-cols-2 gap-2.5">
+          <Stat icon={Eye} label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} />
+          <Stat icon={ShoppingCart} label="Add to Cart" value={asset.addToCart.toLocaleString()} sub={`${(asset.addToCart / asset.landingPageViews * 100).toFixed(1)}% of LPV`} />
+          <Stat icon={Crosshair} label="Initiate Checkout" value={asset.initiateCheckout.toLocaleString()} sub={`${(asset.initiateCheckout / asset.addToCart * 100).toFixed(1)}% of ATC`} />
+          <Stat icon={ShoppingCart} label="Purchases" value={asset.conversions.toLocaleString()} sub={`${(asset.conversions / asset.initiateCheckout * 100).toFixed(1)}% of IC`} />
+        </div>
+      </div>
+
       {/* Delivery */}
       <SectionTitle>Delivery</SectionTitle>
       <div className="grid grid-cols-4 gap-2.5">
@@ -162,7 +288,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <Stat icon={Bookmark} label="Saves" value={asset.postSaves.toLocaleString()} />
       </div>
 
-      {/* Video Metrics */}
+      {/* Video Metrics with Retention Chart */}
       {isVideo && (
         <>
           <SectionTitle>Video Performance</SectionTitle>
@@ -172,23 +298,27 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             <Stat icon={Clock} label="Avg. Watch Time" value={`${asset.avgWatchTime || 0}s`} />
             <Stat icon={Eye} label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
           </div>
-          <div className="grid grid-cols-4 gap-2.5 mt-2.5">
-            <Stat label="Watched 25%" value={`${((asset.videoWatched25 || 0) / (asset.videoPlays || 1) * 100).toFixed(0)}%`} sub={(asset.videoWatched25 || 0).toLocaleString()} />
-            <Stat label="Watched 50%" value={`${((asset.videoWatched50 || 0) / (asset.videoPlays || 1) * 100).toFixed(0)}%`} sub={(asset.videoWatched50 || 0).toLocaleString()} />
-            <Stat label="Watched 75%" value={`${((asset.videoWatched75 || 0) / (asset.videoPlays || 1) * 100).toFixed(0)}%`} sub={(asset.videoWatched75 || 0).toLocaleString()} />
-            <Stat label="Watched 95%" value={`${((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100).toFixed(0)}%`} sub={(asset.videoWatched95 || 0).toLocaleString()} />
+          <div className="mt-3">
+            <ChartCard title="Video Retention Curve">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={videoRetentionData}>
+                  <defs>
+                    <linearGradient id="retentionGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+                  <XAxis dataKey="point" tick={{ fontSize: 10 }} stroke="hsl(228 10% 52%)" />
+                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
+                  <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                  <Area type="monotone" dataKey="pct" name="Retention" stroke="hsl(227, 71%, 55%)" fill="url(#retentionGradient)" strokeWidth={2} dot={{ r: 3 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartCard>
           </div>
         </>
       )}
-
-      {/* Conversion Funnel */}
-      <SectionTitle>Conversion Funnel</SectionTitle>
-      <div className="grid grid-cols-4 gap-2.5">
-        <Stat icon={Eye} label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} />
-        <Stat icon={ShoppingCart} label="Add to Cart" value={asset.addToCart.toLocaleString()} sub={`${(asset.addToCart / asset.landingPageViews * 100).toFixed(1)}% of LPV`} />
-        <Stat icon={Crosshair} label="Initiate Checkout" value={asset.initiateCheckout.toLocaleString()} sub={`${(asset.initiateCheckout / asset.addToCart * 100).toFixed(1)}% of ATC`} />
-        <Stat icon={ShoppingCart} label="Purchases" value={asset.conversions.toLocaleString()} sub={`${(asset.conversions / asset.initiateCheckout * 100).toFixed(1)}% of IC`} />
-      </div>
 
       {/* Ad Quality / Relevance */}
       <SectionTitle>Ad Relevance Diagnostics</SectionTitle>
