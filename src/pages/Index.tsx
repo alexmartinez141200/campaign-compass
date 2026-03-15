@@ -284,7 +284,7 @@ const Index = () => {
                         showCheckbox={false}
                         campaignName={campaignName}
                         onSelectToggle={() => {}}
-                        onClick={() => { setSelectedCampaignId(campaignId); setViewingAssetId(asset.id); }}
+                        onClick={() => { setSelectedCampaignId(campaignId); setViewingAssetId(asset.id); setFromCreativesTab(true); }}
                       />
                     ))}
                   </div>
