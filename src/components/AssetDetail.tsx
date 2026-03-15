@@ -371,7 +371,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           <div>
             <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Link Clicks</p>
             <p className="text-lg font-mono font-bold text-foreground">{asset.linkClicks.toLocaleString()}</p>
-            <TrendArrow value={trends.linkClicks} suffix="%" />
+            <TrendArrow value={trends.clicks} suffix="%" />
           </div>
           <div>
             <div className="flex items-center gap-1.5 mb-0.5">
