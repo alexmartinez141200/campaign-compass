@@ -234,29 +234,23 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
       </div>
 
-      {/* ─── CREATIVE PROFILE ─── */}
-      <div className="rounded-lg border border-border/60 bg-card p-4 mb-5">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">Creative Profile</p>
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          {[
-            { label: "Platform", value: asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : asset.channel === "google" ? "Google" : asset.channel },
-            { label: "Format", value: asset.type.charAt(0).toUpperCase() + asset.type.slice(1) },
-            ...(asset.creativeProfile.videoDuration ? [{ label: "Duration", value: `${asset.creativeProfile.videoDuration}s` }] : []),
-            { label: "Aspect Ratio", value: asset.creativeProfile.aspectRatio },
-            { label: "Motion", value: asset.creativeProfile.motionIntensity },
-            { label: "Contrast", value: asset.creativeProfile.colorContrast },
-            { label: "Brand", value: asset.creativeProfile.brandProminence },
-            { label: "Consistency", value: asset.creativeProfile.brandConsistency },
-            { label: "Funnel", value: asset.creativeProfile.funnelStage },
-            { label: "CTA", value: asset.creativeProfile.callToAction },
-            { label: "Product in 3s", value: asset.creativeProfile.productInFirst3s ? "Yes" : "No" },
-          ].map((attr) => (
-            <div key={attr.label} className="flex items-center gap-1.5">
-              <span className="text-[10px] text-muted-foreground">{attr.label}</span>
-              <span className="text-[11px] font-medium text-foreground bg-muted/60 px-2 py-0.5 rounded">{attr.value}</span>
-            </div>
-          ))}
-        </div>
+      {/* ─── CREATIVE PROFILE (compact inline tags) ─── */}
+      <div className="flex flex-wrap items-center gap-1.5 mb-5">
+        {[
+          asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : asset.channel === "google" ? "Google" : asset.channel,
+          asset.type.charAt(0).toUpperCase() + asset.type.slice(1),
+          ...(asset.creativeProfile.videoDuration ? [`${asset.creativeProfile.videoDuration}s`] : []),
+          asset.creativeProfile.aspectRatio,
+          `${asset.creativeProfile.motionIntensity} motion`,
+          `${asset.creativeProfile.colorContrast} contrast`,
+          `Brand: ${asset.creativeProfile.brandProminence}`,
+          `Consistency: ${asset.creativeProfile.brandConsistency}`,
+          asset.creativeProfile.funnelStage,
+          asset.creativeProfile.callToAction,
+          asset.creativeProfile.productInFirst3s ? "Product in 3s ✓" : "No product in 3s",
+        ].map((tag) => (
+          <span key={tag} className="text-[10px] font-medium text-muted-foreground bg-muted/50 border border-border/40 px-2 py-0.5 rounded-full">{tag}</span>
+        ))}
       </div>
 
       {/* ─── DATE FILTER (global for all charts) ─── */}
