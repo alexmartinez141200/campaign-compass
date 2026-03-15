@@ -55,110 +55,94 @@ interface CorrelationCell {
   signal: "best" | "worst" | "neutral";
 }
 
-interface CorrelationRow {
+interface AssetRow {
+  asset: CreativeAsset;
   attrValue: string;
-  count: number;
   metrics: { value: number; signal: "best" | "worst" | "neutral"; pctVsAvg: number }[];
 }
 
 interface CorrelationCard {
   attr: AttrDef;
-  rows: CorrelationRow[];
-  takeaway: string; // human-readable insight
+  groups: { value: string; assets: AssetRow[] }[];
+  takeaway: string;
 }
 
 function buildCorrelationCards(assets: CreativeAsset[]): CorrelationCard[] {
   const cards: CorrelationCard[] = [];
+  const globalAvgs = METRICS.map(m => assets.reduce((s, a) => s + m.get(a), 0) / assets.length);
 
   for (const attr of PROFILE_ATTRS) {
-    const groups = new Map<string, CreativeAsset[]>();
+    const groupMap = new Map<string, CreativeAsset[]>();
     for (const a of assets) {
       const val = attr.get(a);
-      if (!groups.has(val)) groups.set(val, []);
-      groups.get(val)!.push(a);
+      if (!groupMap.has(val)) groupMap.set(val, []);
+      groupMap.get(val)!.push(a);
     }
-    if (groups.size < 2) continue;
+    if (groupMap.size < 2) continue;
 
-    // Compute averages per group per metric
-    const groupAvgs = new Map<string, number[]>(); // attrVal -> metric averages
-    for (const [val, group] of groups) {
-      const avgs = METRICS.map(m => group.reduce((s, a) => s + m.get(a), 0) / group.length);
-      groupAvgs.set(val, avgs);
-    }
-
-    // Global avg per metric across all selected
-    const globalAvgs = METRICS.map(m => assets.reduce((s, a) => s + m.get(a), 0) / assets.length);
-
-    // Find best/worst per metric
-    const bestKeys: string[] = [];
-    const worstKeys: string[] = [];
+    // Find best/worst per metric across all individual assets
+    const bestIdx: number[] = [];
+    const worstIdx: number[] = [];
     for (let mi = 0; mi < METRICS.length; mi++) {
       const m = METRICS[mi];
       let bestVal = m.higherIsBetter ? -Infinity : Infinity;
       let worstVal = m.higherIsBetter ? Infinity : -Infinity;
-      let bestKey = "", worstKey = "";
-      for (const [val, avgs] of groupAvgs) {
-        const v = avgs[mi];
-        if (m.higherIsBetter) {
-          if (v > bestVal) { bestVal = v; bestKey = val; }
-          if (v < worstVal) { worstVal = v; worstKey = val; }
-        } else {
-          if (v < bestVal) { bestVal = v; bestKey = val; }
-          if (v > worstVal) { worstVal = v; worstKey = val; }
-        }
-      }
+      let bi = 0, wi = 0;
+      assets.forEach((a, i) => {
+        const v = m.get(a);
+        if (m.higherIsBetter ? v > bestVal : v < bestVal) { bestVal = v; bi = i; }
+        if (m.higherIsBetter ? v < worstVal : v > worstVal) { worstVal = v; wi = i; }
+      });
       const spread = (bestVal + worstVal) / 2;
       const pctSpread = spread > 0 ? Math.abs(bestVal - worstVal) / spread : 0;
-      bestKeys.push(pctSpread > 0.1 ? bestKey : "");
-      worstKeys.push(pctSpread > 0.1 ? worstKey : "");
+      bestIdx.push(pctSpread > 0.1 ? bi : -1);
+      worstIdx.push(pctSpread > 0.1 ? wi : -1);
     }
 
-    // Build rows
-    const rows: CorrelationRow[] = [];
-    for (const [val, avgs] of groupAvgs) {
-      rows.push({
-        attrValue: val,
-        count: groups.get(val)!.length,
-        metrics: avgs.map((v, mi) => ({
-          value: v,
-          signal: bestKeys[mi] === val ? "best" : worstKeys[mi] === val ? "worst" : "neutral",
-          pctVsAvg: globalAvgs[mi] > 0 ? Math.round(((v - globalAvgs[mi]) / globalAvgs[mi]) * 100) : 0,
-        })),
-      });
-    }
-    // Sort rows by ROAS (first metric) descending
-    rows.sort((a, b) => b.metrics[0].value - a.metrics[0].value);
+    // Build grouped rows
+    const groups: { value: string; assets: AssetRow[] }[] = [];
+    // Sort groups by avg ROAS descending
+    const sortedGroups = [...groupMap.entries()].sort((a, b) => {
+      const avgA = a[1].reduce((s, x) => s + x.roas, 0) / a[1].length;
+      const avgB = b[1].reduce((s, x) => s + x.roas, 0) / b[1].length;
+      return avgB - avgA;
+    });
 
-    // Generate takeaway: find the most impactful difference
+    for (const [val, group] of sortedGroups) {
+      const assetRows: AssetRow[] = group
+        .sort((a, b) => b.roas - a.roas)
+        .map(asset => ({
+          asset,
+          attrValue: val,
+          metrics: METRICS.map((m, mi) => {
+            const v = m.get(asset);
+            const ai = assets.indexOf(asset);
+            return {
+              value: v,
+              signal: bestIdx[mi] === ai ? "best" as const : worstIdx[mi] === ai ? "worst" as const : "neutral" as const,
+              pctVsAvg: globalAvgs[mi] > 0 ? Math.round(((v - globalAvgs[mi]) / globalAvgs[mi]) * 100) : 0,
+            };
+          }),
+        }));
+      groups.push({ value: val, assets: assetRows });
+    }
+
+    // Takeaway
     let takeaway = "";
-    const roasIdx = 0;
-    if (rows.length >= 2) {
-      const topRow = rows[0];
-      const botRow = rows[rows.length - 1];
-      const roasDiff = Math.round(((topRow.metrics[roasIdx].value - botRow.metrics[roasIdx].value) / botRow.metrics[roasIdx].value) * 100);
-      
-      // Find which other metrics differ most
-      let biggestDiffMetric = "";
-      let biggestDiffPct = 0;
-      for (let mi = 1; mi < METRICS.length; mi++) {
-        const diff = Math.abs(topRow.metrics[mi].pctVsAvg - botRow.metrics[mi].pctVsAvg);
-        if (diff > biggestDiffPct) {
-          biggestDiffPct = diff;
-          biggestDiffMetric = METRICS[mi].label;
-        }
-      }
-      
-      if (roasDiff > 5) {
-        takeaway = `${topRow.attrValue} delivers ${roasDiff}% higher ROAS than ${botRow.attrValue}`;
-        if (biggestDiffMetric && biggestDiffPct > 15) {
-          takeaway += `, driven by ${biggestDiffMetric}`;
-        }
+    if (sortedGroups.length >= 2) {
+      const topGroup = sortedGroups[0];
+      const botGroup = sortedGroups[sortedGroups.length - 1];
+      const topAvgRoas = topGroup[1].reduce((s, a) => s + a.roas, 0) / topGroup[1].length;
+      const botAvgRoas = botGroup[1].reduce((s, a) => s + a.roas, 0) / botGroup[1].length;
+      const diff = botAvgRoas > 0 ? Math.round(((topAvgRoas - botAvgRoas) / botAvgRoas) * 100) : 0;
+      if (diff > 5) {
+        takeaway = `${topGroup[0]} outperforms ${botGroup[0]} by ${diff}% on ROAS`;
       } else {
-        takeaway = `No significant ROAS difference between ${attr.label.toLowerCase()} values`;
+        takeaway = `Similar performance across ${attr.label.toLowerCase()} values`;
       }
     }
 
-    cards.push({ attr, rows, takeaway });
+    cards.push({ attr, groups, takeaway });
   }
 
   return cards;
@@ -291,11 +275,10 @@ const Insights = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {correlationCards.map(card => (
               <div key={card.attr.key} className="rounded-lg border border-border overflow-hidden">
-                {/* Card header with takeaway */}
                 <div className="bg-muted/20 px-3 py-2 border-b border-border/40">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">{card.attr.label}</span>
-                    <span className="text-[9px] text-muted-foreground">{card.rows.length} values</span>
+                    <span className="text-[9px] text-muted-foreground">{card.groups.length} values</span>
                   </div>
                   {card.takeaway && (
                     <p className="text-[10px] text-muted-foreground mt-0.5 italic">{card.takeaway}</p>
@@ -304,31 +287,44 @@ const Insights = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border/30">
-                      <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-3 py-1 text-left">Value</th>
-                      <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-center w-[24px]">n</th>
+                      <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-3 py-1 text-left" colSpan={2}>Asset</th>
                       {METRICS.map(m => (
                         <th key={m.key} className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-right">{m.label}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {card.rows.map(row => (
-                      <tr key={row.attrValue} className="border-b border-border/15 last:border-0 hover:bg-muted/10 transition-colors">
-                        <td className="px-3 py-1.5 text-[11px] font-semibold text-foreground">{row.attrValue}</td>
-                        <td className="px-2 py-1.5 text-center text-[9px] font-mono text-muted-foreground">{row.count}</td>
-                        {row.metrics.map((mc, mi) => (
-                          <td key={METRICS[mi].key} className={`px-2 py-1.5 text-right ${cellStyles[mc.signal]}`}>
-                            <div className="flex flex-col items-end">
-                              <span className="text-[11px] font-mono font-semibold">{fmt(mc.value, METRICS[mi].format)}</span>
-                              {mc.signal !== "neutral" && (
-                                <span className="text-[8px] font-mono opacity-70">
-                                  {mc.pctVsAvg > 0 ? "▲" : "▼"} {Math.abs(mc.pctVsAvg)}%
-                                </span>
-                              )}
-                            </div>
+                    {card.groups.map(group => (
+                      <>
+                        {/* Group header */}
+                        <tr key={`hdr-${group.value}`} className="bg-muted/10 border-b border-border/20">
+                          <td colSpan={2 + METRICS.length} className="px-3 py-1">
+                            <span className="text-[10px] font-bold text-foreground">{group.value}</span>
+                            <span className="text-[9px] text-muted-foreground ml-1.5">({group.assets.length} asset{group.assets.length > 1 ? "s" : ""})</span>
                           </td>
+                        </tr>
+                        {/* Asset rows */}
+                        {group.assets.map(row => (
+                          <tr key={row.asset.id} className="border-b border-border/15 last:border-0 hover:bg-muted/10 transition-colors">
+                            <td className="pl-5 pr-1 py-1.5 w-[24px]">
+                              <img src={row.asset.thumbnail} alt="" className="w-5 h-5 rounded object-cover" />
+                            </td>
+                            <td className="px-1 py-1.5 text-[10px] font-semibold text-foreground truncate max-w-[100px]">{row.asset.name}</td>
+                            {row.metrics.map((mc, mi) => (
+                              <td key={METRICS[mi].key} className={`px-2 py-1.5 text-right ${cellStyles[mc.signal]}`}>
+                                <div className="flex flex-col items-end">
+                                  <span className="text-[11px] font-mono font-semibold">{fmt(mc.value, METRICS[mi].format)}</span>
+                                  {mc.signal !== "neutral" && (
+                                    <span className="text-[8px] font-mono opacity-70">
+                                      {mc.pctVsAvg > 0 ? "▲" : "▼"} {Math.abs(mc.pctVsAvg)}%
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                            ))}
+                          </tr>
                         ))}
-                      </tr>
+                      </>
                     ))}
                   </tbody>
                 </table>
