@@ -568,59 +568,55 @@ const Insights = () => {
             </div>
             <div className="p-5 overflow-auto max-h-[calc(80vh-52px)]">
               {modalGroup && renderGroupTable(modalGroup)}
-              {openModal === "correlation" && (
-                <div className="grid grid-cols-1 gap-4">
-                  {correlationCards.map(card => (
-                    <div key={card.attr.key} className="rounded-lg border border-border overflow-hidden">
-                      <div className="bg-muted/20 px-3 py-2 border-b border-border/40">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">{card.attr.label}</span>
-                          <span className="text-[9px] text-muted-foreground">{card.groups.length} values</span>
-                        </div>
-                        {card.takeaway && <p className="text-[10px] text-muted-foreground mt-0.5 italic">{card.takeaway}</p>}
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full min-w-[800px]">
-                          <thead>
-                            <tr className="border-b border-border/30">
-                              <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-3 py-1 text-left sticky left-0 bg-background z-10 min-w-[140px]">Asset</th>
-                              <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-left min-w-[70px]">{card.attr.label}</th>
-                              {metrics.map(m => (
-                                <th key={m.key} className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-1.5 py-1 text-right whitespace-nowrap">{m.label}</th>
+              {isCorrelationModal && correlationCard && (
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <div className="bg-muted/20 px-3 py-2 border-b border-border/40">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">{correlationCard.attr.label}</span>
+                      <span className="text-[9px] text-muted-foreground">{correlationCard.groups.length} values</span>
+                    </div>
+                    {correlationCard.takeaway && <p className="text-[10px] text-muted-foreground mt-0.5 italic">{correlationCard.takeaway}</p>}
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[800px]">
+                      <thead>
+                        <tr className="border-b border-border/30">
+                          <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-3 py-1 text-left sticky left-0 bg-background z-10 min-w-[140px]">Asset</th>
+                          <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-left min-w-[70px]">{correlationCard.attr.label}</th>
+                          {metrics.map(m => (
+                            <th key={m.key} className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-1.5 py-1 text-right whitespace-nowrap">{m.label}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {correlationCard.groups.flatMap(group =>
+                          group.assets.map(row => (
+                            <tr key={row.asset.id} className="border-b border-border/15 last:border-0 hover:bg-muted/10 transition-colors">
+                              <td className="px-3 py-1.5 sticky left-0 bg-background z-10">
+                                <div className="flex items-center gap-1.5">
+                                  <img src={row.asset.thumbnail} alt="" className="w-5 h-5 rounded object-cover flex-shrink-0" />
+                                  <span className="text-[10px] font-semibold text-foreground truncate max-w-[100px]">{row.asset.name}</span>
+                                </div>
+                              </td>
+                              <td className="px-2 py-1.5 text-[10px] font-mono text-muted-foreground">{group.value}</td>
+                              {row.metrics.map((mc, mi) => (
+                                <td key={metrics[mi].key} className={`px-1.5 py-1.5 text-right ${cellStyles[mc.signal]}`}>
+                                  <div className="flex flex-col items-end">
+                                    <span className="text-[10px] font-mono font-semibold whitespace-nowrap">{fmt(mc.value, metrics[mi].format)}</span>
+                                    {mc.signal !== "neutral" && (
+                                      <span className="text-[7px] font-mono opacity-70">
+                                        {mc.pctVsAvg > 0 ? "▲" : "▼"}{Math.abs(mc.pctVsAvg)}%
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
                               ))}
                             </tr>
-                          </thead>
-                          <tbody>
-                            {card.groups.flatMap(group =>
-                              group.assets.map(row => (
-                                <tr key={row.asset.id} className="border-b border-border/15 last:border-0 hover:bg-muted/10 transition-colors">
-                                  <td className="px-3 py-1.5 sticky left-0 bg-background z-10">
-                                    <div className="flex items-center gap-1.5">
-                                      <img src={row.asset.thumbnail} alt="" className="w-5 h-5 rounded object-cover flex-shrink-0" />
-                                      <span className="text-[10px] font-semibold text-foreground truncate max-w-[100px]">{row.asset.name}</span>
-                                    </div>
-                                  </td>
-                                  <td className="px-2 py-1.5 text-[10px] font-mono text-muted-foreground">{group.value}</td>
-                                  {row.metrics.map((mc, mi) => (
-                                    <td key={metrics[mi].key} className={`px-1.5 py-1.5 text-right ${cellStyles[mc.signal]}`}>
-                                      <div className="flex flex-col items-end">
-                                        <span className="text-[10px] font-mono font-semibold whitespace-nowrap">{fmt(mc.value, metrics[mi].format)}</span>
-                                        {mc.signal !== "neutral" && (
-                                          <span className="text-[7px] font-mono opacity-70">
-                                            {mc.pctVsAvg > 0 ? "▲" : "▼"}{Math.abs(mc.pctVsAvg)}%
-                                          </span>
-                                        )}
-                                      </div>
-                                    </td>
-                                  ))}
-                                </tr>
-                              ))
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  ))}
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>
