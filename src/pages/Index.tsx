@@ -235,7 +235,7 @@ const Index = () => {
                   {/* Creatives list — same style as campaign detail */}
                   <div className="space-y-0.5">
                     <DiagnosticHeader sort={sort} onSortChange={setSort} showCheckbox={false} />
-                    {filteredCreatives.map(({ asset }, i) => (
+                    {filteredCreatives.map(({ asset, campaignName }, i) => (
                       <DiagnosticCard
                         key={asset.id}
                         asset={asset}
@@ -244,6 +244,7 @@ const Index = () => {
                         maxRoas={Math.max(...filteredCreatives.map(r => r.asset.roas))}
                         selected={false}
                         showCheckbox={false}
+                        campaignName={campaignName}
                         onSelectToggle={() => {}}
                         onClick={() => {}}
                       />
