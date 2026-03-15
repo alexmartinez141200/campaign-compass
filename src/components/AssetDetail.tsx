@@ -1,8 +1,12 @@
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, DollarSign, Eye, MousePointerClick, ShoppingCart, Target, BarChart3, Heart, MessageCircle, Share2, Bookmark, Play, Clock, Users, Repeat, ExternalLink, Crosshair } from "lucide-react";
-import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import type { CreativeAsset } from "@/data/mockData";
+import { ArrowLeft, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, DollarSign, Eye, MousePointerClick, ShoppingCart, Target, BarChart3, Heart, MessageCircle, Share2, Bookmark, Play, Clock, Users, Repeat, ExternalLink, Crosshair, CalendarDays } from "lucide-react";
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
+import type { CreativeAsset, DailyMetric } from "@/data/mockData";
 import ChannelIcon from "./ChannelIcon";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import type { DateRange } from "react-day-picker";
 
 interface AssetDetailProps {
   asset: CreativeAsset;
@@ -99,12 +103,90 @@ const chartTooltipStyle = {
   },
 };
 
+type DatePreset = "today" | "yesterday" | "7d" | "30d" | "custom";
+
 const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
+  const [datePreset, setDatePreset] = useState<DatePreset>("7d");
+  const [customRange, setCustomRange] = useState<DateRange | undefined>();
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
   const verdict = getVerdict(asset, campaignAssets);
   const insights = generateInsights(asset, campaignAssets);
   const rank = [...campaignAssets].sort((a, b) => b.roas - a.roas).findIndex(a => a.id === asset.id) + 1;
   const isVideo = asset.type === "video";
   const daily = asset.dailyMetrics;
+
+  // Filter daily metrics by date range
+  const filteredDaily = useMemo(() => {
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    let filtered: DailyMetric[];
+    switch (datePreset) {
+      case "today":
+        filtered = daily.filter(d => d.fullDate === todayStr);
+        break;
+      case "yesterday":
+        filtered = daily.filter(d => d.fullDate === yesterdayStr);
+        break;
+      case "7d": {
+        const start = new Date(now); start.setDate(now.getDate() - 6);
+        const startStr = start.toISOString().split('T')[0];
+        filtered = daily.filter(d => d.fullDate >= startStr && d.fullDate <= todayStr);
+        break;
+      }
+      case "30d":
+        filtered = daily;
+        break;
+      case "custom":
+        if (customRange?.from) {
+          const fromStr = customRange.from.toISOString().split('T')[0];
+          const toStr = customRange.to ? customRange.to.toISOString().split('T')[0] : fromStr;
+          filtered = daily.filter(d => d.fullDate >= fromStr && d.fullDate <= toStr);
+        } else {
+          filtered = daily;
+        }
+        break;
+      default:
+        filtered = daily;
+    }
+
+    // Recalculate cumulative ROAS for filtered range
+    let cumSpend = 0, cumPV = 0;
+    return filtered.map(d => {
+      cumSpend += d.spend;
+      cumPV += d.purchaseValue;
+      return {
+        ...d,
+        cumulativeRoas: cumSpend > 0 ? Math.round(cumPV / cumSpend * 100) / 100 : 0,
+      };
+    });
+  }, [daily, datePreset, customRange]);
+
+  // Summary stats for selected range
+  const rangeSummary = useMemo(() => {
+    const totalSpend = filteredDaily.reduce((s, d) => s + d.spend, 0);
+    const totalPV = filteredDaily.reduce((s, d) => s + d.purchaseValue, 0);
+    const totalConversions = filteredDaily.reduce((s, d) => s + d.conversions, 0);
+    return {
+      spend: totalSpend,
+      revenue: totalPV,
+      roas: totalSpend > 0 ? Math.round(totalPV / totalSpend * 100) / 100 : 0,
+      conversions: totalConversions,
+    };
+  }, [filteredDaily]);
+
+  const presetLabel: Record<DatePreset, string> = {
+    today: "Today",
+    yesterday: "Yesterday",
+    "7d": "Last 7 Days",
+    "30d": "Last 30 Days",
+    custom: customRange?.from
+      ? `${customRange.from.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}${customRange.to ? ` – ${customRange.to.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}`
+      : "Custom Range",
+  };
 
   // Funnel data for bar chart
   const funnelData = [
@@ -170,33 +252,118 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <Stat icon={Target} label="Cost / Result" value={`$${asset.costPerResult.toFixed(2)}`} sub="Per conversion" />
       </div>
 
-      {/* Charts: ROAS Trend */}
-      <SectionTitle>Performance Trends (14 Days)</SectionTitle>
+      {/* ROAS Section with Date Filter */}
+      <div className="flex items-center justify-between mt-7 mb-3">
+        <h3 className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-semibold flex items-center gap-2">
+          <span>ROAS — Purchase Value ÷ Ad Spend</span>
+          <div className="flex-1 h-px bg-border/50" />
+        </h3>
+        <div className="flex items-center gap-1.5">
+          {(["today", "yesterday", "7d", "30d"] as DatePreset[]).map((preset) => (
+            <button
+              key={preset}
+              onClick={() => setDatePreset(preset)}
+              className={`px-2.5 py-1 text-[10px] font-medium rounded-md border transition-colors ${
+                datePreset === preset
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-surface text-muted-foreground border-border/60 hover:bg-muted"
+              }`}
+            >
+              {preset === "today" ? "Today" : preset === "yesterday" ? "Yesterday" : preset === "7d" ? "7D" : "30D"}
+            </button>
+          ))}
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <button
+                onClick={() => setDatePreset("custom")}
+                className={`px-2.5 py-1 text-[10px] font-medium rounded-md border transition-colors flex items-center gap-1 ${
+                  datePreset === "custom"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-surface text-muted-foreground border-border/60 hover:bg-muted"
+                }`}
+              >
+                <CalendarDays className="w-3 h-3" />
+                Custom
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="range"
+                selected={customRange}
+                onSelect={(range) => {
+                  setCustomRange(range);
+                  setDatePreset("custom");
+                  if (range?.to) setCalendarOpen(false);
+                }}
+                numberOfMonths={1}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
+      {/* Range Summary Cards */}
+      <div className="grid grid-cols-4 gap-2.5 mb-3">
+        <div className="p-3 rounded-md border border-border/60 bg-surface">
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Period ROAS</p>
+          <p className="text-xl font-mono font-bold text-foreground mt-0.5">{rangeSummary.roas}x</p>
+          <p className="text-[10px] text-muted-foreground">{presetLabel[datePreset]}</p>
+        </div>
+        <Stat icon={DollarSign} label="Period Spend" value={`$${rangeSummary.spend.toLocaleString()}`} />
+        <Stat icon={TrendingUp} label="Period Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} />
+        <Stat icon={ShoppingCart} label="Period Conversions" value={rangeSummary.conversions.toLocaleString()} />
+      </div>
+
+      {/* ROAS Chart */}
       <div className="grid grid-cols-2 gap-3">
-        <ChartCard title="ROAS Over Time">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={daily}>
-              <defs>
-                <linearGradient id="roasGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
-              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
-              <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}x`} />
-              <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}x`} />
-              <Area type="monotone" dataKey="roas" name="ROAS" stroke="hsl(174, 100%, 33%)" fill="url(#roasGradient)" strokeWidth={2} dot={{ r: 2 }} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartCard>
+        <div className="rounded-lg border border-border/60 bg-surface p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Daily ROAS</p>
+          <p className="text-[9px] text-muted-foreground mb-3">Purchase conversion value ÷ ad spend per day</p>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+                <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}x`} />
+                <Tooltip {...chartTooltipStyle} formatter={(value: number, name: string) => [
+                  name === "roas" ? `${value}x` : `$${value.toLocaleString()}`,
+                  name === "roas" ? "ROAS" : name === "spend" ? "Spend" : "Revenue"
+                ]} />
+                <ReferenceLine y={rangeSummary.roas} stroke="hsl(346, 84%, 61%)" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: `Avg ${rangeSummary.roas}x`, position: "right", fontSize: 9, fill: "hsl(346, 84%, 61%)" }} />
+                <Bar dataKey="roas" name="roas" fill="hsl(174, 100%, 33%)" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-border/60 bg-surface p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Cumulative ROAS</p>
+          <p className="text-[9px] text-muted-foreground mb-3">Running total revenue ÷ running total spend</p>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={filteredDaily}>
+                <defs>
+                  <linearGradient id="cumRoasGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+                <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}x`} />
+                <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}x`} />
+                <Area type="monotone" dataKey="cumulativeRoas" name="Cumulative ROAS" stroke="hsl(227, 71%, 55%)" fill="url(#cumRoasGradient)" strokeWidth={2} dot={{ r: 2 }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
       {/* CTR & CPM trends */}
       <div className="grid grid-cols-2 gap-3 mt-3">
         <ChartCard title="CTR % Over Time">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={daily}>
+            <LineChart data={filteredDaily}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
               <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
               <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}%`} />
@@ -208,7 +375,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
         <ChartCard title="CPM Over Time">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={daily}>
+            <LineChart data={filteredDaily}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
               <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
               <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `$${v}`} />

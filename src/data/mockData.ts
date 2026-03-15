@@ -7,12 +7,16 @@ export type Channel = "meta" | "tiktok" | "google" | "linkedin" | "amazon";
 
 export interface DailyMetric {
   date: string;
+  fullDate: string; // ISO date for filtering
   spend: number;
   impressions: number;
   clicks: number;
   conversions: number;
   purchaseValue: number;
-  roas: number;
+  roas: number; // daily ROAS (purchaseValue / spend)
+  cumulativeSpend: number;
+  cumulativePurchaseValue: number;
+  cumulativeRoas: number; // running total purchaseValue / running total spend
   ctr: number;
   cpm: number;
 }
@@ -69,31 +73,42 @@ export interface CreativeAsset {
   dailyMetrics: DailyMetric[];
 }
 
-function generateDailyMetrics(totalSpend: number, totalImpressions: number, totalClicks: number, totalConversions: number, totalPurchaseValue: number, days: number = 14): DailyMetric[] {
+function generateDailyMetrics(totalSpend: number, totalImpressions: number, totalClicks: number, totalConversions: number, totalPurchaseValue: number, days: number = 30): DailyMetric[] {
   const metrics: DailyMetric[] = [];
   const now = new Date();
   let remainSpend = totalSpend, remainImpr = totalImpressions, remainClicks = totalClicks, remainConv = totalConversions, remainPV = totalPurchaseValue;
+  let cumSpend = 0, cumPV = 0;
   
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(now);
     d.setDate(d.getDate() - i);
-    const weight = 0.7 + Math.random() * 0.6; // variance
+    const weight = 0.6 + Math.random() * 0.8; // more variance for realistic data
     const daySpend = i === 0 ? remainSpend : Math.round(totalSpend / days * weight);
     const dayImpr = i === 0 ? remainImpr : Math.round(totalImpressions / days * weight);
     const dayClicks = i === 0 ? remainClicks : Math.round(totalClicks / days * weight);
     const dayConv = i === 0 ? remainConv : Math.round(totalConversions / days * weight);
     const dayPV = i === 0 ? remainPV : Math.round(totalPurchaseValue / days * weight);
     remainSpend -= daySpend; remainImpr -= dayImpr; remainClicks -= dayClicks; remainConv -= dayConv; remainPV -= dayPV;
+    
+    const s = Math.max(0, daySpend);
+    const pv = Math.max(0, dayPV);
+    cumSpend += s;
+    cumPV += pv;
+    
     metrics.push({
       date: `${d.getMonth() + 1}/${d.getDate()}`,
-      spend: Math.max(0, daySpend),
+      fullDate: d.toISOString().split('T')[0],
+      spend: s,
       impressions: Math.max(0, dayImpr),
       clicks: Math.max(0, dayClicks),
       conversions: Math.max(0, dayConv),
-      purchaseValue: Math.max(0, dayPV),
-      roas: daySpend > 0 ? Math.round(dayPV / daySpend * 10) / 10 : 0,
+      purchaseValue: pv,
+      roas: s > 0 ? Math.round(pv / s * 10) / 10 : 0,
+      cumulativeSpend: cumSpend,
+      cumulativePurchaseValue: cumPV,
+      cumulativeRoas: cumSpend > 0 ? Math.round(cumPV / cumSpend * 100) / 100 : 0,
       ctr: dayImpr > 0 ? Math.round(dayClicks / dayImpr * 10000) / 100 : 0,
-      cpm: dayImpr > 0 ? Math.round(daySpend / dayImpr * 100000) / 100 : 0,
+      cpm: dayImpr > 0 ? Math.round(s / dayImpr * 100000) / 100 : 0,
     });
   }
   return metrics;
