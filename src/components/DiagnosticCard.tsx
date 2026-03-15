@@ -56,6 +56,7 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
 
   return (
     <motion.div
+      onClick={onClick}
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.025 }}
