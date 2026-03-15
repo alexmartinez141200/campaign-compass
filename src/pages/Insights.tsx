@@ -217,6 +217,8 @@ const Insights = () => {
   const navigate = useNavigate();
   const assets = (location.state?.assets || []) as CreativeAsset[];
   const channel: Channel | null = assets.length > 0 ? assets[0].channel : null;
+  const campaignId: string | null = location.state?.campaignId || null;
+  const campaignName: string | null = location.state?.campaignName || null;
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const scrollTo = useCallback((key: string) => {
