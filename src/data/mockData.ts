@@ -232,6 +232,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRV-6612", name: "Video_Gift_Unbox", type: "video", thumbnail: creative4, dimensions: "1080×1920", channel: "google",
+        creativeProfile: { aspectRatio: "9:16", videoDuration: 30, motionIntensity: "High", colorContrast: "Medium", brandProminence: "Balanced", brandConsistency: "Medium", funnelStage: "Consideration", callToAction: "Watch More", productInFirst3s: true },
         spend: 4200, impressions: 112000, reach: 89000, frequency: 1.26, clicks: 2240, linkClicks: 1792, outboundClicks: 1568,
         postReactions: 580, postComments: 42, postShares: 95, postSaves: 210,
         videoPlays: 98000, thruPlays: 58800, avgWatchTime: 5.1, videoWatched25: 86000, videoWatched50: 62000, videoWatched75: 38000, videoWatched95: 18000,
