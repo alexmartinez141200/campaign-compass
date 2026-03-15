@@ -328,33 +328,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
       </div>
 
-      {/* CTR & CPM trends */}
-      <div className="grid grid-cols-2 gap-3 mt-3">
-        <ChartCard title="CTR % Over Time">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={filteredDaily}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
-              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
-              <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}%`} />
-              <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
-              <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={{ r: 2 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        <ChartCard title="CPM Over Time">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={filteredDaily}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
-              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
-              <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `$${v}`} />
-              <Tooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
-              <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={{ r: 2 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
-      </div>
-
       {/* Conversion Funnel */}
       <SectionTitle>Conversion Funnel</SectionTitle>
 
@@ -435,10 +408,11 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
       </div>
 
-      {/* Delivery & Traffic — tells the story: how many people saw it → clicked → landed */}
+      {/* Delivery & Traffic — reach, clicks, and trends in one card */}
       <SectionTitle>Delivery & Traffic</SectionTitle>
       <div className="rounded-lg border border-border/60 bg-surface p-4">
-        <div className="grid grid-cols-5 gap-4">
+        {/* Reach metrics */}
+        <div className="grid grid-cols-3 gap-4 mb-4">
           <div>
             <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Impressions</p>
             <p className="text-lg font-mono font-bold text-foreground">{asset.impressions.toLocaleString()}</p>
@@ -452,35 +426,64 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPM</p>
             <p className="text-lg font-mono font-bold text-foreground">${asset.cpm.toFixed(2)}</p>
           </div>
+        </div>
+
+        {/* Click metrics */}
+        <div className="grid grid-cols-5 gap-4 pt-3 border-t border-border/30 mb-4">
           <div>
             <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Link Clicks</p>
-            <p className="text-lg font-mono font-bold text-foreground">{asset.linkClicks.toLocaleString()}</p>
+            <p className="text-[15px] font-mono font-bold text-foreground">{asset.linkClicks.toLocaleString()}</p>
             <p className="text-[10px] text-muted-foreground">CTR: {asset.ctr}%</p>
           </div>
           <div>
             <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPC</p>
-            <p className="text-lg font-mono font-bold text-foreground">${asset.cpc.toFixed(2)}</p>
+            <p className="text-[15px] font-mono font-bold text-foreground">${asset.cpc.toFixed(2)}</p>
           </div>
-        </div>
-        <div className="grid grid-cols-5 gap-4 mt-3 pt-3 border-t border-border/30">
           <div>
             <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">All Clicks</p>
-            <p className="text-[13px] font-mono font-semibold text-foreground">{asset.clicks.toLocaleString()}</p>
+            <p className="text-[15px] font-mono font-bold text-foreground">{asset.clicks.toLocaleString()}</p>
             <p className="text-[10px] text-muted-foreground">CTR: {asset.ctrAll}%</p>
           </div>
           <div>
             <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Outbound Clicks</p>
-            <p className="text-[13px] font-mono font-semibold text-foreground">{asset.outboundClicks.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Landing Page Views</p>
-            <p className="text-[13px] font-mono font-semibold text-foreground">{asset.landingPageViews.toLocaleString()}</p>
+            <p className="text-[15px] font-mono font-bold text-foreground">{asset.outboundClicks.toLocaleString()}</p>
           </div>
           <div>
             <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPC (All)</p>
-            <p className="text-[13px] font-mono font-semibold text-foreground">${asset.cpcAll.toFixed(2)}</p>
+            <p className="text-[15px] font-mono font-bold text-foreground">${asset.cpcAll.toFixed(2)}</p>
           </div>
-          <div />
+        </div>
+
+        {/* CTR & CPM trend charts */}
+        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border/30">
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">CTR % Over Time</p>
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={filteredDaily}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}%`} />
+                  <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                  <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={{ r: 2 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">CPM Over Time</p>
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={filteredDaily}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `$${v}`} />
+                  <Tooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
+                  <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={{ r: 2 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </div>
 
