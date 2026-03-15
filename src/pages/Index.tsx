@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { FolderOpen, ArrowLeft } from "lucide-react";
 import type { Channel } from "@/data/mockData";
 import AppSidebar from "@/components/AppSidebar";
@@ -13,12 +14,18 @@ type SortOption = "roas" | "spend";
 type CampaignTab = "active" | "archived";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [campaignTab, setCampaignTab] = useState<CampaignTab>("active");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>([]);
   const [sort, setSort] = useState<SortOption>("roas");
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
   const [viewingAssetId, setViewingAssetId] = useState<string | null>(null);
+
+  const handleGetInsights = () => {
+    const assets = filteredAssets.filter(a => selectedAssets.has(a.id));
+    navigate("/insights", { state: { assets } });
+  };
 
   const toggleAssetSelection = (id: string) => {
     setSelectedAssets((prev) => {
@@ -164,7 +171,7 @@ const Index = () => {
               <CampaignHeader campaign={selectedCampaign} />
 
               <div className="mt-5 mb-4">
-                <FilterBar selectedChannels={selectedChannels} sort={sort} selectedCount={selectedAssets.size} showInsights={selectedChannels.length > 0} onChannelsChange={(ch) => { setSelectedChannels(ch); setSelectedAssets(new Set()); }} onSortChange={setSort} />
+                <FilterBar selectedChannels={selectedChannels} sort={sort} selectedCount={selectedAssets.size} showInsights={selectedChannels.length > 0} onChannelsChange={(ch) => { setSelectedChannels(ch); setSelectedAssets(new Set()); }} onSortChange={setSort} onGetInsights={handleGetInsights} />
               </div>
 
               <div className="space-y-0.5">

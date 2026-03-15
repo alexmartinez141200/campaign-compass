@@ -9,6 +9,7 @@ interface FilterBarProps {
   showInsights: boolean;
   onChannelsChange: (channels: Channel[]) => void;
   onSortChange: (s: SortOption) => void;
+  onGetInsights?: () => void;
 }
 
 const channelTabs: { value: Channel | "all"; label: string }[] = [
@@ -23,7 +24,7 @@ const sorts: { value: SortOption; label: string }[] = [
   { value: "spend", label: "Spend" },
 ];
 
-const FilterBar = ({ selectedChannels, sort, selectedCount, showInsights, onChannelsChange, onSortChange }: FilterBarProps) => {
+const FilterBar = ({ selectedChannels, sort, selectedCount, showInsights, onChannelsChange, onSortChange, onGetInsights }: FilterBarProps) => {
   const activeTab = selectedChannels.length === 0 ? "all" : selectedChannels.length === 1 ? selectedChannels[0] : "all";
 
   const handleTab = (value: Channel | "all") => {
@@ -57,6 +58,7 @@ const FilterBar = ({ selectedChannels, sort, selectedCount, showInsights, onChan
       {showInsights && (
         <button
           disabled={selectedCount < 2}
+          onClick={onGetInsights}
           className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-colors ${
             selectedCount >= 2
               ? "bg-primary text-primary-foreground hover:bg-primary/90"
