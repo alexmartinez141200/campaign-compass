@@ -62,18 +62,11 @@ function getVerdict(asset: CreativeAsset, all: CreativeAsset[]) {
 const rankingLabel = (r: string) => r === "above_average" ? "Above Average" : r === "average" ? "Average" : "Below Average";
 const rankingColor = (r: string) => r === "above_average" ? "text-emerald-600 bg-emerald-50" : r === "average" ? "text-yellow-700 bg-yellow-50" : "text-destructive bg-red-50";
 
-const Stat = ({ label, value, sub, icon: Icon }: { label: string; value: string; sub?: string; icon?: typeof DollarSign }) => (
-  <div className="flex items-start gap-2.5 p-3 rounded-md border border-border/60 bg-surface">
-    {Icon && (
-      <div className="w-7 h-7 rounded bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
-        <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-      </div>
-    )}
-    <div className="min-w-0">
-      <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
-      <p className="text-[15px] font-mono font-bold text-foreground mt-0.5 leading-tight">{value}</p>
-      {sub && <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>}
-    </div>
+const Stat = ({ label, value, sub }: { label: string; value: string; sub?: string }) => (
+  <div className="p-3 rounded-md border border-border/60 bg-surface">
+    <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
+    <p className="text-[15px] font-mono font-bold text-foreground mt-0.5 leading-tight">{value}</p>
+    {sub && <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>}
   </div>
 );
 
