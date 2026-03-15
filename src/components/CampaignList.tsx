@@ -22,11 +22,9 @@ const CampaignList = ({ campaigns, onSelect }: CampaignListProps) => {
     <div className="space-y-2">
       {campaigns.map((campaign, i) => {
         const avgRoas = campaign.assets.length > 0
-          ? (campaign.assets.reduce((s, a) => s + a.totalRoas, 0) / campaign.assets.length).toFixed(1)
+          ? (campaign.assets.reduce((s, a) => s + a.roas, 0) / campaign.assets.length).toFixed(1)
           : "—";
-        const totalConversions = campaign.assets.reduce(
-          (s, a) => s + a.channels.reduce((cs, c) => cs + c.conversions, 0), 0
-        );
+        const totalConversions = campaign.assets.reduce((s, a) => s + a.conversions, 0);
         const spendPct = ((campaign.totalSpend / campaign.totalBudget) * 100).toFixed(0);
 
         return (
