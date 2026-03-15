@@ -19,6 +19,8 @@ export interface CreativeAsset {
   roas: number;
   ctr: number;
   cpc: number;
+  cpm: number;
+  conversionRate: number;
 }
 
 export interface Campaign {

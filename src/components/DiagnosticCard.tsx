@@ -63,16 +63,16 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
       </div>
 
       {/* ROAS */}
-      <div className="min-w-[100px]">
+      <div className="min-w-[80px]">
         <span className="block text-[9px] uppercase text-muted-foreground font-semibold tracking-wider">ROAS</span>
         <span className="text-base font-mono font-semibold text-foreground">{asset.roas}x</span>
         <PerformanceBar percentage={(asset.roas / maxRoas) * 100} variant={channelVariant(asset.channel)} />
       </div>
 
-      {/* Spend */}
-      <div className="min-w-[80px]">
-        <span className="block text-[9px] uppercase text-muted-foreground font-semibold tracking-wider">Spend</span>
-        <span className="text-[13px] font-mono font-medium text-foreground">{formatCurrency(asset.spend)}</span>
+      {/* CPM */}
+      <div className="min-w-[60px]">
+        <span className="block text-[9px] uppercase text-muted-foreground font-semibold tracking-wider">CPM</span>
+        <span className="text-[13px] font-mono font-medium text-foreground">${asset.cpm.toFixed(2)}</span>
       </div>
 
       {/* CTR */}
@@ -81,22 +81,16 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
         <span className="text-[13px] font-mono font-medium text-foreground">{asset.ctr}%</span>
       </div>
 
-      {/* Clicks */}
-      <div className="min-w-[60px]">
-        <span className="block text-[9px] uppercase text-muted-foreground font-semibold tracking-wider">Clicks</span>
-        <span className="text-[13px] font-mono font-medium text-foreground">{asset.clicks.toLocaleString()}</span>
-      </div>
-
-      {/* Conversions */}
-      <div className="min-w-[50px]">
-        <span className="block text-[9px] uppercase text-muted-foreground font-semibold tracking-wider">Conv.</span>
-        <span className="text-[13px] font-mono font-medium text-foreground">{asset.conversions.toLocaleString()}</span>
-      </div>
-
       {/* CPC */}
       <div className="min-w-[50px]">
         <span className="block text-[9px] uppercase text-muted-foreground font-semibold tracking-wider">CPC</span>
         <span className="text-[13px] font-mono font-medium text-foreground">${asset.cpc.toFixed(2)}</span>
+      </div>
+
+      {/* Conv. Rate */}
+      <div className="min-w-[60px]">
+        <span className="block text-[9px] uppercase text-muted-foreground font-semibold tracking-wider">Conv. Rate</span>
+        <span className="text-[13px] font-mono font-medium text-foreground">{asset.conversionRate}%</span>
       </div>
     </motion.div>
   );
