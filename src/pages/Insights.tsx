@@ -346,8 +346,12 @@ const Insights = () => {
   );
 
   // Find modal content
-  const modalGroup = openModal ? metricGroups.find(g => g.name === openModal) : null;
-  const ModalIcon = openModal ? (groupIcons[openModal] || BarChart3) : BarChart3;
+  const isCorrelationModal = openModal?.startsWith("correlation:");
+  const correlationAttrKey = isCorrelationModal ? openModal!.split(":")[1] : null;
+  const correlationCard = correlationAttrKey ? correlationCards.find(c => c.attr.key === correlationAttrKey) : null;
+  const modalGroup = openModal && !isCorrelationModal ? metricGroups.find(g => g.name === openModal) : null;
+  const modalTitle = isCorrelationModal && correlationCard ? correlationCard.attr.label : openModal || "";
+  const ModalIcon = isCorrelationModal ? Layers : openModal ? (groupIcons[openModal] || BarChart3) : BarChart3;
 
   return (
     <div className="min-h-screen bg-background">
