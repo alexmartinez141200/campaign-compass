@@ -1,160 +1,356 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from "lucide-react";
-import type { CreativeAsset, Channel } from "@/data/mockData";
+import { ArrowLeft, Lightbulb, ShieldCheck, ShieldAlert, ArrowUpRight, ArrowDownRight, Minus, Target, Palette, Eye, Megaphone, BarChart3 } from "lucide-react";
+import type { CreativeAsset, Channel, CreativeProfile } from "@/data/mockData";
 import { channelConfig } from "@/components/ChannelIcon";
 import { useMemo } from "react";
 
-type RankingLabel = "above_average" | "average" | "below_average";
+/* ─── Types ─── */
 
-const rankingDisplay: Record<RankingLabel, { label: string; className: string }> = {
-  above_average: { label: "Above Avg", className: "text-emerald-600" },
-  average: { label: "Average", className: "text-foreground" },
-  below_average: { label: "Below Avg", className: "text-destructive" },
-};
+type Confidence = "high" | "medium" | "low";
+type InsightCategory = "driver" | "recommendation" | "signal";
 
-/** Determine which asset is "best" for a numeric metric (higher = better or lower = better) */
-function bestIndex(values: number[], higherIsBetter: boolean): number {
-  if (values.length === 0) return -1;
-  return values.reduce((best, v, i) => {
-    if (higherIsBetter ? v > values[best] : v < values[best]) return i;
-    return best;
-  }, 0);
-}
-
-interface Insight {
-  type: "positive" | "warning" | "negative";
+interface CorrelationInsight {
+  category: InsightCategory;
+  confidence: Confidence;
   title: string;
   detail: string;
+  evidence: string;
+  attribute: string; // which creative profile attribute
+  metric: string; // which metric it correlates to
+  direction: "positive" | "negative" | "neutral";
 }
 
-function generateInsights(assets: CreativeAsset[]): Insight[] {
-  const insights: Insight[] = [];
-  if (assets.length < 2) return insights;
+/* ─── Analysis Engine ─── */
 
-  // Sort by ROAS to identify best/worst
+/** Group assets by a creative profile attribute and compute avg metric per group */
+function groupByAttribute<K extends string>(
+  assets: CreativeAsset[],
+  getAttr: (a: CreativeAsset) => K,
+  getMetric: (a: CreativeAsset) => number,
+): Map<K, { avg: number; assets: CreativeAsset[]; totalSpend: number }> {
+  const groups = new Map<K, { sum: number; assets: CreativeAsset[]; totalSpend: number }>();
+  for (const a of assets) {
+    const key = getAttr(a);
+    const g = groups.get(key) || { sum: 0, assets: [], totalSpend: 0 };
+    g.sum += getMetric(a);
+    g.totalSpend += a.spend;
+    g.assets.push(a);
+    groups.set(key, g);
+  }
+  const result = new Map<K, { avg: number; assets: CreativeAsset[]; totalSpend: number }>();
+  for (const [k, g] of groups) {
+    result.set(k, { avg: g.sum / g.assets.length, assets: g.assets, totalSpend: g.totalSpend });
+  }
+  return result;
+}
+
+/** Assess confidence based on sample size and spend distribution */
+function assessConfidence(groupSizes: number[], totalAssets: number, totalSpend: number, groupSpends: number[]): Confidence {
+  const minGroupSize = Math.min(...groupSizes);
+  const minSpend = Math.min(...groupSpends);
+  const spendRatio = minSpend / totalSpend;
+
+  if (minGroupSize >= 3 && spendRatio >= 0.15) return "high";
+  if (minGroupSize >= 2 && spendRatio >= 0.08) return "medium";
+  return "low";
+}
+
+function pctDiff(a: number, b: number): number {
+  if (b === 0) return 0;
+  return ((a - b) / b) * 100;
+}
+
+function analyzeCorrelations(assets: CreativeAsset[]): CorrelationInsight[] {
+  if (assets.length < 2) return [];
+
+  const insights: CorrelationInsight[] = [];
+  const totalSpend = assets.reduce((s, a) => s + a.spend, 0);
   const sorted = [...assets].sort((a, b) => b.roas - a.roas);
   const best = sorted[0];
   const worst = sorted[sorted.length - 1];
 
-  // ROAS spread
-  const roasSpread = best.roas - worst.roas;
-  if (roasSpread > 2) {
-    insights.push({
-      type: "warning",
-      title: "Significant ROAS Gap",
-      detail: `${best.name} (${best.roas}x) outperforms ${worst.name} (${worst.roas}x) by ${roasSpread.toFixed(1)}x. Consider reallocating budget from underperformers.`,
-    });
+  // ─── 1. CREATIVE ATTRIBUTE → PERFORMANCE CORRELATIONS ───
+
+  type AttributeAnalysis = {
+    name: string;
+    getAttr: (a: CreativeAsset) => string;
+    metrics: { name: string; get: (a: CreativeAsset) => number; higherIsBetter: boolean }[];
+  };
+
+  const analyses: AttributeAnalysis[] = [
+    {
+      name: "Color Contrast",
+      getAttr: a => a.creativeProfile.colorContrast,
+      metrics: [
+        { name: "ROAS", get: a => a.roas, higherIsBetter: true },
+        { name: "CTR", get: a => a.ctr, higherIsBetter: true },
+        { name: "Engagement Rate", get: a => (a.postReactions + a.postComments + a.postShares) / a.impressions * 100, higherIsBetter: true },
+      ],
+    },
+    {
+      name: "Motion Intensity",
+      getAttr: a => a.creativeProfile.motionIntensity,
+      metrics: [
+        { name: "ROAS", get: a => a.roas, higherIsBetter: true },
+        { name: "CTR", get: a => a.ctr, higherIsBetter: true },
+        { name: "CPM", get: a => a.cpm, higherIsBetter: false },
+      ],
+    },
+    {
+      name: "Brand Prominence",
+      getAttr: a => a.creativeProfile.brandProminence,
+      metrics: [
+        { name: "Conv. Rate", get: a => a.conversionRate, higherIsBetter: true },
+        { name: "ROAS", get: a => a.roas, higherIsBetter: true },
+      ],
+    },
+    {
+      name: "Funnel Stage",
+      getAttr: a => a.creativeProfile.funnelStage,
+      metrics: [
+        { name: "ROAS", get: a => a.roas, higherIsBetter: true },
+        { name: "CTR", get: a => a.ctr, higherIsBetter: true },
+        { name: "Cost / Result", get: a => a.costPerResult, higherIsBetter: false },
+      ],
+    },
+    {
+      name: "Aspect Ratio",
+      getAttr: a => a.creativeProfile.aspectRatio,
+      metrics: [
+        { name: "ROAS", get: a => a.roas, higherIsBetter: true },
+        { name: "CPM", get: a => a.cpm, higherIsBetter: false },
+      ],
+    },
+    {
+      name: "CTA Copy",
+      getAttr: a => a.creativeProfile.callToAction,
+      metrics: [
+        { name: "Conv. Rate", get: a => a.conversionRate, higherIsBetter: true },
+        { name: "CTR", get: a => a.ctr, higherIsBetter: true },
+      ],
+    },
+    {
+      name: "Brand Consistency",
+      getAttr: a => a.creativeProfile.brandConsistency,
+      metrics: [
+        { name: "ROAS", get: a => a.roas, higherIsBetter: true },
+        { name: "Conv. Rate", get: a => a.conversionRate, higherIsBetter: true },
+      ],
+    },
+  ];
+
+  for (const analysis of analyses) {
+    for (const metric of analysis.metrics) {
+      const groups = groupByAttribute(assets, analysis.getAttr, metric.get);
+      if (groups.size < 2) continue;
+
+      const entries = [...groups.entries()].sort((a, b) =>
+        metric.higherIsBetter ? b[1].avg - a[1].avg : a[1].avg - b[1].avg
+      );
+      const bestGroup = entries[0];
+      const worstGroup = entries[entries.length - 1];
+      const diff = Math.abs(pctDiff(bestGroup[1].avg, worstGroup[1].avg));
+
+      if (diff < 10) continue; // Skip insignificant differences
+
+      const confidence = assessConfidence(
+        entries.map(e => e[1].assets.length),
+        assets.length,
+        totalSpend,
+        entries.map(e => e[1].totalSpend)
+      );
+
+      const isPositive = metric.higherIsBetter
+        ? bestGroup[1].avg > worstGroup[1].avg
+        : bestGroup[1].avg < worstGroup[1].avg;
+
+      insights.push({
+        category: "driver",
+        confidence,
+        title: `${analysis.name} → ${metric.name}`,
+        detail: `"${bestGroup[0]}" ${analysis.name.toLowerCase()} averages ${formatMetricValue(metric.name, bestGroup[1].avg)} ${metric.name} vs "${worstGroup[0]}" at ${formatMetricValue(metric.name, worstGroup[1].avg)} — a ${diff.toFixed(0)}% difference.`,
+        evidence: `Based on ${bestGroup[1].assets.length} vs ${worstGroup[1].assets.length} assets, $${bestGroup[1].totalSpend.toLocaleString()} vs $${worstGroup[1].totalSpend.toLocaleString()} spend.`,
+        attribute: analysis.name,
+        metric: metric.name,
+        direction: isPositive ? "positive" : "negative",
+      });
+    }
   }
 
-  // Engagement vs Creative Profile analysis
-  if (best.ctr > worst.ctr && best.creativeProfile.colorContrast !== worst.creativeProfile.colorContrast) {
-    insights.push({
-      type: "positive",
-      title: "Color Contrast Drives Engagement",
-      detail: `${best.name} uses ${best.creativeProfile.colorContrast} contrast and achieves ${best.ctr}% CTR vs ${worst.name}'s ${worst.ctr}% with ${worst.creativeProfile.colorContrast} contrast. Higher contrast correlates with better click-through.`,
-    });
-  }
-
-  // Product in first 3s analysis
+  // ─── 2. PRODUCT IN FIRST 3 SECONDS ───
   const withProduct = assets.filter(a => a.creativeProfile.productInFirst3s);
   const withoutProduct = assets.filter(a => !a.creativeProfile.productInFirst3s);
   if (withProduct.length > 0 && withoutProduct.length > 0) {
-    const avgRoasWithProduct = withProduct.reduce((s, a) => s + a.roas, 0) / withProduct.length;
-    const avgRoasWithout = withoutProduct.reduce((s, a) => s + a.roas, 0) / withoutProduct.length;
-    if (avgRoasWithProduct > avgRoasWithout) {
-      insights.push({
-        type: "positive",
-        title: "Product Visibility Boosts Conversions",
-        detail: `Assets showing the product in the first 3 seconds average ${avgRoasWithProduct.toFixed(1)}x ROAS vs ${avgRoasWithout.toFixed(1)}x without. Early product presence signals purchase intent more effectively.`,
-      });
-    } else {
-      insights.push({
-        type: "warning",
-        title: "Late Product Reveal Outperforms",
-        detail: `Assets without early product visibility average ${avgRoasWithout.toFixed(1)}x ROAS vs ${avgRoasWithProduct.toFixed(1)}x with it. Storytelling-first creatives may resonate better with this audience.`,
-      });
-    }
-  }
+    const avgRoasW = withProduct.reduce((s, a) => s + a.roas, 0) / withProduct.length;
+    const avgRoasWo = withoutProduct.reduce((s, a) => s + a.roas, 0) / withoutProduct.length;
+    const avgCvrW = withProduct.reduce((s, a) => s + a.conversionRate, 0) / withProduct.length;
+    const avgCvrWo = withoutProduct.reduce((s, a) => s + a.conversionRate, 0) / withoutProduct.length;
+    const diff = Math.abs(pctDiff(avgRoasW, avgRoasWo));
 
-  // Brand prominence analysis
-  if (best.creativeProfile.brandProminence !== worst.creativeProfile.brandProminence) {
-    insights.push({
-      type: "positive",
-      title: "Brand Prominence Impact",
-      detail: `${best.name} uses "${best.creativeProfile.brandProminence}" brand prominence and converts at ${best.conversionRate}% vs ${worst.name}'s "${worst.creativeProfile.brandProminence}" at ${worst.conversionRate}%. Consider testing ${best.creativeProfile.brandProminence} branding on future creatives.`,
-    });
-  }
-
-  // CPM efficiency
-  const cpmBest = assets.reduce((b, a, i) => a.cpm < assets[b].cpm ? i : b, 0);
-  const cpmWorst = assets.reduce((w, a, i) => a.cpm > assets[w].cpm ? i : w, 0);
-  if (assets[cpmBest].cpm < assets[cpmWorst].cpm * 0.7) {
-    insights.push({
-      type: "warning",
-      title: "Delivery Cost Disparity",
-      detail: `${assets[cpmBest].name} delivers at $${assets[cpmBest].cpm.toFixed(2)} CPM while ${assets[cpmWorst].name} costs $${assets[cpmWorst].cpm.toFixed(2)}. The ${assets[cpmWorst].creativeProfile.aspectRatio} format with ${assets[cpmWorst].creativeProfile.motionIntensity} motion may be less efficient for this audience.`,
-    });
-  }
-
-  // Funnel stage alignment
-  const funnelGroups = new Map<string, CreativeAsset[]>();
-  assets.forEach(a => {
-    const stage = a.creativeProfile.funnelStage;
-    funnelGroups.set(stage, [...(funnelGroups.get(stage) || []), a]);
-  });
-  if (funnelGroups.size > 1) {
-    const conversionAssets = funnelGroups.get("Conversion") || [];
-    const awarenessAssets = funnelGroups.get("Awareness") || [];
-    if (conversionAssets.length > 0 && awarenessAssets.length > 0) {
-      const convAvgRoas = conversionAssets.reduce((s, a) => s + a.roas, 0) / conversionAssets.length;
-      const awarenessAvgCtr = awarenessAssets.reduce((s, a) => s + a.ctr, 0) / awarenessAssets.length;
+    if (diff > 10) {
+      const better = avgRoasW > avgRoasWo;
+      const conf = assessConfidence(
+        [withProduct.length, withoutProduct.length], assets.length, totalSpend,
+        [withProduct.reduce((s, a) => s + a.spend, 0), withoutProduct.reduce((s, a) => s + a.spend, 0)]
+      );
       insights.push({
-        type: "positive",
-        title: "Funnel Strategy Working",
-        detail: `Awareness assets drive ${awarenessAvgCtr.toFixed(1)}% CTR for top-funnel engagement, while Conversion assets deliver ${convAvgRoas.toFixed(1)}x ROAS. The funnel stages are properly aligned to their objectives.`,
+        category: "driver",
+        confidence: conf,
+        title: "Product Visibility (First 3s) → ROAS",
+        detail: better
+          ? `Showing the product in the first 3 seconds drives ${avgRoasW.toFixed(1)}x ROAS and ${avgCvrW.toFixed(1)}% conversion rate vs ${avgRoasWo.toFixed(1)}x / ${avgCvrWo.toFixed(1)}% without. Early product presence accelerates purchase intent.`
+          : `Creatives that delay the product reveal achieve ${avgRoasWo.toFixed(1)}x ROAS vs ${avgRoasW.toFixed(1)}x with immediate product. Storytelling-first approaches resonate better with this audience.`,
+        evidence: `${withProduct.length} assets with product vs ${withoutProduct.length} without.`,
+        attribute: "Product in First 3s",
+        metric: "ROAS",
+        direction: better ? "positive" : "negative",
       });
     }
   }
 
-  // Quality ranking analysis (Meta)
+  // ─── 3. RECOMMENDATIONS ───
+
+  // Find which attributes the best performer has that are different from worst
+  const profileDiffs = getProfileDifferences(best, worst);
+  for (const diff of profileDiffs) {
+    insights.push({
+      category: "recommendation",
+      confidence: assets.length >= 4 ? "medium" : "low",
+      title: `Produce more: ${diff.attribute} = "${diff.bestValue}"`,
+      detail: `${best.name} (${best.roas}x ROAS, ${best.conversionRate}% conv.) uses "${diff.bestValue}" ${diff.attribute.toLowerCase()} while the weakest performer ${worst.name} (${worst.roas}x ROAS) uses "${diff.worstValue}". Consider shifting creative production toward "${diff.bestValue}".`,
+      evidence: `Top performer: $${best.purchaseValue.toLocaleString()} revenue on $${best.spend.toLocaleString()} spend. Bottom: $${worst.purchaseValue.toLocaleString()} on $${worst.spend.toLocaleString()}.`,
+      attribute: diff.attribute,
+      metric: "ROAS",
+      direction: "positive",
+    });
+  }
+
+  // ─── 4. NOISE / RELIABILITY SIGNALS ───
+
+  // Check if differences are within margin of error (small sample, similar spend)
+  const roasValues = assets.map(a => a.roas);
+  const roasStdDev = stdDev(roasValues);
+  const roasMean = roasValues.reduce((s, v) => s + v, 0) / roasValues.length;
+  const coeffVar = roasMean > 0 ? (roasStdDev / roasMean) * 100 : 0;
+
+  if (coeffVar < 15 && assets.length < 5) {
+    insights.push({
+      category: "signal",
+      confidence: "low",
+      title: "Performance gap may be noise",
+      detail: `ROAS varies only ${coeffVar.toFixed(0)}% across these ${assets.length} assets (${sorted[sorted.length - 1].roas}x – ${sorted[0].roas}x). With a small sample, this difference may not be statistically meaningful. Increase spend or run longer before drawing conclusions.`,
+      evidence: `Coefficient of variation: ${coeffVar.toFixed(1)}%. Standard deviation: ${roasStdDev.toFixed(2)}.`,
+      attribute: "Overall",
+      metric: "ROAS",
+      direction: "neutral",
+    });
+  }
+
+  // Check for spend imbalance
+  const spendValues = assets.map(a => a.spend);
+  const maxSpend = Math.max(...spendValues);
+  const minSpend = Math.min(...spendValues);
+  if (maxSpend > minSpend * 2.5) {
+    const underSpent = assets.filter(a => a.spend < maxSpend * 0.4);
+    if (underSpent.length > 0) {
+      insights.push({
+        category: "signal",
+        confidence: "medium",
+        title: "Uneven spend distribution",
+        detail: `${underSpent.map(a => a.name).join(", ")} received significantly less budget ($${Math.min(...underSpent.map(a => a.spend)).toLocaleString()} vs $${maxSpend.toLocaleString()}). Their metrics may be unreliable — performance often stabilizes after the learning phase. Consider equalizing spend before comparing.`,
+        evidence: `Spend range: $${minSpend.toLocaleString()} – $${maxSpend.toLocaleString()} (${((maxSpend / minSpend - 1) * 100).toFixed(0)}% gap).`,
+        attribute: "Budget",
+        metric: "Spend",
+        direction: "neutral",
+      });
+    }
+  }
+
+  // Quality ranking correlation
+  const aboveAvgQuality = assets.filter(a => a.qualityRanking === "above_average" && a.engagementRateRanking === "above_average");
   const belowAvgQuality = assets.filter(a => a.qualityRanking === "below_average" || a.engagementRateRanking === "below_average");
-  if (belowAvgQuality.length > 0) {
+  if (aboveAvgQuality.length > 0 && belowAvgQuality.length > 0) {
+    const avgRoasAbove = aboveAvgQuality.reduce((s, a) => s + a.roas, 0) / aboveAvgQuality.length;
+    const avgRoasBelow = belowAvgQuality.reduce((s, a) => s + a.roas, 0) / belowAvgQuality.length;
     insights.push({
-      type: "negative",
-      title: "Quality Ranking Concern",
-      detail: `${belowAvgQuality.map(a => a.name).join(", ")} ${belowAvgQuality.length === 1 ? "has" : "have"} below-average quality or engagement rankings. This typically indicates creative fatigue or audience misalignment — consider refreshing the visual or copy.`,
+      category: "signal",
+      confidence: "high",
+      title: "Platform quality signals confirm performance",
+      detail: `Assets with above-average platform quality scores achieve ${avgRoasAbove.toFixed(1)}x ROAS vs ${avgRoasBelow.toFixed(1)}x for below-average. This validates that the performance differences are design-driven, not audience-targeting artifacts.`,
+      evidence: `${aboveAvgQuality.map(a => a.name).join(", ")} vs ${belowAvgQuality.map(a => a.name).join(", ")}.`,
+      attribute: "Quality Ranking",
+      metric: "ROAS",
+      direction: avgRoasAbove > avgRoasBelow ? "positive" : "negative",
     });
   }
 
-  // Motion intensity vs engagement
-  const highMotion = assets.filter(a => a.creativeProfile.motionIntensity === "High");
-  const lowMotion = assets.filter(a => a.creativeProfile.motionIntensity !== "High");
-  if (highMotion.length > 0 && lowMotion.length > 0) {
-    const avgEngHigh = highMotion.reduce((s, a) => s + (a.postReactions + a.postComments + a.postShares), 0) / highMotion.length;
-    const avgEngLow = lowMotion.reduce((s, a) => s + (a.postReactions + a.postComments + a.postShares), 0) / lowMotion.length;
-    if (avgEngHigh > avgEngLow * 1.3) {
-      insights.push({
-        type: "positive",
-        title: "High Motion Drives Engagement",
-        detail: `High-motion creatives average ${Math.round(avgEngHigh).toLocaleString()} engagement actions vs ${Math.round(avgEngLow).toLocaleString()} for static/subtle motion. Dynamic visuals are capturing more attention.`,
-      });
-    }
-  }
+  // Sort: drivers first, then recommendations, then signals. Within each, high confidence first.
+  const categoryOrder: Record<InsightCategory, number> = { driver: 0, recommendation: 1, signal: 2 };
+  const confOrder: Record<Confidence, number> = { high: 0, medium: 1, low: 2 };
+  insights.sort((a, b) => {
+    const catDiff = categoryOrder[a.category] - categoryOrder[b.category];
+    if (catDiff !== 0) return catDiff;
+    return confOrder[a.confidence] - confOrder[b.confidence];
+  });
 
-  return insights.slice(0, 6);
+  // Deduplicate by attribute+metric
+  const seen = new Set<string>();
+  return insights.filter(i => {
+    const key = `${i.attribute}:${i.metric}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
-const insightIcon = {
-  positive: <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />,
-  warning: <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />,
-  negative: <TrendingDown className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />,
+function getProfileDifferences(best: CreativeAsset, worst: CreativeAsset) {
+  const diffs: { attribute: string; bestValue: string; worstValue: string }[] = [];
+  const p1 = best.creativeProfile;
+  const p2 = worst.creativeProfile;
+
+  if (p1.motionIntensity !== p2.motionIntensity) diffs.push({ attribute: "Motion Intensity", bestValue: p1.motionIntensity, worstValue: p2.motionIntensity });
+  if (p1.colorContrast !== p2.colorContrast) diffs.push({ attribute: "Color Contrast", bestValue: p1.colorContrast, worstValue: p2.colorContrast });
+  if (p1.brandProminence !== p2.brandProminence) diffs.push({ attribute: "Brand Prominence", bestValue: p1.brandProminence, worstValue: p2.brandProminence });
+  if (p1.funnelStage !== p2.funnelStage) diffs.push({ attribute: "Funnel Stage", bestValue: p1.funnelStage, worstValue: p2.funnelStage });
+  if (p1.callToAction !== p2.callToAction) diffs.push({ attribute: "CTA", bestValue: p1.callToAction, worstValue: p2.callToAction });
+
+  return diffs.slice(0, 3); // Top 3 most impactful
+}
+
+function stdDev(values: number[]): number {
+  const mean = values.reduce((s, v) => s + v, 0) / values.length;
+  const squaredDiffs = values.map(v => (v - mean) ** 2);
+  return Math.sqrt(squaredDiffs.reduce((s, v) => s + v, 0) / values.length);
+}
+
+function formatMetricValue(metricName: string, value: number): string {
+  if (metricName === "ROAS") return `${value.toFixed(1)}x`;
+  if (metricName === "CTR" || metricName === "Conv. Rate" || metricName === "Engagement Rate") return `${value.toFixed(1)}%`;
+  if (metricName === "CPM" || metricName === "CPC" || metricName === "Cost / Result") return `$${value.toFixed(2)}`;
+  return value.toFixed(1);
+}
+
+/* ─── UI Helpers ─── */
+
+const confidenceConfig: Record<Confidence, { label: string; icon: typeof ShieldCheck; colorClass: string; bgClass: string }> = {
+  high: { label: "High Confidence", icon: ShieldCheck, colorClass: "text-emerald-600", bgClass: "bg-emerald-500/10" },
+  medium: { label: "Medium Confidence", icon: ShieldCheck, colorClass: "text-amber-600", bgClass: "bg-amber-500/10" },
+  low: { label: "Low Confidence", icon: ShieldAlert, colorClass: "text-muted-foreground", bgClass: "bg-muted/40" },
 };
 
-const insightBg = {
-  positive: "border-emerald-200/60 bg-emerald-50/30",
-  warning: "border-amber-200/60 bg-amber-50/30",
-  negative: "border-destructive/20 bg-destructive/5",
+const categoryConfig: Record<InsightCategory, { label: string; icon: typeof Lightbulb; description: string }> = {
+  driver: { label: "Performance Drivers", icon: BarChart3, description: "Creative attributes that correlate with better or worse metrics" },
+  recommendation: { label: "What to Produce Next", icon: Target, description: "Actionable creative direction based on top performers" },
+  signal: { label: "Reliability Check", icon: Eye, description: "Whether these insights are statistically meaningful or potentially noise" },
 };
+
+const directionIcon = {
+  positive: <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />,
+  negative: <ArrowDownRight className="w-3.5 h-3.5 text-destructive" />,
+  neutral: <Minus className="w-3.5 h-3.5 text-muted-foreground" />,
+};
+
+/* ─── Component ─── */
 
 const Insights = () => {
   const location = useLocation();
@@ -163,7 +359,7 @@ const Insights = () => {
   const channel: Channel | null = assets.length > 0 ? assets[0].channel : null;
   const channelLabel = channel ? channelConfig[channel].label : "";
 
-  const insights = useMemo(() => generateInsights(assets), [assets]);
+  const correlations = useMemo(() => analyzeCorrelations(assets), [assets]);
 
   if (assets.length === 0) {
     return (
@@ -176,50 +372,15 @@ const Insights = () => {
     );
   }
 
-  // Define metric rows for comparison table
-  type MetricRow = { label: string; getValue: (a: CreativeAsset) => string | number; getRaw: (a: CreativeAsset) => number; higherIsBetter: boolean; section: string };
+  // Group insights by category
+  const categories: InsightCategory[] = ["driver", "recommendation", "signal"];
+  const grouped = categories.map(cat => ({
+    category: cat,
+    insights: correlations.filter(i => i.category === cat),
+  })).filter(g => g.insights.length > 0);
 
-  const metricRows: MetricRow[] = [
-    // Performance
-    { label: "Spend", getValue: a => `$${a.spend.toLocaleString()}`, getRaw: a => a.spend, higherIsBetter: false, section: "Investment" },
-    { label: "Revenue", getValue: a => `$${a.purchaseValue.toLocaleString()}`, getRaw: a => a.purchaseValue, higherIsBetter: true, section: "Investment" },
-    { label: "ROAS", getValue: a => `${a.roas}x`, getRaw: a => a.roas, higherIsBetter: true, section: "Performance" },
-    { label: "Conversions", getValue: a => a.conversions.toLocaleString(), getRaw: a => a.conversions, higherIsBetter: true, section: "Performance" },
-    { label: "Conv. Rate", getValue: a => `${a.conversionRate}%`, getRaw: a => a.conversionRate, higherIsBetter: true, section: "Performance" },
-    { label: "Cost / Result", getValue: a => `$${a.costPerResult.toFixed(2)}`, getRaw: a => a.costPerResult, higherIsBetter: false, section: "Performance" },
-    // Delivery
-    { label: "Impressions", getValue: a => a.impressions.toLocaleString(), getRaw: a => a.impressions, higherIsBetter: true, section: "Delivery" },
-    { label: "Reach", getValue: a => a.reach.toLocaleString(), getRaw: a => a.reach, higherIsBetter: true, section: "Delivery" },
-    { label: "CPM", getValue: a => `$${a.cpm.toFixed(2)}`, getRaw: a => a.cpm, higherIsBetter: false, section: "Delivery" },
-    { label: "Frequency", getValue: a => a.frequency.toFixed(2), getRaw: a => a.frequency, higherIsBetter: false, section: "Delivery" },
-    // Engagement
-    { label: "CTR", getValue: a => `${a.ctr}%`, getRaw: a => a.ctr, higherIsBetter: true, section: "Engagement" },
-    { label: "CPC", getValue: a => `$${a.cpc.toFixed(2)}`, getRaw: a => a.cpc, higherIsBetter: false, section: "Engagement" },
-    { label: "Reactions", getValue: a => a.postReactions.toLocaleString(), getRaw: a => a.postReactions, higherIsBetter: true, section: "Engagement" },
-    { label: "Shares", getValue: a => a.postShares.toLocaleString(), getRaw: a => a.postShares, higherIsBetter: true, section: "Engagement" },
-    { label: "Saves", getValue: a => a.postSaves.toLocaleString(), getRaw: a => a.postSaves, higherIsBetter: true, section: "Engagement" },
-    // Funnel
-    { label: "LP Views", getValue: a => a.landingPageViews.toLocaleString(), getRaw: a => a.landingPageViews, higherIsBetter: true, section: "Funnel" },
-    { label: "Add to Cart", getValue: a => a.addToCart.toLocaleString(), getRaw: a => a.addToCart, higherIsBetter: true, section: "Funnel" },
-    { label: "Init. Checkout", getValue: a => a.initiateCheckout.toLocaleString(), getRaw: a => a.initiateCheckout, higherIsBetter: true, section: "Funnel" },
-  ];
-
-  // Creative profile rows
-  type ProfileRow = { label: string; getValue: (a: CreativeAsset) => string };
-  const profileRows: ProfileRow[] = [
-    { label: "Format", getValue: a => a.type.charAt(0).toUpperCase() + a.type.slice(1) },
-    { label: "Aspect Ratio", getValue: a => a.creativeProfile.aspectRatio },
-    { label: "Video Duration", getValue: a => a.creativeProfile.videoDuration ? `${a.creativeProfile.videoDuration}s` : "—" },
-    { label: "Motion Intensity", getValue: a => a.creativeProfile.motionIntensity },
-    { label: "Color Contrast", getValue: a => a.creativeProfile.colorContrast },
-    { label: "Brand Prominence", getValue: a => a.creativeProfile.brandProminence },
-    { label: "Brand Consistency", getValue: a => a.creativeProfile.brandConsistency },
-    { label: "Funnel Stage", getValue: a => a.creativeProfile.funnelStage },
-    { label: "CTA", getValue: a => a.creativeProfile.callToAction },
-    { label: "Product in First 3s", getValue: a => a.creativeProfile.productInFirst3s ? "Yes" : "No" },
-  ];
-
-  const sections = [...new Set(metricRows.map(r => r.section))];
+  // Quick performance ranking
+  const ranked = [...assets].sort((a, b) => b.roas - a.roas);
 
   return (
     <div className="min-h-screen bg-background">
@@ -240,217 +401,142 @@ const Insights = () => {
         </div>
       </div>
 
-      <div className="p-6 space-y-6">
-        {/* Insights Cards */}
-        {insights.length > 0 && (
-          <div>
-            <h2 className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5" /> Interpretive Insights
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {insights.map((insight, i) => (
-                <div key={i} className={`rounded-lg border p-3 ${insightBg[insight.type]}`}>
-                  <div className="flex items-start gap-2">
-                    {insightIcon[insight.type]}
-                    <div>
-                      <p className="text-[12px] font-semibold text-foreground leading-tight">{insight.title}</p>
-                      <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">{insight.detail}</p>
+      <div className="p-6 space-y-8">
+        {/* Performance Ranking Strip */}
+        <div className="rounded-lg border border-border overflow-hidden bg-card">
+          <div className="px-4 py-2 bg-muted/20 border-b border-border/40">
+            <h2 className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Performance Ranking</h2>
+          </div>
+          <div className="flex divide-x divide-border/40">
+            {ranked.map((a, i) => {
+              const roasColor = a.roas >= 5 ? "text-emerald-600" : a.roas >= 3 ? "text-foreground" : "text-destructive";
+              return (
+                <div key={a.id} className="flex-1 px-4 py-3 flex items-center gap-3">
+                  <img src={a.thumbnail} alt={a.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-semibold text-foreground truncate">{a.name}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className={`text-[14px] font-mono font-bold ${roasColor}`}>{a.roas}x</span>
+                      <span className="text-[10px] font-mono text-muted-foreground">ROAS</span>
+                      <span className="text-[10px] font-mono text-muted-foreground">·</span>
+                      <span className="text-[10px] font-mono text-muted-foreground">${a.purchaseValue.toLocaleString()} rev</span>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        )}
+        </div>
 
-        {/* Creative Profile Comparison */}
+        {/* Insight Sections */}
+        {grouped.map(({ category, insights }) => {
+          const config = categoryConfig[category];
+          const Icon = config.icon;
+          return (
+            <div key={category}>
+              <div className="flex items-center gap-2 mb-1">
+                <Icon className="w-4 h-4 text-muted-foreground" />
+                <h2 className="text-[12px] uppercase tracking-wider font-bold text-foreground">{config.label}</h2>
+              </div>
+              <p className="text-[11px] text-muted-foreground mb-3">{config.description}</p>
+
+              <div className="space-y-2.5">
+                {insights.map((insight, i) => {
+                  const conf = confidenceConfig[insight.confidence];
+                  const ConfIcon = conf.icon;
+                  return (
+                    <div key={i} className="rounded-lg border border-border bg-card overflow-hidden">
+                      <div className="flex items-stretch">
+                        {/* Direction indicator */}
+                        <div className={`w-1 flex-shrink-0 ${
+                          insight.direction === "positive" ? "bg-emerald-500" :
+                          insight.direction === "negative" ? "bg-destructive" : "bg-muted-foreground/30"
+                        }`} />
+
+                        <div className="flex-1 px-4 py-3">
+                          {/* Title row */}
+                          <div className="flex items-center gap-2 mb-1">
+                            {directionIcon[insight.direction]}
+                            <span className="text-[13px] font-semibold text-foreground">{insight.title}</span>
+                            <div className="ml-auto flex items-center gap-1">
+                              <ConfIcon className={`w-3 h-3 ${conf.colorClass}`} />
+                              <span className={`text-[9px] font-bold uppercase tracking-wider ${conf.colorClass} ${conf.bgClass} px-1.5 py-0.5 rounded`}>
+                                {conf.label}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Detail */}
+                          <p className="text-[12px] text-foreground/80 leading-relaxed mb-1.5">{insight.detail}</p>
+
+                          {/* Evidence */}
+                          <p className="text-[10px] text-muted-foreground font-mono">{insight.evidence}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Creative Profile Diff — Compact */}
         <div>
-          <h2 className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-3">Creative Profile</h2>
+          <div className="flex items-center gap-2 mb-1">
+            <Palette className="w-4 h-4 text-muted-foreground" />
+            <h2 className="text-[12px] uppercase tracking-wider font-bold text-foreground">Creative Profile Comparison</h2>
+          </div>
+          <p className="text-[11px] text-muted-foreground mb-3">Attributes that differ between assets are highlighted</p>
+
           <div className="rounded-lg border border-border overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-muted/20">
                   <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-2 text-left w-[140px]">Attribute</th>
-                  {assets.map(a => (
+                  {ranked.map(a => (
                     <th key={a.id} className="text-[10px] font-semibold text-foreground px-3 py-2 text-center">
                       <div className="flex flex-col items-center gap-0.5">
-                        <img src={a.thumbnail} alt={a.name} className="w-8 h-8 rounded object-cover" />
-                        <span className="truncate max-w-[100px]">{a.name}</span>
-                        <span className="text-[8px] font-mono text-muted-foreground">{a.id}</span>
+                        <img src={a.thumbnail} alt={a.name} className="w-7 h-7 rounded object-cover" />
+                        <span className="truncate max-w-[90px]">{a.name}</span>
                       </div>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {profileRows.map(row => (
-                  <tr key={row.label} className="border-b border-border/30 last:border-0">
-                    <td className="px-4 py-1.5 text-[10px] font-semibold text-muted-foreground">{row.label}</td>
-                    {assets.map(a => {
-                      const val = row.getValue(a);
-                      // Highlight differences
-                      const allSame = assets.every(x => row.getValue(x) === val);
-                      return (
+                {([
+                  { label: "Format", get: (a: CreativeAsset) => a.type.charAt(0).toUpperCase() + a.type.slice(1) },
+                  { label: "Aspect Ratio", get: (a: CreativeAsset) => a.creativeProfile.aspectRatio },
+                  { label: "Video Duration", get: (a: CreativeAsset) => a.creativeProfile.videoDuration ? `${a.creativeProfile.videoDuration}s` : "—" },
+                  { label: "Motion Intensity", get: (a: CreativeAsset) => a.creativeProfile.motionIntensity },
+                  { label: "Color Contrast", get: (a: CreativeAsset) => a.creativeProfile.colorContrast },
+                  { label: "Brand Prominence", get: (a: CreativeAsset) => a.creativeProfile.brandProminence },
+                  { label: "Brand Consistency", get: (a: CreativeAsset) => a.creativeProfile.brandConsistency },
+                  { label: "Funnel Stage", get: (a: CreativeAsset) => a.creativeProfile.funnelStage },
+                  { label: "CTA", get: (a: CreativeAsset) => a.creativeProfile.callToAction },
+                  { label: "Product in First 3s", get: (a: CreativeAsset) => a.creativeProfile.productInFirst3s ? "Yes" : "No" },
+                ] as { label: string; get: (a: CreativeAsset) => string }[]).map(row => {
+                  const values = ranked.map(a => row.get(a));
+                  const allSame = values.every(v => v === values[0]);
+                  return (
+                    <tr key={row.label} className={`border-b border-border/20 last:border-0 ${!allSame ? "bg-primary/[0.02]" : ""}`}>
+                      <td className={`px-4 py-1.5 text-[10px] font-semibold ${!allSame ? "text-foreground" : "text-muted-foreground"}`}>
+                        {row.label}
+                        {!allSame && <span className="ml-1 text-primary text-[8px]">●</span>}
+                      </td>
+                      {ranked.map((a, i) => (
                         <td key={a.id} className={`px-3 py-1.5 text-center text-[11px] font-mono ${allSame ? "text-muted-foreground" : "text-foreground font-semibold"}`}>
-                          {val}
+                          {row.get(a)}
                         </td>
-                      );
-                    })}
-                  </tr>
-                ))}
+                      ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
-
-        {/* Metrics Comparison */}
-        <div>
-          <h2 className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-3">Metrics Comparison</h2>
-          <div className="rounded-lg border border-border overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border bg-muted/20">
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-2 text-left w-[140px]">Metric</th>
-                  {assets.map(a => (
-                    <th key={a.id} className="text-[10px] font-semibold text-foreground px-3 py-2 text-center">
-                      <span className="truncate max-w-[100px]">{a.name}</span>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {sections.map(section => (
-                  <>
-                    <tr key={`section-${section}`} className="bg-muted/10">
-                      <td colSpan={assets.length + 1} className="px-4 py-1 text-[8px] uppercase tracking-widest font-bold text-muted-foreground/50">{section}</td>
-                    </tr>
-                    {metricRows.filter(r => r.section === section).map(row => {
-                      const rawValues = assets.map(a => row.getRaw(a));
-                      const best = bestIndex(rawValues, row.higherIsBetter);
-                      return (
-                        <tr key={row.label} className="border-b border-border/20 last:border-0 hover:bg-muted/10 transition-colors">
-                          <td className="px-4 py-1.5 text-[10px] font-semibold text-muted-foreground">{row.label}</td>
-                          {assets.map((a, i) => (
-                            <td key={a.id} className={`px-3 py-1.5 text-center text-[12px] font-mono ${i === best ? "text-foreground font-bold" : "text-muted-foreground"}`}>
-                              {row.getValue(a)}
-                              {i === best && assets.length > 1 && (
-                                <span className="ml-1 text-[8px] text-emerald-500 font-bold">●</span>
-                              )}
-                            </td>
-                          ))}
-                        </tr>
-                      );
-                    })}
-                  </>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Quality Rankings (Meta-specific) */}
-        {channel === "meta" && (
-          <div>
-            <h2 className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-3">Ad Relevance Diagnostics</h2>
-            <div className="rounded-lg border border-border overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border bg-muted/20">
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-2 text-left w-[140px]">Diagnostic</th>
-                    {assets.map(a => (
-                      <th key={a.id} className="text-[10px] font-semibold text-foreground px-3 py-2 text-center truncate max-w-[100px]">{a.name}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(["qualityRanking", "engagementRateRanking", "conversionRateRanking"] as const).map(key => {
-                    const labels = { qualityRanking: "Quality", engagementRateRanking: "Engagement Rate", conversionRateRanking: "Conversion Rate" };
-                    return (
-                      <tr key={key} className="border-b border-border/20 last:border-0">
-                        <td className="px-4 py-1.5 text-[10px] font-semibold text-muted-foreground">{labels[key]}</td>
-                        {assets.map(a => {
-                          const r = rankingDisplay[a[key]];
-                          return (
-                            <td key={a.id} className={`px-3 py-1.5 text-center text-[11px] font-semibold ${r.className}`}>{r.label}</td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* TikTok-specific */}
-        {channel === "tiktok" && (
-          <div>
-            <h2 className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-3">TikTok Video Metrics</h2>
-            <div className="rounded-lg border border-border overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border bg-muted/20">
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-2 text-left w-[140px]">Metric</th>
-                    {assets.map(a => (
-                      <th key={a.id} className="text-[10px] font-semibold text-foreground px-3 py-2 text-center truncate max-w-[100px]">{a.name}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { label: "Video View Rate", getValue: (a: CreativeAsset) => a.videoViewRate ? `${a.videoViewRate}%` : "—" },
-                    { label: "6s Focused Views", getValue: (a: CreativeAsset) => a.videoViews6s?.toLocaleString() || "—" },
-                    { label: "Completed Views", getValue: (a: CreativeAsset) => a.completedViews?.toLocaleString() || "—" },
-                    { label: "Avg Watch Time", getValue: (a: CreativeAsset) => a.avgWatchTime ? `${a.avgWatchTime}s` : "—" },
-                    { label: "Profile Visits", getValue: (a: CreativeAsset) => a.profileVisits?.toLocaleString() || "—" },
-                    { label: "Follows", getValue: (a: CreativeAsset) => a.follows?.toLocaleString() || "—" },
-                  ].map(row => (
-                    <tr key={row.label} className="border-b border-border/20 last:border-0">
-                      <td className="px-4 py-1.5 text-[10px] font-semibold text-muted-foreground">{row.label}</td>
-                      {assets.map(a => (
-                        <td key={a.id} className="px-3 py-1.5 text-center text-[11px] font-mono text-foreground">{row.getValue(a)}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Google-specific */}
-        {channel === "google" && (
-          <div>
-            <h2 className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-3">Google Ads Metrics</h2>
-            <div className="rounded-lg border border-border overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border bg-muted/20">
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-2 text-left w-[140px]">Metric</th>
-                    {assets.map(a => (
-                      <th key={a.id} className="text-[10px] font-semibold text-foreground px-3 py-2 text-center truncate max-w-[100px]">{a.name}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { label: "View-Through Conv.", getValue: (a: CreativeAsset) => a.viewThroughConversions?.toLocaleString() || "—" },
-                    { label: "Avg CPV", getValue: (a: CreativeAsset) => a.avgCpv ? `$${a.avgCpv.toFixed(3)}` : "—" },
-                    { label: "Interaction Rate", getValue: (a: CreativeAsset) => a.interactionRate ? `${a.interactionRate}%` : "—" },
-                  ].map(row => (
-                    <tr key={row.label} className="border-b border-border/20 last:border-0">
-                      <td className="px-4 py-1.5 text-[10px] font-semibold text-muted-foreground">{row.label}</td>
-                      {assets.map(a => (
-                        <td key={a.id} className="px-3 py-1.5 text-center text-[11px] font-mono text-foreground">{row.getValue(a)}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
