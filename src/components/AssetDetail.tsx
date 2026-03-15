@@ -503,29 +503,31 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       {isVideo && (
         <>
           <SectionHeader title="Video Performance" description="Retention analysis — where viewers drop off reveals content quality." />
-          <div className="grid grid-cols-4 gap-2.5 mb-3">
-            <KpiCard label="Plays" value={(asset.videoPlays || 0).toLocaleString()} />
-            <KpiCard label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} />
-            <KpiCard label="Avg Watch" value={`${asset.avgWatchTime || 0}s`} />
-            <KpiCard label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
+              <KpiCard label="Plays" value={(asset.videoPlays || 0).toLocaleString()} />
+              <KpiCard label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} />
+              <KpiCard label="Avg Watch" value={`${asset.avgWatchTime || 0}s`} />
+              <KpiCard label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
+            </div>
+            <ChartCard title="Retention Curve" height="h-[140px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={videoRetentionData}>
+                  <defs>
+                    <linearGradient id="retentionGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="point" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
+                  <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                  <Area type="monotone" dataKey="pct" name="Retention" stroke="hsl(227, 71%, 55%)" fill="url(#retentionGrad)" strokeWidth={2} dot={{ r: 3 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartCard>
           </div>
-          <ChartCard title="Retention Curve">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={videoRetentionData}>
-                <defs>
-                  <linearGradient id="retentionGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="point" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
-                <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
-                <Area type="monotone" dataKey="pct" name="Retention" stroke="hsl(227, 71%, 55%)" fill="url(#retentionGrad)" strokeWidth={2} dot={{ r: 3 }} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </ChartCard>
         </>
       )}
 
