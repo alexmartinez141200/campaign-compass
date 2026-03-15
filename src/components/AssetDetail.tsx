@@ -198,14 +198,23 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     { point: "95%", pct: Math.round((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100) },
   ] : [];
 
+  // Engagement data for pie chart
+  const engagementData = [
+    { name: "Reactions", value: asset.postReactions, color: "hsl(227, 71%, 55%)" },
+    { name: "Comments", value: asset.postComments, color: "hsl(174, 100%, 33%)" },
+    { name: "Shares", value: asset.postShares, color: "hsl(45, 93%, 47%)" },
+    { name: "Saves", value: asset.postSaves, color: "hsl(346, 84%, 61%)" },
+  ];
+  const engagementTotal = engagementData.reduce((s, d) => s + d.value, 0);
+
   return (
     <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
       <button onClick={onBack} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium mb-5">
         <ArrowLeft className="w-4 h-4" /> Back to assets
       </button>
 
-      {/* Hero */}
-      <div className="flex gap-5 mb-5">
+      {/* ─── HERO ─── */}
+      <div className="flex gap-5 mb-4">
         <div className="w-24 h-24 rounded-xl overflow-hidden bg-muted flex-shrink-0">
           <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
         </div>
@@ -226,7 +235,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       </div>
 
       {/* Verdict */}
-      <div className={`rounded-lg border p-3.5 mb-5 ${verdict.bg}`}>
+      <div className={`rounded-lg border p-3.5 mb-4 ${verdict.bg}`}>
         <div className="flex items-center gap-2 mb-0.5">
           {verdict.label === "Top Performer" ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> :
            verdict.label === "Underperforming" ? <AlertTriangle className="w-4 h-4 text-destructive" /> :
@@ -236,21 +245,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <p className="text-[12px] text-foreground/75">{verdict.description}</p>
       </div>
 
-      {/* Revenue Summary */}
-      <SectionTitle>Revenue Summary</SectionTitle>
-      <div className="grid grid-cols-4 gap-2.5">
-        <Stat label="Total Spend" value={`$${asset.spend.toLocaleString()}`} sub="Input budget" />
-        <Stat label="Purchase Value" value={`$${asset.purchaseValue.toLocaleString()}`} sub={`${asset.roas}x return`} />
-        <Stat label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% conv. rate`} />
-        <Stat label="Cost / Result" value={`$${asset.costPerResult.toFixed(2)}`} sub="Per conversion" />
-      </div>
-
-      {/* ROAS Section with Date Filter */}
-      <div className="flex items-center justify-between mt-7 mb-3">
-        <h3 className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-semibold flex items-center gap-2">
-          <span>ROAS — Purchase Value ÷ Ad Spend</span>
-          <div className="flex-1 h-px bg-border/50" />
-        </h3>
+      {/* ─── DATE FILTER (applies to all trend charts) ─── */}
+      <div className="flex items-center justify-end mb-4">
         <div className="flex items-center gap-1.5">
           {(["today", "yesterday", "7d", "30d"] as DatePreset[]).map((preset) => (
             <button
@@ -296,11 +292,25 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
       </div>
 
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 1: REVENUE & ROAS
+          "How much money did this ad make?"
+          ═══════════════════════════════════════════════════════════════ */}
+      <SectionTitle>Revenue & Return</SectionTitle>
+      <p className="text-[11px] text-muted-foreground -mt-1 mb-3">The financial outcome — what you spent vs. what you earned back.</p>
+
+      <div className="grid grid-cols-4 gap-2.5 mb-3">
+        <Stat label="Total Spend" value={`$${asset.spend.toLocaleString()}`} sub="Budget consumed" />
+        <Stat label="Revenue" value={`$${asset.purchaseValue.toLocaleString()}`} sub={`${asset.roas}x return`} />
+        <Stat label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
+        <Stat label="Cost / Result" value={`$${asset.costPerResult.toFixed(2)}`} sub="Per conversion" />
+      </div>
+
       {/* ROAS Chart */}
       <div className="rounded-lg border border-border/60 bg-surface p-4">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">ROAS</p>
-        <p className="text-[9px] text-muted-foreground mb-3">Purchase conversion value ÷ ad spend per day</p>
-        <div className="h-48">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">ROAS Over Time</p>
+        <p className="text-[9px] text-muted-foreground mb-3">Revenue ÷ Spend per day — values above the average line are profitable days.</p>
+        <div className="h-44">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
@@ -328,15 +338,121 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
       </div>
 
-      {/* Conversion Funnel */}
-      <SectionTitle>Conversion Funnel</SectionTitle>
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 2: DELIVERY
+          "How many people saw this ad and at what cost?"
+          ═══════════════════════════════════════════════════════════════ */}
+      <SectionTitle>Delivery</SectionTitle>
+      <p className="text-[11px] text-muted-foreground -mt-1 mb-3">How the platform distributed your ad — reach, frequency, and cost efficiency.</p>
 
-      {/* Funnel Over Time Chart with integrated legend */}
+      <div className="rounded-lg border border-border/60 bg-surface p-4">
+        <div className="grid grid-cols-4 gap-4 mb-4">
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Impressions</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.impressions.toLocaleString()}</p>
+            <p className="text-[9px] text-muted-foreground">Times ad was shown</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Reach</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.reach.toLocaleString()}</p>
+            <p className="text-[9px] text-muted-foreground">Unique people</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Frequency</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.frequency.toFixed(2)}</p>
+            <p className="text-[9px] text-muted-foreground">Avg times per person</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPM</p>
+            <p className="text-lg font-mono font-bold text-foreground">${asset.cpm.toFixed(2)}</p>
+            <p className="text-[9px] text-muted-foreground">Cost per 1K views</p>
+          </div>
+        </div>
+
+        {/* CPM Trend */}
+        <div className="pt-3 border-t border-border/30">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">CPM Over Time</p>
+          <p className="text-[9px] text-muted-foreground mb-3">Spend ÷ Impressions × 1,000 — lower is more cost-efficient delivery.</p>
+          <div className="h-36">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={filteredDaily}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+                <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `$${v}`} />
+                <Tooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
+                <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={{ r: 2 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 3: CLICKS & TRAFFIC
+          "Did people click? How much did each click cost?"
+          ═══════════════════════════════════════════════════════════════ */}
+      <SectionTitle>Clicks & Traffic</SectionTitle>
+      <p className="text-[11px] text-muted-foreground -mt-1 mb-3">User intent signals — who was interested enough to click through to your site.</p>
+
+      <div className="rounded-lg border border-border/60 bg-surface p-4">
+        <div className="grid grid-cols-5 gap-4 mb-4">
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Link Clicks</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.linkClicks.toLocaleString()}</p>
+            <p className="text-[9px] text-muted-foreground">Clicks to destination</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CTR</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.ctr}%</p>
+            <p className="text-[9px] text-muted-foreground">Link Clicks ÷ Impressions</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPC</p>
+            <p className="text-lg font-mono font-bold text-foreground">${asset.cpc.toFixed(2)}</p>
+            <p className="text-[9px] text-muted-foreground">Spend ÷ Link Clicks</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">All Clicks</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.clicks.toLocaleString()}</p>
+            <p className="text-[9px] text-muted-foreground">CTR: {asset.ctrAll}%</p>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Outbound</p>
+            <p className="text-lg font-mono font-bold text-foreground">{asset.outboundClicks.toLocaleString()}</p>
+            <p className="text-[9px] text-muted-foreground">Off-platform clicks</p>
+          </div>
+        </div>
+
+        {/* CTR Trend */}
+        <div className="pt-3 border-t border-border/30">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">CTR % Over Time</p>
+          <p className="text-[9px] text-muted-foreground mb-3">Higher CTR = more compelling creative. Declining CTR may signal ad fatigue.</p>
+          <div className="h-36">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={filteredDaily}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+                <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}%`} />
+                <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={{ r: 2 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 4: CONVERSION FUNNEL
+          "What happened after they clicked?"
+          ═══════════════════════════════════════════════════════════════ */}
+      <SectionTitle>Conversion Funnel</SectionTitle>
+      <p className="text-[11px] text-muted-foreground -mt-1 mb-3">The post-click journey — from landing page to purchase. Drop-offs show where users lose interest.</p>
+
       <div className="rounded-lg border border-border/60 bg-surface p-5">
         <div className="flex gap-6">
           <div className="flex-1 min-w-0">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Funnel Over Time</p>
-            <div className="h-56">
+            <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={filteredDaily}>
                   <defs>
@@ -397,7 +513,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             })}
           </div>
         </div>
-        {/* Overall funnel efficiency */}
         <div className="mt-4 pt-3 border-t border-border/40">
           <div className="flex items-center justify-between">
             <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Overall Funnel Efficiency</span>
@@ -408,215 +523,117 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
       </div>
 
-      {/* Delivery & Traffic */}
-      <SectionTitle>Delivery & Traffic</SectionTitle>
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 5: ENGAGEMENT & CREATIVE QUALITY
+          "How did people respond to the creative itself?"
+          ═══════════════════════════════════════════════════════════════ */}
+      <SectionTitle>Engagement & Creative Quality</SectionTitle>
+      <p className="text-[11px] text-muted-foreground -mt-1 mb-3">Social proof and platform quality signals — how users reacted to your creative.</p>
+
       <div className="rounded-lg border border-border/60 bg-surface p-4">
-        {/* Shared reach metrics — relevant to both charts */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Impressions</p>
-            <p className="text-lg font-mono font-bold text-foreground">{asset.impressions.toLocaleString()}</p>
-            <p className="text-[10px] text-muted-foreground">Total ad views — drives both CPM and CTR calculations</p>
+        <div className="flex items-center gap-6">
+          <div className="w-36 h-36 flex-shrink-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={engagementData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={30}
+                  outerRadius={58}
+                  paddingAngle={3}
+                  dataKey="value"
+                  strokeWidth={0}
+                >
+                  {engagementData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  {...chartTooltipStyle}
+                  formatter={(value: number, name: string) => [`${value.toLocaleString()} (${(value / engagementTotal * 100).toFixed(1)}%)`, name]}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Reach</p>
-            <p className="text-lg font-mono font-bold text-foreground">{asset.reach.toLocaleString()}</p>
-            <p className="text-[10px] text-muted-foreground">Unique users · Freq: {asset.frequency.toFixed(2)}</p>
+          <div className="flex-1 grid grid-cols-2 gap-3">
+            {engagementData.map((item) => (
+              <div key={item.name} className="flex items-start gap-2">
+                <div className="w-2.5 h-2.5 rounded-full mt-0.5 flex-shrink-0" style={{ background: item.color }} />
+                <div>
+                  <p className="text-[10px] text-muted-foreground font-medium">{item.name}</p>
+                  <p className="text-[15px] font-mono font-bold text-foreground leading-tight">{item.value.toLocaleString()}</p>
+                  <p className="text-[9px] text-muted-foreground font-mono">{(item.value / engagementTotal * 100).toFixed(1)}%</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
+        <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between">
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Total Engagement</span>
+          <span className="text-[13px] font-mono font-bold text-foreground">{engagementTotal.toLocaleString()}</span>
+        </div>
 
-        {/* Two-column: CTR chart + metrics | CPM chart + metrics */}
-        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border/30">
-          {/* CTR column */}
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">CTR % Over Time</p>
-            <p className="text-[9px] text-muted-foreground mb-2">Link Clicks ÷ Impressions</p>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={filteredDaily}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
-                  <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
-                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}%`} />
-                  <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
-                  <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={{ r: 2 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            {/* Click metrics under CTR chart */}
-            <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-border/20">
-              <div>
-                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Link Clicks</p>
-                <p className="text-[14px] font-mono font-bold text-foreground">{asset.linkClicks.toLocaleString()}</p>
-                <p className="text-[9px] text-muted-foreground">CTR: {asset.ctr}%</p>
+        {/* Ad Quality Rankings */}
+        <div className="mt-3 pt-3 border-t border-border/30">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Platform Quality Signals</p>
+          <p className="text-[9px] text-muted-foreground mb-3">How the ad platform rates this creative compared to ads competing for the same audience.</p>
+          <div className="grid grid-cols-3 gap-2.5">
+            {([
+              ["Quality", asset.qualityRanking],
+              ["Engagement Rate", asset.engagementRateRanking],
+              ["Conversion Rate", asset.conversionRateRanking],
+            ] as const).map(([label, val]) => (
+              <div key={label} className="p-2.5 rounded-md border border-border/40 bg-background text-center">
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium mb-1">{label}</p>
+                <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-semibold ${rankingColor(val)}`}>
+                  {rankingLabel(val)}
+                </span>
               </div>
-              <div>
-                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPC</p>
-                <p className="text-[14px] font-mono font-bold text-foreground">${asset.cpc.toFixed(2)}</p>
-                <p className="text-[9px] text-muted-foreground">Spend ÷ Link Clicks</p>
-              </div>
-              <div>
-                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">All Clicks</p>
-                <p className="text-[14px] font-mono font-bold text-foreground">{asset.clicks.toLocaleString()}</p>
-                <p className="text-[9px] text-muted-foreground">CTR: {asset.ctrAll}%</p>
-              </div>
-              <div>
-                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Outbound Clicks</p>
-                <p className="text-[14px] font-mono font-bold text-foreground">{asset.outboundClicks.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* CPM column */}
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">CPM Over Time</p>
-            <p className="text-[9px] text-muted-foreground mb-2">Spend ÷ Impressions × 1,000</p>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={filteredDaily}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
-                  <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
-                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `$${v}`} />
-                  <Tooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
-                  <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={{ r: 2 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            {/* Cost metrics under CPM chart */}
-            <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-border/20">
-              <div>
-                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPM</p>
-                <p className="text-[14px] font-mono font-bold text-foreground">${asset.cpm.toFixed(2)}</p>
-                <p className="text-[9px] text-muted-foreground">Cost per 1K impressions</p>
-              </div>
-              <div>
-                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPC (All)</p>
-                <p className="text-[14px] font-mono font-bold text-foreground">${asset.cpcAll.toFixed(2)}</p>
-                <p className="text-[9px] text-muted-foreground">Spend ÷ All Clicks</p>
-              </div>
-              <div>
-                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Landing Page Views</p>
-                <p className="text-[14px] font-mono font-bold text-foreground">{asset.landingPageViews.toLocaleString()}</p>
-                <p className="text-[9px] text-muted-foreground">Post-click arrivals</p>
-              </div>
-              <div>
-                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Total Spend</p>
-                <p className="text-[14px] font-mono font-bold text-foreground">${asset.spend.toLocaleString()}</p>
-                <p className="text-[9px] text-muted-foreground">Budget consumed</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Engagement — pie chart + legend */}
-      <SectionTitle>Engagement</SectionTitle>
-      {(() => {
-        const engagementData = [
-          { name: "Reactions", value: asset.postReactions, color: "hsl(227, 71%, 55%)" },
-          { name: "Comments", value: asset.postComments, color: "hsl(174, 100%, 33%)" },
-          { name: "Shares", value: asset.postShares, color: "hsl(45, 93%, 47%)" },
-          { name: "Saves", value: asset.postSaves, color: "hsl(346, 84%, 61%)" },
-        ];
-        const total = engagementData.reduce((s, d) => s + d.value, 0);
-        return (
-          <div className="rounded-lg border border-border/60 bg-surface p-4">
-            <div className="flex items-center gap-6">
-              <div className="w-40 h-40 flex-shrink-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={engagementData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={35}
-                      outerRadius={65}
-                      paddingAngle={3}
-                      dataKey="value"
-                      strokeWidth={0}
-                    >
-                      {engagementData.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      {...chartTooltipStyle}
-                      formatter={(value: number, name: string) => [`${value.toLocaleString()} (${(value / total * 100).toFixed(1)}%)`, name]}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex-1 grid grid-cols-2 gap-3">
-                {engagementData.map((item) => (
-                  <div key={item.name} className="flex items-start gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full mt-0.5 flex-shrink-0" style={{ background: item.color }} />
-                    <div>
-                      <p className="text-[10px] text-muted-foreground font-medium">{item.name}</p>
-                      <p className="text-[15px] font-mono font-bold text-foreground leading-tight">{item.value.toLocaleString()}</p>
-                      <p className="text-[9px] text-muted-foreground font-mono">{(item.value / total * 100).toFixed(1)}%</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between">
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Total Engagement</span>
-              <span className="text-[13px] font-mono font-bold text-foreground">{total.toLocaleString()}</span>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Video Metrics with Retention Chart */}
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 6: VIDEO PERFORMANCE (conditional)
+          ═══════════════════════════════════════════════════════════════ */}
       {isVideo && (
         <>
           <SectionTitle>Video Performance</SectionTitle>
-          <div className="grid grid-cols-4 gap-2.5">
+          <p className="text-[11px] text-muted-foreground -mt-1 mb-3">How users watched your video — retention drop-offs reveal where interest fades.</p>
+          <div className="grid grid-cols-4 gap-2.5 mb-3">
             <Stat label="Video Plays" value={(asset.videoPlays || 0).toLocaleString()} />
             <Stat label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} sub="15s+ or complete" />
             <Stat label="Avg. Watch Time" value={`${asset.avgWatchTime || 0}s`} />
             <Stat label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
           </div>
-          <div className="mt-3">
-            <ChartCard title="Video Retention Curve">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={videoRetentionData}>
-                  <defs>
-                    <linearGradient id="retentionGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
-                  <XAxis dataKey="point" tick={{ fontSize: 10 }} stroke="hsl(228 10% 52%)" />
-                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
-                  <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
-                  <Area type="monotone" dataKey="pct" name="Retention" stroke="hsl(227, 71%, 55%)" fill="url(#retentionGradient)" strokeWidth={2} dot={{ r: 3 }} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </ChartCard>
-          </div>
+          <ChartCard title="Video Retention Curve">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={videoRetentionData}>
+                <defs>
+                  <linearGradient id="retentionGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+                <XAxis dataKey="point" tick={{ fontSize: 10 }} stroke="hsl(228 10% 52%)" />
+                <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
+                <Tooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                <Area type="monotone" dataKey="pct" name="Retention" stroke="hsl(227, 71%, 55%)" fill="url(#retentionGradient)" strokeWidth={2} dot={{ r: 3 }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </ChartCard>
         </>
       )}
 
-      {/* Ad Quality / Relevance */}
-      <SectionTitle>Ad Relevance Diagnostics</SectionTitle>
-      <div className="grid grid-cols-3 gap-2.5">
-        {([
-          ["Quality Ranking", asset.qualityRanking],
-          ["Engagement Rate Ranking", asset.engagementRateRanking],
-          ["Conversion Rate Ranking", asset.conversionRateRanking],
-        ] as const).map(([label, val]) => (
-          <div key={label} className="p-3 rounded-md border border-border/60 bg-surface">
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
-            <span className={`inline-block mt-1.5 px-2 py-0.5 rounded text-[11px] font-semibold ${rankingColor(val)}`}>
-              {rankingLabel(val)}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Insights */}
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 7: INSIGHTS & RECOMMENDATIONS
+          "What should you do next?"
+          ═══════════════════════════════════════════════════════════════ */}
       <SectionTitle>Insights & Recommendations</SectionTitle>
+      <p className="text-[11px] text-muted-foreground -mt-1 mb-3">AI-generated analysis comparing this creative to others in your campaign.</p>
       <div className="space-y-1.5 mb-8">
         {insights.map((insight, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
