@@ -397,11 +397,11 @@ const Insights = () => {
                   const overall = scores ? Math.round([...scores.values()].reduce((s, v) => s + v, 0) / scores.size) : 0;
                   return (
                     <tr key={asset.id} className="border-b border-border/30 last:border-0 hover:bg-muted/10 transition-colors">
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
-                          <img src={asset.thumbnail} alt={asset.name} className="w-9 h-9 rounded-lg object-cover flex-shrink-0 border border-border/40" />
+                          <img src={asset.thumbnail} alt={asset.name} className="w-8 h-8 rounded-lg object-cover flex-shrink-0 border border-border/40" />
                           <div className="min-w-0">
-                            <p className="text-[13px] font-semibold text-foreground truncate">{asset.name}</p>
+                            <p className="text-[12px] font-semibold text-foreground truncate">{asset.name}</p>
                             <p className="text-[10px] font-mono text-muted-foreground/50">{asset.id}</p>
                           </div>
                         </div>
@@ -409,14 +409,14 @@ const Insights = () => {
                       {groupNames.map(name => {
                         const score = scores?.get(name) ?? 0;
                         return (
-                          <td key={name} className="px-3 py-4 text-center">
+                          <td key={name} className="px-3 py-3 text-center">
                             <button onClick={() => setOpenModal(name)} className="cursor-pointer hover:scale-105 transition-transform">
                               <span className={`text-[12px] font-semibold font-mono leading-none ${scoreColor(score)}`}>{score}</span>
                             </button>
                           </td>
                         );
                       })}
-                      <td className="px-3 py-4 text-center bg-muted/5">
+                      <td className="px-3 py-3 text-center bg-muted/5">
                         <span className={`text-[12px] font-semibold font-mono leading-none ${scoreColor(overall)}`}>{overall}</span>
                       </td>
                     </tr>
