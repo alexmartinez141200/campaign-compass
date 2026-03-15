@@ -25,7 +25,7 @@ interface NavItem {
 const mainNav: NavItem[] = [
   { icon: Search, label: "Search" },
   { icon: FolderOpen, label: "Campaigns", path: "/" },
-  { icon: Box, label: "All Creatives", path: "/creatives" },
+  { icon: Box, label: "Toolkits" },
   { icon: Sparkles, label: "AI Creative Flows" },
   { icon: BarChart3, label: "Performance" },
   { icon: Clock, label: "Platform Utilization" },
