@@ -7,14 +7,14 @@ import DiagnosticCard from "@/components/DiagnosticCard";
 import FilterBar from "@/components/FilterBar";
 import { campaigns } from "@/data/mockData";
 
-type AssetFilter = "all" | "video" | "image" | "carousel";
-type SortOption = "roas" | "spend" | "delta";
+type ChannelFilter = "all" | "meta" | "tiktok" | "google" | "linkedin" | "amazon";
+type SortOption = "roas" | "spend";
 type CampaignTab = "active" | "archived";
 
 const Index = () => {
   const [campaignTab, setCampaignTab] = useState<CampaignTab>("active");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<AssetFilter>("all");
+  const [channelFilter, setChannelFilter] = useState<ChannelFilter>("all");
   const [sort, setSort] = useState<SortOption>("roas");
 
   const visibleCampaigns = campaigns.filter((c) =>
