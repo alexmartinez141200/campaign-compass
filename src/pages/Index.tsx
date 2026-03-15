@@ -9,9 +9,11 @@ import DiagnosticCard, { DiagnosticHeader } from "@/components/DiagnosticCard";
 import AssetDetail from "@/components/AssetDetail";
 import FilterBar from "@/components/FilterBar";
 import { campaigns } from "@/data/mockData";
+import { channelConfig } from "@/components/ChannelIcon";
 
 type SortOption = "roas" | "spend";
-type CampaignTab = "active" | "archived";
+type CampaignTab = "active" | "archived" | "creatives";
+type CreativeSortKey = "name" | "roas" | "spend" | "conversions";
 
 const Index = () => {
   const navigate = useNavigate();
