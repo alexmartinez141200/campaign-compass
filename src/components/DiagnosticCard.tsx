@@ -17,6 +17,7 @@ interface DiagnosticCardProps {
   maxRoas: number;
   selected?: boolean;
   onSelectToggle?: (id: string) => void;
+  onClick?: () => void;
 }
 
 /** Column header row — render once above the list */
