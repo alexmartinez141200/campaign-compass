@@ -337,6 +337,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </LineChart>
           </ResponsiveContainer>
         </ChartCard>
+        </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════
