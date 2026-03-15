@@ -17,35 +17,47 @@ interface AssetDetailProps {
 
 // ─── KPI Definitions (for info tooltips) ───
 const kpiInfo: Record<string, string> = {
+  // Universal
   "Impressions": "Total number of times this ad was displayed on screen. Includes repeat views by the same person.",
-  "CTR": "Click-Through Rate — percentage of impressions that resulted in a link click. Higher CTR indicates more compelling creative.",
-  "Link Clicks": "Clicks on links within the ad that lead to your website or app. Does not include post reactions or comments.",
   "Conversions": "Number of completed purchase events attributed to this ad within the conversion window.",
   "ROAS": "Return on Ad Spend — revenue generated per dollar spent. A 4x ROAS means $4 revenue for every $1 spent.",
   "Reach": "Total unique users who saw this ad at least once. Unlike impressions, each person is counted only once.",
   "Frequency": "Average number of times each unique user saw this ad. Above 3.0 signals potential ad fatigue.",
   "CPM": "Cost Per Mille — cost per 1,000 impressions. Lower CPM means more efficient reach for your budget.",
   "Spend": "Total amount spent delivering this ad during the selected period.",
+  "Revenue": "Total purchase value attributed to this ad within the conversion window.",
+  "CPA": "Cost Per Acquisition — how much you pay for each purchase. Lower CPA means more efficient conversion spend.",
+  "Avg Watch": "Average duration a viewer watched the video before scrolling or closing.",
+  // Meta-specific
+  "CTR": "Click-Through Rate — percentage of impressions that resulted in a link click. Higher CTR indicates more compelling creative.",
+  "Link Clicks": "Clicks on links within the ad that lead to your website or app. Does not include post reactions or comments.",
   "CPC (Link)": "Cost Per Click on links only. Measures the efficiency of driving traffic to your destination.",
   "CPC (All)": "Cost Per Click including all click types — link clicks, post reactions, profile visits, etc.",
   "Outbound Clicks": "Clicks that take users off-platform to your website. Closest metric to actual site visits.",
-  "Website Clicks": "Clicks that take users to your website from TikTok. Equivalent to outbound clicks.",
-  "Revenue": "Total purchase value attributed to this ad within the conversion window.",
-  "CPA": "Cost Per Acquisition — how much you pay for each purchase. Lower CPA means more efficient conversion spend.",
   "Plays": "Total number of times the video started playing, including auto-plays in feed.",
   "ThruPlays": "Number of times the video was played to completion or for at least 15 seconds. Meta-specific metric.",
-  "Completed Views": "Number of times the video was watched to completion. TikTok's equivalent of Meta's ThruPlays.",
-  "Avg Watch": "Average duration a viewer watched the video before scrolling or closing.",
   "ThruPlay Rate": "Percentage of total plays that counted as ThruPlays (15s+ or completion). Meta-specific.",
+  // TikTok-specific
+  "Completed Views": "Number of times the video was watched to completion. TikTok's equivalent of Meta's ThruPlays.",
   "Completion Rate": "Percentage of viewers who watched the video to completion. TikTok's primary content retention metric.",
   "Video Views": "Total 2-second+ video views. TikTok's primary video metric.",
   "Video View Rate": "Percentage of impressions that resulted in a 2s+ video view. Higher = stronger hook.",
   "6s Views": "Video views that reached 6 seconds. TikTok's key hook metric — did your content hold attention past the critical first moments?",
   "6s View Rate": "Percentage of total video views that reached 6 seconds. The definitive measure of hook strength on TikTok.",
+  "Website Clicks": "Clicks that take users to your website from TikTok. Equivalent to outbound clicks.",
   "Profile Visits": "Number of times users visited your TikTok profile after seeing this ad.",
   "Follows": "New followers attributed to this ad. Measures brand-building effectiveness.",
   "Paid Likes": "Likes from paid impressions only, excluding organic engagement.",
   "Paid Shares": "Shares from paid impressions only. High shares indicate viral potential.",
+  // Google Ads-specific
+  "Clicks": "Total clicks on the ad, including clicks to website. Google Ads' primary interaction metric.",
+  "CPC": "Cost Per Click — average cost for each click on your ad. Google Ads' core efficiency metric.",
+  "Interaction Rate": "Percentage of impressions that resulted in an interaction (click, video view, etc.). Google's engagement metric.",
+  "View-Through Conv.": "Conversions from users who saw your ad but didn't click — they converted later. Key for measuring Display ad influence.",
+  "Video Views (Google)": "Views of your video ad. On YouTube, counted when a user watches 30s (or the full ad if shorter) or interacts.",
+  "View Rate": "Percentage of impressions that resulted in a video view. Measures how compelling your video thumbnail/hook is.",
+  "Avg CPV": "Average Cost Per View — what you pay each time someone views your video ad. Core YouTube Ads efficiency metric.",
+  "Video Completion": "Percentage of viewers who watched the video to 100%. Shows full content engagement.",
 };
 
 // ─── Insights Generator ───
