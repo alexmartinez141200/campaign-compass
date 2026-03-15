@@ -64,8 +64,6 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
         <div className="flex gap-8">
           <MetricCell label="Budget" value={`$${campaign.totalBudget.toLocaleString()}`} />
           <MetricCell label="Spend" value={`$${campaign.totalSpend.toLocaleString()}`} delta={`${((campaign.totalSpend / campaign.totalBudget) * 100).toFixed(0)}% used`} />
-          <MetricCell label="Avg ROAS" value={`${avgRoas}x`} />
-          <MetricCell label="Conversions" value={totalConversions.toLocaleString()} />
         </div>
       </div>
 
