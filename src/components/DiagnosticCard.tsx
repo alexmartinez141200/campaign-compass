@@ -76,13 +76,15 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
       </div>
 
       {/* Checkbox */}
-      <div className="ml-2.5 flex-shrink-0">
-        <Checkbox
-          checked={selected}
-          onCheckedChange={() => onSelectToggle?.(asset.id)}
-          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-        />
-      </div>
+      {showCheckbox && (
+        <div className="ml-2.5 flex-shrink-0">
+          <Checkbox
+            checked={selected}
+            onCheckedChange={() => onSelectToggle?.(asset.id)}
+            className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+          />
+        </div>
+      )}
 
       {/* Thumbnail */}
       <div className="ml-3 w-11 h-11 rounded-md overflow-hidden flex-shrink-0 bg-muted">
