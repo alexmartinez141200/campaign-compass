@@ -244,6 +244,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 98, purchaseValue: 4082, addToCart: 310, initiateCheckout: 180, landingPageViews: 1800,
         roas: 1.2, ctr: 3.0, ctrAll: 3.5, cpc: 1.27, cpcAll: 1.05, cpm: 38.22, conversionRate: 3.7, costPerResult: 34.71,
         qualityRanking: "below_average", engagementRateRanking: "below_average", conversionRateRanking: "below_average",
+        viewThroughConversions: 42, interactionRate: 3.5,
       },
       {
         id: "CRV-6612", name: "Video_Gift_Unbox", type: "video", thumbnail: creative4, dimensions: "1080×1920", channel: "google",
