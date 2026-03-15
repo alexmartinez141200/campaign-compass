@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { FolderOpen, ArrowLeft } from "lucide-react";
+import type { Channel } from "@/data/mockData";
 import AppSidebar from "@/components/AppSidebar";
 import CampaignHeader from "@/components/CampaignHeader";
 import CampaignList from "@/components/CampaignList";
