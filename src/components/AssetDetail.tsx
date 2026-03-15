@@ -216,24 +216,21 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
       {/* ─── HERO + VERDICT (side by side for wide screens) ─── */}
       <div className="flex gap-4 mb-5">
-        <div className="flex gap-4 flex-1 min-w-0">
-          <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0">
-            <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">{asset.name}</h2>
-                <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
-                <div className="mt-1.5"><ChannelIcon channel={asset.channel} size="md" /></div>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-mono font-bold text-foreground">#{rank}</p>
-                <p className="text-[10px] text-muted-foreground">of {campaignAssets.length}</p>
-              </div>
+        <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0">
+          <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">{asset.name}</h2>
+              <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions} · {asset.type}</p>
+              <div className="mt-1.5"><ChannelIcon channel={asset.channel} size="md" /></div>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-mono font-bold text-foreground">#{rank}</p>
+              <p className="text-[10px] text-muted-foreground">of {campaignAssets.length}</p>
             </div>
           </div>
-        </div>
         </div>
       </div>
 
