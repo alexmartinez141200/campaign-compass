@@ -12,12 +12,14 @@ import { campaigns } from "@/data/mockData";
 import { channelConfig } from "@/components/ChannelIcon";
 
 type SortOption = "roas" | "spend";
-type CampaignTab = "active" | "archived" | "creatives";
+type TopTab = "campaigns" | "creatives";
+type CampaignFilter = "active" | "past" | "all";
 type CreativeSortKey = "name" | "roas" | "spend" | "conversions";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [campaignTab, setCampaignTab] = useState<CampaignTab>("active");
+  const [topTab, setTopTab] = useState<TopTab>("campaigns");
+  const [campaignFilter, setCampaignFilter] = useState<CampaignFilter>("active");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>([]);
   const [sort, setSort] = useState<SortOption>("roas");
@@ -41,7 +43,7 @@ const Index = () => {
   };
 
   const visibleCampaigns = campaigns.filter((c) =>
-    campaignTab === "active" ? c.status === "active" : c.status !== "active"
+    campaignFilter === "all" ? true : campaignFilter === "active" ? c.status === "active" : c.status !== "active"
   );
 
   const selectedCampaign = selectedCampaignId
@@ -159,18 +161,17 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* Tabs */}
+              {/* Top tabs */}
               <div className="flex gap-1 border-b border-border mb-5">
                 {([
-                  { key: "active" as CampaignTab, label: "Active Campaigns" },
-                  { key: "archived" as CampaignTab, label: "Past Campaigns" },
-                  { key: "creatives" as CampaignTab, label: "All Creative Assets" },
+                  { key: "campaigns" as TopTab, label: "All Campaigns" },
+                  { key: "creatives" as TopTab, label: "All Creative Assets" },
                 ]).map(({ key, label }) => (
                   <button
                     key={key}
-                    onClick={() => setCampaignTab(key)}
+                    onClick={() => setTopTab(key)}
                     className={`px-4 py-2.5 text-[13px] font-medium transition-colors duration-100 border-b-2 -mb-px ${
-                      campaignTab === key
+                      topTab === key
                         ? "border-primary text-primary"
                         : "border-transparent text-muted-foreground hover:text-foreground"
                     }`}
@@ -181,11 +182,31 @@ const Index = () => {
               </div>
 
               {/* Tab content */}
-              {campaignTab !== "creatives" ? (
-                <CampaignList
-                  campaigns={visibleCampaigns}
-                  onSelect={(id) => setSelectedCampaignId(id)}
-                />
+              {topTab === "campaigns" ? (
+                <>
+                  {/* Sub-filters */}
+                  <div className="flex items-center gap-2 mb-4">
+                    {([
+                      { key: "active" as CampaignFilter, label: "Active" },
+                      { key: "past" as CampaignFilter, label: "Past" },
+                      { key: "all" as CampaignFilter, label: "All" },
+                    ]).map(({ key, label }) => (
+                      <button
+                        key={key}
+                        onClick={() => setCampaignFilter(key)}
+                        className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${
+                          campaignFilter === key ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <CampaignList
+                    campaigns={visibleCampaigns}
+                    onSelect={(id) => setSelectedCampaignId(id)}
+                  />
+                </>
               ) : (
                 <>
                   {/* Channel filters */}
