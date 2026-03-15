@@ -23,9 +23,6 @@ const DiagnosticCard = ({ asset, index, maxRoas }: DiagnosticCardProps) => {
       {/* Thumbnail */}
       <div className="w-16 h-16 bg-muted rounded-md overflow-hidden relative flex-shrink-0">
         <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
-        <div className="absolute bottom-0.5 left-0.5 px-1 py-px bg-foreground/60 backdrop-blur text-[8px] text-primary-foreground rounded font-bold uppercase tracking-wide">
-          {asset.type}
-        </div>
       </div>
 
       {/* Name & ID */}
