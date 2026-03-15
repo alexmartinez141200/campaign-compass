@@ -381,77 +381,85 @@ const Insights = () => {
           </div>
         </div>
 
-        {/* ═══ 1. Full Performance Comparison by Metric Group ═══ */}
+        {/* ═══ 1. Full Performance Comparison by Metric Group (Collapsible) ═══ */}
         {metricGroups.map(group => {
           const Icon = groupIcons[group.name] || BarChart3;
+          const isOpen = expandedSections.has(group.name);
           return (
             <div key={group.name} ref={el => { sectionRefs.current[group.name] = el; }} className="scroll-mt-4">
-              <div className="flex items-center gap-2 mb-2">
+              <button
+                onClick={() => toggleSection(group.name)}
+                className="flex items-center gap-2 mb-2 w-full text-left group hover:opacity-80 transition-opacity"
+              >
                 <Icon className="w-4 h-4 text-primary" />
                 <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">{group.name}</h2>
-              </div>
-              <div className="rounded-lg border border-border overflow-hidden">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-muted/20 border-b border-border/40">
-                      <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-4 py-1.5 text-left w-[40px]">#</th>
-                      <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 text-left">Asset</th>
-                      {group.name === "Efficiency" && (
-                        <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 text-right">Spend</th>
-                      )}
-                      {group.metrics.map(m => (
-                        <th key={m.key} className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 text-right">{m.label}</th>
-                      ))}
-                      {group.name === "Efficiency" && (
-                        <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 w-[80px]" />
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ranked.map((asset, i) => {
-                      const barW = maxRoas > 0 ? (asset.roas / maxRoas) * 100 : 0;
-                      const barColor = asset.roas >= 5 ? "bg-emerald-500" : asset.roas >= 3 ? "bg-primary" : "bg-destructive";
-                      return (
-                        <tr key={asset.id} className="border-b border-border/20 last:border-0 hover:bg-muted/10 transition-colors">
-                          <td className="px-4 py-2 text-[11px] font-mono text-muted-foreground">{i + 1}</td>
-                          <td className="px-3 py-2">
-                            <div className="flex items-center gap-2">
-                              <img src={asset.thumbnail} alt={asset.name} className="w-6 h-6 rounded object-cover flex-shrink-0" />
-                              <div className="min-w-0">
-                                <p className="text-[11px] font-semibold text-foreground truncate">{asset.name}</p>
-                                <p className="text-[8px] font-mono text-muted-foreground">{asset.id}</p>
-                              </div>
-                            </div>
-                          </td>
-                          {group.name === "Efficiency" && (
-                            <td className="px-3 py-2 text-right text-[11px] font-mono text-muted-foreground">${asset.spend.toLocaleString()}</td>
-                          )}
-                          {group.metrics.map(m => {
-                            const val = m.get(asset);
-                            const avg = assets.reduce((s, a) => s + m.get(a), 0) / assets.length;
-                            const pctDiff = avg > 0 ? ((val - avg) / avg) * 100 : 0;
-                            const isGood = m.higherIsBetter ? pctDiff > 15 : pctDiff < -15;
-                            const isBad = m.higherIsBetter ? pctDiff < -15 : pctDiff > 15;
-                            const color = isGood ? "text-emerald-600" : isBad ? "text-destructive" : "text-foreground";
-                            return (
-                              <td key={m.key} className={`px-3 py-2 text-right text-[11px] font-mono font-semibold ${color}`}>
-                                {fmt(val, m.format)}
-                              </td>
-                            );
-                          })}
-                          {group.name === "Efficiency" && (
+                {isOpen ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />}
+                {!isOpen && <span className="text-[9px] text-muted-foreground ml-auto">Click to expand</span>}
+              </button>
+              {isOpen && (
+                <div className="rounded-lg border border-border overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-muted/20 border-b border-border/40">
+                        <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-4 py-1.5 text-left w-[40px]">#</th>
+                        <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 text-left">Asset</th>
+                        {group.name === "Efficiency" && (
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 text-right">Spend</th>
+                        )}
+                        {group.metrics.map(m => (
+                          <th key={m.key} className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 text-right">{m.label}</th>
+                        ))}
+                        {group.name === "Efficiency" && (
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 w-[80px]" />
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ranked.map((asset, i) => {
+                        const barW = maxRoas > 0 ? (asset.roas / maxRoas) * 100 : 0;
+                        const barColor = asset.roas >= 5 ? "bg-emerald-500" : asset.roas >= 3 ? "bg-primary" : "bg-destructive";
+                        return (
+                          <tr key={asset.id} className="border-b border-border/20 last:border-0 hover:bg-muted/10 transition-colors">
+                            <td className="px-4 py-2 text-[11px] font-mono text-muted-foreground">{i + 1}</td>
                             <td className="px-3 py-2">
-                              <div className="w-full h-1.5 bg-muted/40 rounded-full overflow-hidden">
-                                <div className={`h-full rounded-full ${barColor}`} style={{ width: `${barW}%` }} />
+                              <div className="flex items-center gap-2">
+                                <img src={asset.thumbnail} alt={asset.name} className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                                <div className="min-w-0">
+                                  <p className="text-[11px] font-semibold text-foreground truncate">{asset.name}</p>
+                                  <p className="text-[8px] font-mono text-muted-foreground">{asset.id}</p>
+                                </div>
                               </div>
                             </td>
-                          )}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                            {group.name === "Efficiency" && (
+                              <td className="px-3 py-2 text-right text-[11px] font-mono text-muted-foreground">${asset.spend.toLocaleString()}</td>
+                            )}
+                            {group.metrics.map(m => {
+                              const val = m.get(asset);
+                              const avg = assets.reduce((s, a) => s + m.get(a), 0) / assets.length;
+                              const pctDiff = avg > 0 ? ((val - avg) / avg) * 100 : 0;
+                              const isGood = m.higherIsBetter ? pctDiff > 15 : pctDiff < -15;
+                              const isBad = m.higherIsBetter ? pctDiff < -15 : pctDiff > 15;
+                              const color = isGood ? "text-emerald-600" : isBad ? "text-destructive" : "text-foreground";
+                              return (
+                                <td key={m.key} className={`px-3 py-2 text-right text-[11px] font-mono font-semibold ${color}`}>
+                                  {fmt(val, m.format)}
+                                </td>
+                              );
+                            })}
+                            {group.name === "Efficiency" && (
+                              <td className="px-3 py-2">
+                                <div className="w-full h-1.5 bg-muted/40 rounded-full overflow-hidden">
+                                  <div className={`h-full rounded-full ${barColor}`} style={{ width: `${barW}%` }} />
+                                </div>
+                              </td>
+                            )}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           );
         })}
