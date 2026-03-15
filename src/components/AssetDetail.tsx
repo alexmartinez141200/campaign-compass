@@ -446,7 +446,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
 
         {/* ROAS chart + Funnel side by side */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-5 gap-3">
+          <div className="col-span-3">
           <ChartCard title="ROAS Over Time" height="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
@@ -472,9 +473,10 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
+          </div>
 
           {/* Conversion Funnel */}
-          <div className="rounded-lg border border-border/60 bg-card p-4">
+          <div className="col-span-2 rounded-lg border border-border/60 bg-card p-4">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">Conversion Funnel</p>
             <div className="space-y-2">
               {funnelSteps.map((step, i, arr) => {
