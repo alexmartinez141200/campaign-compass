@@ -402,27 +402,65 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
           </div>
 
-          {/* Platform quality signals */}
-          <div className="rounded-lg border border-border/60 bg-card p-4">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Platform Quality Signals</p>
-            <div className="space-y-3">
-              {([
-                ["Quality Ranking", asset.qualityRanking, "Ad creative quality vs competitors"],
-                ["Engagement Ranking", asset.engagementRateRanking, "Expected engagement vs competitors"],
-                ["Conversion Ranking", asset.conversionRateRanking, "Expected conversion vs competitors"],
-              ] as const).map(([label, val, desc]) => (
-                <div key={label} className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[11px] font-medium text-foreground">{label}</p>
-                    <p className="text-[9px] text-muted-foreground">{desc}</p>
+          {/* Right panel — platform-specific */}
+          {isMeta ? (
+            <div className="rounded-lg border border-border/60 bg-card p-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Platform Quality Signals</p>
+              <div className="space-y-3">
+                {([
+                  ["Quality Ranking", asset.qualityRanking, "Ad creative quality vs competitors"],
+                  ["Engagement Ranking", asset.engagementRateRanking, "Expected engagement vs competitors"],
+                  ["Conversion Ranking", asset.conversionRateRanking, "Expected conversion vs competitors"],
+                ] as const).map(([label, val, desc]) => (
+                  <div key={label} className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] font-medium text-foreground">{label}</p>
+                      <p className="text-[9px] text-muted-foreground">{desc}</p>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-md text-[11px] font-semibold ${rankingColor(val)}`}>
+                      {rankingLabel(val)}
+                    </span>
                   </div>
-                  <span className={`px-2.5 py-1 rounded-md text-[11px] font-semibold ${rankingColor(val)}`}>
-                    {rankingLabel(val)}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          ) : isTikTok ? (
+            <div className="rounded-lg border border-border/60 bg-card p-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">TikTok Growth Signals</p>
+              <div className="grid grid-cols-2 gap-3">
+                <KpiCard label="Profile Visits" value={(asset.profileVisits || 0).toLocaleString()} sub="From this ad" />
+                <KpiCard label="Follows" value={(asset.follows || 0).toLocaleString()} sub="New followers" />
+                <KpiCard label="Paid Likes" value={(asset.paidLikes || 0).toLocaleString()} sub="From paid reach" />
+                <KpiCard label="Paid Shares" value={(asset.paidShares || 0).toLocaleString()} sub="Viral potential" />
+              </div>
+              {asset.videoViewRate && (
+                <div className="mt-3 pt-3 border-t border-border/30">
+                  <KpiCard label="Video View Rate" value={`${asset.videoViewRate}%`} sub="2s+ views / impressions" />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-border/60 bg-card p-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Platform Quality Signals</p>
+              <div className="space-y-3">
+                {([
+                  ["Quality Ranking", asset.qualityRanking, "Ad creative quality vs competitors"],
+                  ["Engagement Ranking", asset.engagementRateRanking, "Expected engagement vs competitors"],
+                  ["Conversion Ranking", asset.conversionRateRanking, "Expected conversion vs competitors"],
+                ] as const).map(([label, val, desc]) => (
+                  <div key={label} className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] font-medium text-foreground">{label}</p>
+                      <p className="text-[9px] text-muted-foreground">{desc}</p>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-md text-[11px] font-semibold ${rankingColor(val)}`}>
+                      {rankingLabel(val)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ═══ C. TRAFFIC ═══ */}
