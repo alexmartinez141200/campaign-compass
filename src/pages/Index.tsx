@@ -168,7 +168,7 @@ const Index = () => {
               </div>
 
               <div className="space-y-0.5">
-                <DiagnosticHeader />
+                <DiagnosticHeader sort={sort} onSortChange={setSort} />
                 {filteredAssets.length > 0 ? (
                   filteredAssets.map((asset, i) => (
                     <DiagnosticCard key={asset.id} asset={asset} index={i} rank={i} maxRoas={Math.max(...filteredAssets.map(a => a.roas))} selected={selectedAssets.has(asset.id)} onSelectToggle={toggleAssetSelection} onClick={() => setViewingAssetId(asset.id)} />
