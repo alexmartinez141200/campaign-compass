@@ -235,10 +235,11 @@ const Insights = () => {
       }
     }
 
-    // Compute per-group scores (0-100) based on how top asset compares to worst
-    const groupScores: { name: string; score: number; topAsset: string; insight: string }[] = [];
-    for (const g of metricGroups) {
-      const perAsset = ranked.map(a => {
+    // Compute per-asset per-group scores (0-100)
+    const assetGroupScores: Map<string, Map<string, number>> = new Map(); // assetId -> groupName -> score
+    for (const a of ranked) {
+      const scores = new Map<string, number>();
+      for (const g of metricGroups) {
         const vals = g.metrics.map(m => {
           const allVals = assets.map(x => m.get(x));
           const min = Math.min(...allVals);
@@ -248,29 +249,12 @@ const Insights = () => {
           const norm = (m.get(a) - min) / range;
           return m.higherIsBetter ? norm * 100 : (1 - norm) * 100;
         });
-        return { asset: a, avg: vals.reduce((s, v) => s + v, 0) / vals.length };
-      });
-      perAsset.sort((a, b) => b.avg - a.avg);
-      const topScore = Math.round(perAsset[0].avg);
-      const botScore = Math.round(perAsset[perAsset.length - 1].avg);
-      const spread = topScore - botScore;
-      const insight = spread > 30
-        ? `${perAsset[0].asset.name} leads by a wide margin`
-        : spread > 10
-        ? `${perAsset[0].asset.name} edges ahead`
-        : "Assets perform similarly";
-      groupScores.push({ name: g.name, score: topScore, topAsset: perAsset[0].asset.name, insight });
+        scores.set(g.name, Math.round(vals.reduce((s, v) => s + v, 0) / vals.length));
+      }
+      assetGroupScores.set(a.id, scores);
     }
 
-    // Best creative profile attributes from top performer
-    const top = ranked[0];
-    const profileSummary = top ? PROFILE_ATTRS.map(attr => {
-      const topVal = attr.get(top);
-      const allSame = assets.every(a => attr.get(a) === topVal);
-      return { label: attr.label, value: topVal, differs: !allSame };
-    }) : [];
-
-    return { ranked, correlationCards, metrics, metricGroups, groupScores, profileSummary };
+    return { ranked, correlationCards, metrics, metricGroups, assetGroupScores };
   }, [assets]);
 
   if (assets.length === 0) {
