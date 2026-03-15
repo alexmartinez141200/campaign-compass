@@ -194,7 +194,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
     startDate: "2024-11-15",
     endDate: "2024-12-31",
     totalBudget: 85000,
-    totalSpend: 52340,
+    totalSpend: 73502,
     assets: [
       {
         id: "CRV-4821", name: "Video_Hero_01", type: "video", thumbnail: creative1, dimensions: "1080×1920", channel: "tiktok",
