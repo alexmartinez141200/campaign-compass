@@ -7,12 +7,16 @@ export type Channel = "meta" | "tiktok" | "google" | "linkedin" | "amazon";
 
 export interface DailyMetric {
   date: string;
+  fullDate: string; // ISO date for filtering
   spend: number;
   impressions: number;
   clicks: number;
   conversions: number;
   purchaseValue: number;
-  roas: number;
+  roas: number; // daily ROAS (purchaseValue / spend)
+  cumulativeSpend: number;
+  cumulativePurchaseValue: number;
+  cumulativeRoas: number; // running total purchaseValue / running total spend
   ctr: number;
   cpm: number;
 }
