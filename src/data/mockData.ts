@@ -309,7 +309,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 588, purchaseValue: 38880, addToCart: 1900, initiateCheckout: 1020, landingPageViews: 9800,
         roas: 4.8, ctr: 3.0, ctrAll: 4.3, cpc: 0.55, cpcAll: 0.43, cpm: 16.53, conversionRate: 4.0, costPerResult: 13.78,
         qualityRanking: "above_average", engagementRateRanking: "above_average", conversionRateRanking: "average",
-        profileVisits: 7600, follows: 520, paidLikes: 4800, paidShares: 1100, videoViewRate: 91.8,
+        profileVisits: 7600, follows: 520, paidLikes: 4800, paidShares: 1100, videoViewRate: 91.8, completedViews: 112000, videoViews6s: 369000,
       },
       {
         id: "CRI-7789", name: "Static_Summer_Hero", type: "image", thumbnail: creative2, dimensions: "1200×628", channel: "google",
