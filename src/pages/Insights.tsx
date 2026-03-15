@@ -510,7 +510,7 @@ const Insights = () => {
         </div>
 
         {/* ═══ 3. Per-Asset Profile Comparison ═══ */}
-        <div>
+        <div ref={el => { sectionRefs.current["profile"] = el; }} className="scroll-mt-4">
           <div className="flex items-center gap-2 mb-3">
             <BarChart3 className="w-4 h-4 text-primary" />
             <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Asset Profile Grid</h2>
