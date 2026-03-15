@@ -51,27 +51,10 @@ const FilterBar = ({ selectedChannels, sort, onChannelsChange, onSortChange }: F
         ))}
       </div>
 
-      {/* Sort */}
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-          Sort by
-        </span>
-        <div className="flex gap-1">
-          {sorts.map((s) => (
-            <button
-              key={s.value}
-              onClick={() => onSortChange(s.value)}
-              className={`px-2.5 py-1 text-xs font-medium rounded transition-all duration-150 ${
-                sort === s.value
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Get Insights */}
+      <button className="px-4 py-1.5 text-xs font-semibold rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+        Get Insights
+      </button>
     </div>
   );
 };

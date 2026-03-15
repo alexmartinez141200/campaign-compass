@@ -16,8 +16,15 @@ interface DiagnosticCardProps {
   onClick?: () => void;
 }
 
+type SortOption = "roas" | "spend";
+
+const sorts: { value: SortOption; label: string }[] = [
+  { value: "roas", label: "ROAS" },
+  { value: "spend", label: "Spend" },
+];
+
 /** Column header row — render once above the list */
-export const DiagnosticHeader = () => (
+export const DiagnosticHeader = ({ sort, onSortChange }: { sort?: SortOption; onSortChange?: (s: SortOption) => void }) => (
   <div className="flex items-center h-8 px-4 text-[9px] uppercase tracking-wider font-semibold text-muted-foreground/60 select-none">
     <div className="w-6 flex-shrink-0" /> {/* rank */}
     <div className="ml-2.5 w-4 flex-shrink-0" /> {/* checkbox */}
@@ -34,6 +41,24 @@ export const DiagnosticHeader = () => (
     <div className="min-w-[48px] mr-4 flex-shrink-0 text-center">CPC</div>
     <div className="min-w-[44px] flex-shrink-0 text-center">Conv.</div>
     <div className="w-3.5 ml-4 flex-shrink-0" />
+    {sort && onSortChange && (
+      <div className="flex items-center gap-1.5 ml-4 flex-shrink-0">
+        <span className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold">Sort</span>
+        {sorts.map((s) => (
+          <button
+            key={s.value}
+            onClick={() => onSortChange(s.value)}
+            className={`px-2 py-0.5 text-[10px] font-medium rounded transition-all duration-150 ${
+              sort === s.value
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+    )}
   </div>
 );
 
