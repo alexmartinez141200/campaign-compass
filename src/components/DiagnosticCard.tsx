@@ -45,7 +45,7 @@ export const DiagnosticHeader = ({ sort, onSortChange, showCheckbox = true }: { 
   </div>
 );
 
-const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelectToggle, onClick }: DiagnosticCardProps) => {
+const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showCheckbox = true, onSelectToggle, onClick }: DiagnosticCardProps) => {
   const roasPercent = Math.min((asset.roas / maxRoas) * 100, 100);
 
   const roasColor =
