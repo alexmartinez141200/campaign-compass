@@ -372,24 +372,23 @@ const Insights = () => {
         </div>
       </div>
 
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-8">
 
         {/* ═══ SUMMARY SCORECARD TABLE ═══ */}
         <div>
-          <div className="mb-2">
-            <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Performance Summary</h2>
-            <p className="text-[10px] text-muted-foreground mt-1">Click on a column header (e.g. Efficiency, Delivery) to open a detailed breakdown of how each asset scores in that category.</p>
+          <div className="mb-3">
+            <h2 className="text-xs uppercase tracking-wider font-bold text-foreground">Performance Summary</h2>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Click on a column header to open a detailed breakdown of how each asset scores in that category.</p>
           </div>
-          <div className="rounded-lg border border-border overflow-auto">
+          <div className="rounded-lg border border-border overflow-auto shadow-[var(--shadow-card)]">
             <table className="w-full">
               <thead>
-                <tr className="bg-muted/20 border-b border-border/40">
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-4 py-2 text-left w-[40px]">#</th>
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-2 text-left">Asset</th>
+                <tr className="bg-muted/30 border-b border-border">
+                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left min-w-[180px]">Asset</th>
                   {groupNames.map(name => {
                     const Icon = groupIcons[name] || BarChart3;
                     return (
-                      <th key={name} className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-2 py-2 text-center">
+                      <th key={name} className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-3 py-2.5 text-center">
                         <button
                           onClick={() => setOpenModal(name)}
                           className="inline-flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer"
@@ -400,7 +399,7 @@ const Insights = () => {
                       </th>
                     );
                   })}
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-2 py-2 text-center">
+                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-3 py-2.5 text-center bg-muted/20">
                     <div className="inline-flex items-center gap-1">
                       <Layers className="w-3 h-3" />
                       <span>Overall</span>
@@ -409,38 +408,35 @@ const Insights = () => {
                 </tr>
               </thead>
               <tbody>
-                {ranked.map((asset, i) => {
+                {ranked.map((asset) => {
                   const scores = assetGroupScores.get(asset.id);
                   const overall = scores ? Math.round([...scores.values()].reduce((s, v) => s + v, 0) / scores.size) : 0;
                   return (
-                    <tr key={asset.id} className="border-b border-border/20 last:border-0 hover:bg-muted/10 transition-colors">
-                      <td className="px-4 py-2 text-[11px] font-mono text-muted-foreground">{i + 1}</td>
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-2">
-                          <img src={asset.thumbnail} alt={asset.name} className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                    <tr key={asset.id} className="border-b border-border/30 last:border-0 hover:bg-muted/10 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <img src={asset.thumbnail} alt={asset.name} className="w-7 h-7 rounded-md object-cover flex-shrink-0 border border-border/40" />
                           <div className="min-w-0">
                             <p className="text-[11px] font-semibold text-foreground truncate">{asset.name}</p>
-                            <p className="text-[8px] font-mono text-muted-foreground">{asset.id}</p>
+                            <p className="text-[9px] font-mono text-muted-foreground/60">{asset.id}</p>
                           </div>
                         </div>
                       </td>
                       {groupNames.map(name => {
                         const score = scores?.get(name) ?? 0;
                         return (
-                          <td key={name} className="px-2 py-2 text-center">
-                            <button onClick={() => setOpenModal(name)} className="cursor-pointer hover:scale-110 transition-transform">
-                              <div className="flex flex-col items-center gap-0.5">
-                                <span className={`text-sm font-bold font-mono ${scoreColor(score)}`}>{score}</span>
-                                <div className="w-10 h-1 bg-muted/30 rounded-full overflow-hidden">
-                                  <div className={`h-full rounded-full ${scoreBg(score).replace('/10', '')}`} style={{ width: `${score}%` }} />
-                                </div>
+                          <td key={name} className="px-3 py-3 text-center">
+                            <button onClick={() => setOpenModal(name)} className="cursor-pointer hover:scale-105 transition-transform inline-flex flex-col items-center gap-1">
+                              <span className={`text-[13px] font-bold font-mono leading-none ${scoreColor(score)}`}>{score}</span>
+                              <div className="w-8 h-[3px] bg-muted/40 rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full transition-all ${score >= 70 ? "bg-accent" : score >= 40 ? "bg-amber-500" : "bg-destructive"}`} style={{ width: `${score}%` }} />
                               </div>
                             </button>
                           </td>
                         );
                       })}
-                      <td className="px-2 py-2 text-center">
-                        <span className={`text-sm font-bold font-mono ${scoreColor(overall)}`}>{overall}</span>
+                      <td className="px-3 py-3 text-center bg-muted/5">
+                        <span className={`text-[13px] font-bold font-mono leading-none ${scoreColor(overall)}`}>{overall}</span>
                       </td>
                     </tr>
                   );
@@ -450,23 +446,23 @@ const Insights = () => {
           </div>
         </div>
 
-        {/* ═══ Profile Comparison Table (always visible) ═══ */}
+        {/* ═══ Profile Comparison Table ═══ */}
         <div>
           <div className="flex items-center gap-2 mb-3">
             <BarChart3 className="w-4 h-4 text-primary" />
-            <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Asset Profile Grid</h2>
-            <span className="text-[10px] text-muted-foreground">— sorted by ROAS · differences marked <span className="text-primary">●</span></span>
+            <h2 className="text-xs uppercase tracking-wider font-bold text-foreground">Asset Profile Grid</h2>
+            <span className="text-[10px] text-muted-foreground ml-1">— sorted by ROAS · differences highlighted</span>
           </div>
-          <div className="rounded-lg border border-border overflow-auto">
+          <div className="rounded-lg border border-border overflow-auto shadow-[var(--shadow-card)]">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border bg-muted/20">
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-4 py-2 text-left sticky left-0 bg-muted/20 w-[120px]">Attribute</th>
+                <tr className="border-b border-border bg-muted/30">
+                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left sticky left-0 bg-muted/30 w-[130px]">Attribute</th>
                   {ranked.map(a => (
-                    <th key={a.id} className="text-[10px] font-semibold text-foreground px-3 py-2 text-center min-w-[80px]">
+                    <th key={a.id} className="text-[10px] font-semibold text-foreground px-4 py-2.5 text-center min-w-[100px]">
                       <div className="flex flex-col items-center gap-0.5">
-                        <span className="truncate max-w-[80px] block">{a.name}</span>
-                        <span className={`text-[10px] font-mono ${a.roas >= 5 ? "text-emerald-600" : a.roas >= 3 ? "text-foreground" : "text-destructive"}`}>{a.roas}x</span>
+                        <span className="truncate max-w-[90px] block">{a.name}</span>
+                        <span className={`text-[10px] font-mono ${a.roas >= 5 ? "text-accent" : a.roas >= 3 ? "text-foreground" : "text-destructive"}`}>{a.roas}x</span>
                       </div>
                     </th>
                   ))}
@@ -477,12 +473,12 @@ const Insights = () => {
                   const vals = ranked.map(a => attr.get(a));
                   const diff = !vals.every(v => v === vals[0]);
                   return (
-                    <tr key={attr.key} className={`border-b border-border/20 last:border-0 ${diff ? "bg-primary/[0.02]" : ""}`}>
-                      <td className={`px-4 py-1.5 text-[10px] font-semibold sticky left-0 ${diff ? "text-foreground bg-primary/[0.02]" : "text-muted-foreground bg-background"}`}>
+                    <tr key={attr.key} className={`border-b border-border/20 last:border-0 ${diff ? "bg-primary/[0.03]" : ""}`}>
+                      <td className={`px-4 py-2 text-[10px] font-semibold sticky left-0 ${diff ? "text-foreground bg-primary/[0.03]" : "text-muted-foreground bg-background"}`}>
                         {attr.label}{diff && <span className="ml-1 text-primary text-[8px]">●</span>}
                       </td>
                       {ranked.map(a => (
-                        <td key={a.id} className={`px-3 py-1.5 text-center text-[11px] font-mono ${diff ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
+                        <td key={a.id} className={`px-4 py-2 text-center text-[11px] font-mono ${diff ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
                           {attr.get(a)}
                         </td>
                       ))}
@@ -497,20 +493,20 @@ const Insights = () => {
         {/* ═══ Creative Profile Performance Summary ═══ */}
         {correlationCards.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-1">
               <Layers className="w-4 h-4 text-primary" />
-              <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Creative Profile Performance Summary</h2>
+              <h2 className="text-xs uppercase tracking-wider font-bold text-foreground">Creative Profile Insights</h2>
             </div>
-            <p className="text-[10px] text-muted-foreground mb-3">How each creative attribute correlates with performance. Click a row to see the full breakdown in a popup.</p>
-            <div className="rounded-lg border border-border overflow-hidden">
+            <p className="text-[10px] text-muted-foreground mb-3">How each creative attribute correlates with performance. Click a row to see the full metric breakdown.</p>
+            <div className="rounded-lg border border-border overflow-hidden shadow-[var(--shadow-card)]">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-muted/20 border-b border-border/40">
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-4 py-2 text-left">Attribute</th>
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-2 text-left">Best Value</th>
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-2 text-left">Worst Value</th>
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-2 text-right">ROAS Δ</th>
-                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-2 text-left">Insight</th>
+                  <tr className="bg-muted/30 border-b border-border">
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Attribute</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Best</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Worst</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right">ROAS Δ</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Insight</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -525,22 +521,22 @@ const Insights = () => {
                       <tr
                         key={card.attr.key}
                         onClick={() => setOpenModal(`correlation:${card.attr.key}`)}
-                        className="border-b border-border/20 last:border-0 hover:bg-muted/10 transition-colors cursor-pointer"
+                        className="border-b border-border/20 last:border-0 hover:bg-primary/[0.03] transition-colors cursor-pointer group"
                       >
-                        <td className="px-4 py-2 text-[11px] font-semibold text-foreground">{card.attr.label}</td>
-                        <td className="px-3 py-2">
-                          <span className="text-[11px] font-mono font-semibold text-emerald-600">{topGroup.value}</span>
+                        <td className="px-4 py-2.5 text-[11px] font-semibold text-foreground group-hover:text-primary transition-colors">{card.attr.label}</td>
+                        <td className="px-4 py-2.5">
+                          <span className="text-[11px] font-mono font-semibold text-accent">{topGroup.value}</span>
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-4 py-2.5">
                           <span className="text-[11px] font-mono font-semibold text-destructive">{botGroup.value}</span>
                         </td>
-                        <td className="px-3 py-2 text-right">
-                          <span className={`text-[11px] font-mono font-bold ${significant ? "text-emerald-600" : "text-muted-foreground"}`}>
+                        <td className="px-4 py-2.5 text-right">
+                          <span className={`text-[11px] font-mono font-bold ${significant ? "text-accent" : "text-muted-foreground"}`}>
                             {diff > 0 ? "+" : ""}{diff}%
                           </span>
                         </td>
-                        <td className="px-3 py-2">
-                          <span className="text-[10px] text-muted-foreground italic">{card.takeaway || "Similar performance"}</span>
+                        <td className="px-4 py-2.5">
+                          <span className="text-[10px] text-muted-foreground">{card.takeaway || "Similar performance"}</span>
                         </td>
                       </tr>
                     );
