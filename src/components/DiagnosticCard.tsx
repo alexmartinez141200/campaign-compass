@@ -4,11 +4,7 @@ import type { CreativeAsset } from "@/data/mockData";
 import { Checkbox } from "@/components/ui/checkbox";
 import ChannelIcon from "./ChannelIcon";
 
-const rankStyles: Record<number, string> = {
-  0: "bg-yellow-400/15 text-yellow-600 ring-1 ring-yellow-400/20",
-  1: "bg-muted text-muted-foreground",
-  2: "bg-amber-400/10 text-amber-600",
-};
+const rankStyle = "text-muted-foreground/60";
 
 interface DiagnosticCardProps {
   asset: CreativeAsset;
