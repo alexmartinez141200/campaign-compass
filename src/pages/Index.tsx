@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FolderOpen, ArrowLeft, Search } from "lucide-react";
 import type { Channel } from "@/data/mockData";
 import AppSidebar from "@/components/AppSidebar";
@@ -18,6 +18,7 @@ type CreativeSortKey = "name" | "roas" | "spend" | "conversions";
 
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [topTab, setTopTab] = useState<TopTab>("campaigns");
   const [campaignFilter, setCampaignFilter] = useState<CampaignFilter>("all");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
@@ -29,6 +30,16 @@ const Index = () => {
   const [creativeFilterChannel, setCreativeFilterChannel] = useState<Channel | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [fromCreativesTab, setFromCreativesTab] = useState(false);
+
+  // Restore campaign selection when navigating back from Insights
+  useEffect(() => {
+    const state = location.state as { returnToCampaignId?: string } | null;
+    if (state?.returnToCampaignId) {
+      setSelectedCampaignId(state.returnToCampaignId);
+      // Clear the state so refreshing doesn't re-trigger
+      window.history.replaceState({}, '');
+    }
+  }, [location.state]);
 
   const handleGetInsights = () => {
     const assets = filteredAssets.filter(a => selectedAssets.has(a.id));

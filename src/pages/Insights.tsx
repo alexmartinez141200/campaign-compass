@@ -358,7 +358,7 @@ const Insights = () => {
       <main className="ml-[232px]">
       <div className="px-6 py-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <button onClick={() => navigate(-1)} className="flex items-center text-muted-foreground hover:text-foreground transition-colors mr-1">
+          <button onClick={() => campaignId ? navigate("/", { state: { returnToCampaignId: campaignId } }) : navigate("/")} className="flex items-center text-muted-foreground hover:text-foreground transition-colors mr-1">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <button onClick={() => navigate("/")} className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">
@@ -367,7 +367,7 @@ const Insights = () => {
           {campaignId && (
             <>
               <span className="text-muted-foreground/30 text-xs">›</span>
-              <button onClick={() => navigate(-1)} className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <button onClick={() => navigate("/", { state: { returnToCampaignId: campaignId } })} className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Campaign Profile
               </button>
             </>
