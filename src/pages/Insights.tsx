@@ -560,7 +560,7 @@ const Insights = () => {
             <div className="flex items-center justify-between px-5 py-3 border-b border-border">
               <div className="flex items-center gap-2">
                 <ModalIcon className="w-4 h-4 text-primary" />
-                <h3 className="text-sm font-bold text-foreground">{openModal} — Detailed Breakdown</h3>
+                <h3 className="text-sm font-bold text-foreground">{modalTitle} — Detailed Breakdown</h3>
               </div>
               <button onClick={() => setOpenModal(null)} className="p-1 rounded-md hover:bg-muted transition-colors">
                 <X className="w-4 h-4 text-muted-foreground" />
