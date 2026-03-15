@@ -77,6 +77,7 @@ const Index = () => {
   const filteredCreatives = useMemo(() => {
     let list = allCreativeAssets;
     if (creativeFilterChannel !== "all") list = list.filter(r => r.asset.channel === creativeFilterChannel);
+    if (searchQuery) list = list.filter(r => r.asset.name.toLowerCase().includes(searchQuery.toLowerCase()) || r.campaignName.toLowerCase().includes(searchQuery.toLowerCase()));
     return [...list].sort((a, b) => {
       if (creativeSortKey === "name") return a.asset.name.localeCompare(b.asset.name);
       if (creativeSortKey === "roas") return b.asset.roas - a.asset.roas;
