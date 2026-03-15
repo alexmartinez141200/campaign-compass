@@ -74,7 +74,11 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
     >
       {/* Checkbox */}
       {showCheckbox && (
-        <div className="ml-2.5 flex-shrink-0">
+        <div
+          className="ml-2.5 flex-shrink-0"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           <Checkbox
             checked={selected}
             onCheckedChange={() => onSelectToggle?.(asset.id)}
