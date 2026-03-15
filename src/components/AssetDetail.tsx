@@ -558,13 +558,21 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         {/* ═══ E. VIDEO PERFORMANCE (conditional) ═══ */}
         {isVideo && (
           <>
-            <SectionHeader title="Video Performance" description="Retention analysis — where viewers drop off reveals content quality." />
+            <SectionHeader title="Video Performance" description={isTikTok ? "TikTok video metrics — view rate and retention show content quality and hook strength." : "Retention analysis — where viewers drop off reveals content quality."} />
             <div className="grid grid-cols-2 gap-3">
               <div className="grid grid-cols-2 gap-3">
-                <KpiCard label="Plays" value={(asset.videoPlays || 0).toLocaleString()} />
-                <KpiCard label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} />
+                <KpiCard label={isTikTok ? "Video Views" : "Plays"} value={(asset.videoPlays || 0).toLocaleString()} />
+                {isTikTok ? (
+                  <KpiCard label="Video View Rate" value={`${asset.videoViewRate || 0}%`} sub="2s+ views / impressions" />
+                ) : (
+                  <KpiCard label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} />
+                )}
                 <KpiCard label="Avg Watch" value={`${asset.avgWatchTime || 0}s`} />
-                <KpiCard label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
+                {isTikTok ? (
+                  <KpiCard label="Completion Rate" value={`${((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} sub="Watched to 95%" />
+                ) : (
+                  <KpiCard label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
+                )}
               </div>
               <ChartCard title="Retention Curve" height="h-[140px]">
                 <ResponsiveContainer width="100%" height="100%">
