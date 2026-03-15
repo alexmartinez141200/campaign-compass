@@ -116,9 +116,14 @@ interface CorrelationCard {
   takeaway: string;
 }
 
-function buildCorrelationCards(assets: CreativeAsset[]): CorrelationCard[] {
+function getActiveMetrics(assets: CreativeAsset[]): MetricDef[] {
+  const hasVideo = assets.some(a => a.type === "video");
+  return ALL_METRICS.filter(m => !m.videoOnly || hasVideo);
+}
+
+function buildCorrelationCards(assets: CreativeAsset[], metrics: MetricDef[]): CorrelationCard[] {
   const cards: CorrelationCard[] = [];
-  const globalAvgs = METRICS.map(m => assets.reduce((s, a) => s + m.get(a), 0) / assets.length);
+  const globalAvgs = metrics.map(m => assets.reduce((s, a) => s + m.get(a), 0) / assets.length);
 
   for (const attr of PROFILE_ATTRS) {
     const groupMap = new Map<string, CreativeAsset[]>();
@@ -129,11 +134,10 @@ function buildCorrelationCards(assets: CreativeAsset[]): CorrelationCard[] {
     }
     if (groupMap.size < 2) continue;
 
-    // Find best/worst per metric across all individual assets
     const bestIdx: number[] = [];
     const worstIdx: number[] = [];
-    for (let mi = 0; mi < METRICS.length; mi++) {
-      const m = METRICS[mi];
+    for (let mi = 0; mi < metrics.length; mi++) {
+      const m = metrics[mi];
       let bestVal = m.higherIsBetter ? -Infinity : Infinity;
       let worstVal = m.higherIsBetter ? Infinity : -Infinity;
       let bi = 0, wi = 0;
@@ -148,9 +152,7 @@ function buildCorrelationCards(assets: CreativeAsset[]): CorrelationCard[] {
       worstIdx.push(pctSpread > 0.1 ? wi : -1);
     }
 
-    // Build grouped rows
     const groups: { value: string; assets: AssetRow[] }[] = [];
-    // Sort groups by avg ROAS descending
     const sortedGroups = [...groupMap.entries()].sort((a, b) => {
       const avgA = a[1].reduce((s, x) => s + x.roas, 0) / a[1].length;
       const avgB = b[1].reduce((s, x) => s + x.roas, 0) / b[1].length;
@@ -163,7 +165,7 @@ function buildCorrelationCards(assets: CreativeAsset[]): CorrelationCard[] {
         .map(asset => ({
           asset,
           attrValue: val,
-          metrics: METRICS.map((m, mi) => {
+          metrics: metrics.map((m, mi) => {
             const v = m.get(asset);
             const ai = assets.indexOf(asset);
             return {
@@ -176,7 +178,6 @@ function buildCorrelationCards(assets: CreativeAsset[]): CorrelationCard[] {
       groups.push({ value: val, assets: assetRows });
     }
 
-    // Takeaway
     let takeaway = "";
     if (sortedGroups.length >= 2) {
       const topGroup = sortedGroups[0];
@@ -184,11 +185,7 @@ function buildCorrelationCards(assets: CreativeAsset[]): CorrelationCard[] {
       const topAvgRoas = topGroup[1].reduce((s, a) => s + a.roas, 0) / topGroup[1].length;
       const botAvgRoas = botGroup[1].reduce((s, a) => s + a.roas, 0) / botGroup[1].length;
       const diff = botAvgRoas > 0 ? Math.round(((topAvgRoas - botAvgRoas) / botAvgRoas) * 100) : 0;
-      if (diff > 5) {
-        takeaway = `${topGroup[0]} outperforms ${botGroup[0]} by ${diff}% on ROAS`;
-      } else {
-        takeaway = `Similar performance across ${attr.label.toLowerCase()} values`;
-      }
+      takeaway = diff > 5 ? `${topGroup[0]} outperforms ${botGroup[0]} by ${diff}% on ROAS` : `Similar performance across ${attr.label.toLowerCase()} values`;
     }
 
     cards.push({ attr, groups, takeaway });
@@ -203,16 +200,37 @@ const cellStyles: Record<string, string> = {
   neutral: "text-foreground",
 };
 
+const groupIcons: Record<string, typeof TrendingUp> = {
+  Efficiency: TrendingUp,
+  Delivery: Eye,
+  Click: MousePointerClick,
+  Engagement: Zap,
+  Funnel: ShoppingCart,
+  "Funnel Rates": ShoppingCart,
+  Video: Video,
+  Quality: BarChart3,
+};
+
 const Insights = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const assets = (location.state?.assets || []) as CreativeAsset[];
   const channel: Channel | null = assets.length > 0 ? assets[0].channel : null;
 
-  const { ranked, correlationCards } = useMemo(() => {
+  const { ranked, correlationCards, metrics, metricGroups } = useMemo(() => {
     const ranked = [...assets].sort((a, b) => b.roas - a.roas);
-    const correlationCards = buildCorrelationCards(assets);
-    return { ranked, correlationCards };
+    const metrics = getActiveMetrics(assets);
+    const correlationCards = buildCorrelationCards(assets, metrics);
+    // Group metrics by group name
+    const metricGroups: { name: string; metrics: MetricDef[] }[] = [];
+    const seen = new Set<string>();
+    for (const m of metrics) {
+      if (!seen.has(m.group)) {
+        seen.add(m.group);
+        metricGroups.push({ name: m.group, metrics: metrics.filter(x => x.group === m.group) });
+      }
+    }
+    return { ranked, correlationCards, metrics, metricGroups };
   }, [assets]);
 
   if (assets.length === 0) {
@@ -249,69 +267,80 @@ const Insights = () => {
 
       <div className="p-6 space-y-6">
 
-        {/* ═══ 1. Performance Ranking ═══ */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="w-4 h-4 text-primary" />
-            <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Performance Ranking</h2>
-          </div>
-          <div className="rounded-lg border border-border overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-muted/20 border-b border-border/40">
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-4 py-1.5 text-left w-[40px]">#</th>
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 text-left">Asset</th>
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 text-right">Spend</th>
-                  {METRICS.map(m => (
-                    <th key={m.key} className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 text-right">{m.label}</th>
-                  ))}
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 w-[100px]" />
-                </tr>
-              </thead>
-              <tbody>
-                {ranked.map((asset, i) => {
-                  const barW = maxRoas > 0 ? (asset.roas / maxRoas) * 100 : 0;
-                  const roasColor = asset.roas >= 5 ? "text-emerald-600" : asset.roas >= 3 ? "text-foreground" : "text-destructive";
-                  const barColor = asset.roas >= 5 ? "bg-emerald-500" : asset.roas >= 3 ? "bg-primary" : "bg-destructive";
-                  
-                  return (
-                    <tr key={asset.id} className="border-b border-border/20 last:border-0 hover:bg-muted/10 transition-colors">
-                      <td className="px-4 py-2 text-[11px] font-mono text-muted-foreground">{i + 1}</td>
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-2">
-                          <img src={asset.thumbnail} alt={asset.name} className="w-7 h-7 rounded object-cover flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-[11px] font-semibold text-foreground truncate">{asset.name}</p>
-                            <p className="text-[9px] font-mono text-muted-foreground">{asset.id} · {asset.type}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-3 py-2 text-right text-[11px] font-mono text-muted-foreground">${asset.spend.toLocaleString()}</td>
-                      {METRICS.map(m => {
-                        const val = m.get(asset);
-                        const avg = assets.reduce((s, a) => s + m.get(a), 0) / assets.length;
-                        const pctDiff = avg > 0 ? ((val - avg) / avg) * 100 : 0;
-                        const isGood = m.higherIsBetter ? pctDiff > 15 : pctDiff < -15;
-                        const isBad = m.higherIsBetter ? pctDiff < -15 : pctDiff > 15;
-                        const color = m.key === "roas" ? roasColor : isGood ? "text-emerald-600" : isBad ? "text-destructive" : "text-foreground";
-                        return (
-                          <td key={m.key} className={`px-3 py-2 text-right text-[11px] font-mono font-semibold ${color}`}>
-                            {fmt(val, m.format)}
-                          </td>
-                        );
-                      })}
-                      <td className="px-3 py-2">
-                        <div className="w-full h-1.5 bg-muted/40 rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full ${barColor}`} style={{ width: `${barW}%` }} />
-                        </div>
-                      </td>
+        {/* ═══ 1. Full Performance Comparison by Metric Group ═══ */}
+        {metricGroups.map(group => {
+          const Icon = groupIcons[group.name] || BarChart3;
+          return (
+            <div key={group.name}>
+              <div className="flex items-center gap-2 mb-2">
+                <Icon className="w-4 h-4 text-primary" />
+                <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">{group.name}</h2>
+              </div>
+              <div className="rounded-lg border border-border overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-muted/20 border-b border-border/40">
+                      <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-4 py-1.5 text-left w-[40px]">#</th>
+                      <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 text-left">Asset</th>
+                      {group.name === "Efficiency" && (
+                        <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 text-right">Spend</th>
+                      )}
+                      {group.metrics.map(m => (
+                        <th key={m.key} className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 text-right">{m.label}</th>
+                      ))}
+                      {group.name === "Efficiency" && (
+                        <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-1.5 w-[80px]" />
+                      )}
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                  </thead>
+                  <tbody>
+                    {ranked.map((asset, i) => {
+                      const barW = maxRoas > 0 ? (asset.roas / maxRoas) * 100 : 0;
+                      const barColor = asset.roas >= 5 ? "bg-emerald-500" : asset.roas >= 3 ? "bg-primary" : "bg-destructive";
+                      return (
+                        <tr key={asset.id} className="border-b border-border/20 last:border-0 hover:bg-muted/10 transition-colors">
+                          <td className="px-4 py-2 text-[11px] font-mono text-muted-foreground">{i + 1}</td>
+                          <td className="px-3 py-2">
+                            <div className="flex items-center gap-2">
+                              <img src={asset.thumbnail} alt={asset.name} className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                              <div className="min-w-0">
+                                <p className="text-[11px] font-semibold text-foreground truncate">{asset.name}</p>
+                                <p className="text-[8px] font-mono text-muted-foreground">{asset.id}</p>
+                              </div>
+                            </div>
+                          </td>
+                          {group.name === "Efficiency" && (
+                            <td className="px-3 py-2 text-right text-[11px] font-mono text-muted-foreground">${asset.spend.toLocaleString()}</td>
+                          )}
+                          {group.metrics.map(m => {
+                            const val = m.get(asset);
+                            const avg = assets.reduce((s, a) => s + m.get(a), 0) / assets.length;
+                            const pctDiff = avg > 0 ? ((val - avg) / avg) * 100 : 0;
+                            const isGood = m.higherIsBetter ? pctDiff > 15 : pctDiff < -15;
+                            const isBad = m.higherIsBetter ? pctDiff < -15 : pctDiff > 15;
+                            const color = isGood ? "text-emerald-600" : isBad ? "text-destructive" : "text-foreground";
+                            return (
+                              <td key={m.key} className={`px-3 py-2 text-right text-[11px] font-mono font-semibold ${color}`}>
+                                {fmt(val, m.format)}
+                              </td>
+                            );
+                          })}
+                          {group.name === "Efficiency" && (
+                            <td className="px-3 py-2">
+                              <div className="w-full h-1.5 bg-muted/40 rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full ${barColor}`} style={{ width: `${barW}%` }} />
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
+        })}
 
         {/* ═══ 2. Attribute × Metric Correlation ═══ */}
         <div>
@@ -321,7 +350,7 @@ const Insights = () => {
             <span className="text-[10px] text-muted-foreground">— how each creative attribute affects performance</span>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {correlationCards.map(card => (
               <div key={card.attr.key} className="rounded-lg border border-border overflow-hidden">
                 <div className="bg-muted/20 px-3 py-2 border-b border-border/40">
@@ -333,44 +362,46 @@ const Insights = () => {
                     <p className="text-[10px] text-muted-foreground mt-0.5 italic">{card.takeaway}</p>
                   )}
                 </div>
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border/30">
-                      <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-3 py-1 text-left">Asset</th>
-                      <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-left">{card.attr.label}</th>
-                      {METRICS.map(m => (
-                        <th key={m.key} className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-right">{m.label}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {card.groups.flatMap(group =>
-                      group.assets.map(row => (
-                        <tr key={row.asset.id} className="border-b border-border/15 last:border-0 hover:bg-muted/10 transition-colors">
-                          <td className="px-3 py-1.5">
-                            <div className="flex items-center gap-1.5">
-                              <img src={row.asset.thumbnail} alt="" className="w-5 h-5 rounded object-cover flex-shrink-0" />
-                              <span className="text-[10px] font-semibold text-foreground truncate max-w-[100px]">{row.asset.name}</span>
-                            </div>
-                          </td>
-                          <td className="px-2 py-1.5 text-[10px] font-mono text-muted-foreground">{group.value}</td>
-                          {row.metrics.map((mc, mi) => (
-                            <td key={METRICS[mi].key} className={`px-2 py-1.5 text-right ${cellStyles[mc.signal]}`}>
-                              <div className="flex flex-col items-end">
-                                <span className="text-[11px] font-mono font-semibold">{fmt(mc.value, METRICS[mi].format)}</span>
-                                {mc.signal !== "neutral" && (
-                                  <span className="text-[8px] font-mono opacity-70">
-                                    {mc.pctVsAvg > 0 ? "▲" : "▼"} {Math.abs(mc.pctVsAvg)}%
-                                  </span>
-                                )}
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[800px]">
+                    <thead>
+                      <tr className="border-b border-border/30">
+                        <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-3 py-1 text-left sticky left-0 bg-background z-10 min-w-[140px]">Asset</th>
+                        <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-left min-w-[70px]">{card.attr.label}</th>
+                        {metrics.map(m => (
+                          <th key={m.key} className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-1.5 py-1 text-right whitespace-nowrap">{m.label}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {card.groups.flatMap(group =>
+                        group.assets.map(row => (
+                          <tr key={row.asset.id} className="border-b border-border/15 last:border-0 hover:bg-muted/10 transition-colors">
+                            <td className="px-3 py-1.5 sticky left-0 bg-background z-10">
+                              <div className="flex items-center gap-1.5">
+                                <img src={row.asset.thumbnail} alt="" className="w-5 h-5 rounded object-cover flex-shrink-0" />
+                                <span className="text-[10px] font-semibold text-foreground truncate max-w-[100px]">{row.asset.name}</span>
                               </div>
                             </td>
-                          ))}
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                            <td className="px-2 py-1.5 text-[10px] font-mono text-muted-foreground">{group.value}</td>
+                            {row.metrics.map((mc, mi) => (
+                              <td key={metrics[mi].key} className={`px-1.5 py-1.5 text-right ${cellStyles[mc.signal]}`}>
+                                <div className="flex flex-col items-end">
+                                  <span className="text-[10px] font-mono font-semibold whitespace-nowrap">{fmt(mc.value, metrics[mi].format)}</span>
+                                  {mc.signal !== "neutral" && (
+                                    <span className="text-[7px] font-mono opacity-70">
+                                      {mc.pctVsAvg > 0 ? "▲" : "▼"}{Math.abs(mc.pctVsAvg)}%
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                            ))}
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ))}
           </div>
