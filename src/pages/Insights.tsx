@@ -287,45 +287,39 @@ const Insights = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border/30">
-                      <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-3 py-1 text-left" colSpan={2}>Asset</th>
+                      <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-3 py-1 text-left">Asset</th>
+                      <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-left">{card.attr.label}</th>
                       {METRICS.map(m => (
                         <th key={m.key} className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-right">{m.label}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {card.groups.map(group => (
-                      <>
-                        {/* Group header */}
-                        <tr key={`hdr-${group.value}`} className="bg-muted/10 border-b border-border/20">
-                          <td colSpan={2 + METRICS.length} className="px-3 py-1">
-                            <span className="text-[10px] font-bold text-foreground">{group.value}</span>
-                            <span className="text-[9px] text-muted-foreground ml-1.5">({group.assets.length} asset{group.assets.length > 1 ? "s" : ""})</span>
+                    {card.groups.flatMap(group =>
+                      group.assets.map(row => (
+                        <tr key={row.asset.id} className="border-b border-border/15 last:border-0 hover:bg-muted/10 transition-colors">
+                          <td className="px-3 py-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <img src={row.asset.thumbnail} alt="" className="w-5 h-5 rounded object-cover flex-shrink-0" />
+                              <span className="text-[10px] font-semibold text-foreground truncate max-w-[100px]">{row.asset.name}</span>
+                            </div>
                           </td>
-                        </tr>
-                        {/* Asset rows */}
-                        {group.assets.map(row => (
-                          <tr key={row.asset.id} className="border-b border-border/15 last:border-0 hover:bg-muted/10 transition-colors">
-                            <td className="pl-5 pr-1 py-1.5 w-[24px]">
-                              <img src={row.asset.thumbnail} alt="" className="w-5 h-5 rounded object-cover" />
+                          <td className="px-2 py-1.5 text-[10px] font-mono text-muted-foreground">{group.value}</td>
+                          {row.metrics.map((mc, mi) => (
+                            <td key={METRICS[mi].key} className={`px-2 py-1.5 text-right ${cellStyles[mc.signal]}`}>
+                              <div className="flex flex-col items-end">
+                                <span className="text-[11px] font-mono font-semibold">{fmt(mc.value, METRICS[mi].format)}</span>
+                                {mc.signal !== "neutral" && (
+                                  <span className="text-[8px] font-mono opacity-70">
+                                    {mc.pctVsAvg > 0 ? "▲" : "▼"} {Math.abs(mc.pctVsAvg)}%
+                                  </span>
+                                )}
+                              </div>
                             </td>
-                            <td className="px-1 py-1.5 text-[10px] font-semibold text-foreground truncate max-w-[100px]">{row.asset.name}</td>
-                            {row.metrics.map((mc, mi) => (
-                              <td key={METRICS[mi].key} className={`px-2 py-1.5 text-right ${cellStyles[mc.signal]}`}>
-                                <div className="flex flex-col items-end">
-                                  <span className="text-[11px] font-mono font-semibold">{fmt(mc.value, METRICS[mi].format)}</span>
-                                  {mc.signal !== "neutral" && (
-                                    <span className="text-[8px] font-mono opacity-70">
-                                      {mc.pctVsAvg > 0 ? "▲" : "▼"} {Math.abs(mc.pctVsAvg)}%
-                                    </span>
-                                  )}
-                                </div>
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </>
-                    ))}
+                          ))}
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
