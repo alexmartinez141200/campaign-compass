@@ -342,8 +342,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         {isTikTok ? (
           <div className="grid grid-cols-5 gap-3 mb-2">
             <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
-            <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} />
-            <KpiCard label="Video View Rate" value={`${asset.videoViewRate || 0}%`} sub="2s+ views / impressions" />
+            <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} sub="2s+ views" />
+            <KpiCard label="6s View Rate" value={`${asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays * 100).toFixed(1) : 0}%`} sub="Hook strength" />
             <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
             <KpiCard label="ROAS" value={`${asset.roas}x`} trend={trends.roas} health={roasHealth} />
           </div>
