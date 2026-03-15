@@ -19,6 +19,26 @@ interface DiagnosticCardProps {
   onSelectToggle?: (id: string) => void;
 }
 
+/** Column header row — render once above the list */
+export const DiagnosticHeader = () => (
+  <div className="flex items-center h-8 px-4 text-[9px] uppercase tracking-wider font-semibold text-muted-foreground/60 select-none">
+    <div className="w-6 flex-shrink-0" /> {/* rank */}
+    <div className="ml-2.5 w-4 flex-shrink-0" /> {/* checkbox */}
+    <div className="ml-3 w-11 flex-shrink-0" /> {/* thumbnail */}
+    <div className="ml-3 min-w-[130px] max-w-[180px] flex-shrink-0">Creative Asset</div>
+    <div className="ml-3 min-w-[60px] flex-shrink-0">Channel</div>
+    <div className="flex-1" />
+    <div className="mr-6 min-w-[70px] text-right flex-shrink-0">Spend</div>
+    <div className="w-px mr-5 flex-shrink-0" />
+    <div className="min-w-[60px] mr-5 flex-shrink-0">ROAS</div>
+    <div className="min-w-[56px] mr-4 flex-shrink-0 text-center">CPM</div>
+    <div className="min-w-[40px] mr-4 flex-shrink-0 text-center">CTR</div>
+    <div className="min-w-[48px] mr-4 flex-shrink-0 text-center">CPC</div>
+    <div className="min-w-[44px] flex-shrink-0 text-center">Conv.</div>
+    <div className="w-3.5 ml-4 flex-shrink-0" />
+  </div>
+);
+
 const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelectToggle }: DiagnosticCardProps) => {
   const isTop = rank === 0;
   const roasPercent = Math.min((asset.roas / maxRoas) * 100, 100);
@@ -38,7 +58,7 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.025 }}
-      className={`group flex items-center h-[72px] px-4 rounded-lg cursor-pointer transition-all duration-100 border ${
+      className={`group flex items-center h-[68px] px-4 rounded-lg cursor-pointer transition-all duration-100 border ${
         selected
           ? "border-primary/25 bg-primary/[0.02]"
           : isTop
@@ -67,32 +87,30 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
         <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
       </div>
 
-      {/* Name block */}
+      {/* Name */}
       <div className="ml-3 min-w-[130px] max-w-[180px] flex-shrink-0">
         <p className="text-[13px] font-medium text-foreground truncate leading-tight">{asset.name}</p>
         <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate">{asset.id}</p>
       </div>
 
       {/* Channel */}
-      <div className="ml-3 flex-shrink-0">
+      <div className="ml-3 min-w-[60px] flex-shrink-0">
         <ChannelIcon channel={asset.channel} size="sm" />
       </div>
 
       {/* Spacer */}
       <div className="flex-1" />
 
-      {/* Spend (input) */}
+      {/* Spend */}
       <div className="mr-6 text-right min-w-[70px] flex-shrink-0">
-        <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium leading-none mb-1">Spend</p>
         <p className="text-[13px] font-mono text-muted-foreground font-medium">${asset.spend.toLocaleString()}</p>
       </div>
 
       {/* Divider */}
-      <div className="w-px h-9 bg-border/60 mr-5 flex-shrink-0" />
+      <div className="w-px h-8 bg-border/60 mr-5 flex-shrink-0" />
 
-      {/* ROAS (hero) */}
+      {/* ROAS */}
       <div className="min-w-[60px] mr-5 flex-shrink-0">
-        <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium leading-none mb-1">ROAS</p>
         <p className={`text-[15px] font-mono font-bold leading-tight ${roasColor}`}>{asset.roas}x</p>
         <div className="w-full h-[2px] bg-border/50 rounded-full overflow-hidden mt-1">
           <motion.div
@@ -106,25 +124,21 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
 
       {/* CPM */}
       <div className="min-w-[56px] mr-4 flex-shrink-0 text-center">
-        <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium leading-none mb-1">CPM</p>
         <p className="text-[13px] font-mono font-medium text-foreground">${asset.cpm.toFixed(2)}</p>
       </div>
 
       {/* CTR */}
       <div className="min-w-[40px] mr-4 flex-shrink-0 text-center">
-        <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium leading-none mb-1">CTR</p>
         <p className="text-[13px] font-mono font-medium text-foreground">{asset.ctr}%</p>
       </div>
 
       {/* CPC */}
       <div className="min-w-[48px] mr-4 flex-shrink-0 text-center">
-        <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium leading-none mb-1">CPC</p>
         <p className="text-[13px] font-mono font-medium text-foreground">${asset.cpc.toFixed(2)}</p>
       </div>
 
       {/* Conv Rate */}
       <div className="min-w-[44px] flex-shrink-0 text-center">
-        <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium leading-none mb-1">Conv.</p>
         <p className="text-[13px] font-mono font-medium text-foreground">{asset.conversionRate}%</p>
       </div>
 

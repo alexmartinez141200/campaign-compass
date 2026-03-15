@@ -3,7 +3,7 @@ import { FolderOpen, ArrowLeft } from "lucide-react";
 import AppSidebar from "@/components/AppSidebar";
 import CampaignHeader from "@/components/CampaignHeader";
 import CampaignList from "@/components/CampaignList";
-import DiagnosticCard from "@/components/DiagnosticCard";
+import DiagnosticCard, { DiagnosticHeader } from "@/components/DiagnosticCard";
 import FilterBar from "@/components/FilterBar";
 import { campaigns } from "@/data/mockData";
 
@@ -146,7 +146,8 @@ const Index = () => {
                 <FilterBar channelFilter={channelFilter} sort={sort} onChannelFilterChange={setChannelFilter} onSortChange={setSort} />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-0.5">
+                <DiagnosticHeader />
                 {filteredAssets.length > 0 ? (
                   filteredAssets.map((asset, i) => (
                     <DiagnosticCard key={asset.id} asset={asset} index={i} rank={i} maxRoas={Math.max(...filteredAssets.map(a => a.roas))} selected={selectedAssets.has(asset.id)} onSelectToggle={toggleAssetSelection} />
