@@ -273,7 +273,7 @@ const Insights = () => {
   const maxRoas = Math.max(...assets.map(a => a.roas));
 
   const scoreColor = (s: number) =>
-    s >= 70 ? "text-emerald-600 dark:text-emerald-400" : s >= 40 ? "text-amber-600 dark:text-amber-400" : "text-destructive";
+    s >= 70 ? "text-accent" : s >= 40 ? "text-amber-500" : "text-destructive";
   const scoreBg = (s: number) =>
     s >= 70 ? "bg-emerald-500/10" : s >= 40 ? "bg-amber-500/10" : "bg-destructive/10";
 
@@ -368,7 +368,7 @@ const Insights = () => {
             <table className="w-full">
               <thead>
                 <tr className="bg-muted/30 border-b border-border">
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left min-w-[180px]">Asset</th>
+                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-5 py-2.5 text-left min-w-[220px]">Asset</th>
                   {groupNames.map(name => {
                     const Icon = groupIcons[name] || BarChart3;
                     return (
@@ -397,27 +397,27 @@ const Insights = () => {
                   const overall = scores ? Math.round([...scores.values()].reduce((s, v) => s + v, 0) / scores.size) : 0;
                   return (
                     <tr key={asset.id} className="border-b border-border/30 last:border-0 hover:bg-muted/10 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
-                          <img src={asset.thumbnail} alt={asset.name} className="w-7 h-7 rounded-md object-cover flex-shrink-0 border border-border/40" />
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <img src={asset.thumbnail} alt={asset.name} className="w-9 h-9 rounded-lg object-cover flex-shrink-0 border border-border/40" />
                           <div className="min-w-0">
-                            <p className="text-[11px] font-semibold text-foreground truncate">{asset.name}</p>
-                            <p className="text-[9px] font-mono text-muted-foreground/60">{asset.id}</p>
+                            <p className="text-[13px] font-semibold text-foreground truncate">{asset.name}</p>
+                            <p className="text-[10px] font-mono text-muted-foreground/50">{asset.id}</p>
                           </div>
                         </div>
                       </td>
                       {groupNames.map(name => {
                         const score = scores?.get(name) ?? 0;
                         return (
-                          <td key={name} className="px-3 py-3 text-center">
+                          <td key={name} className="px-3 py-4 text-center">
                             <button onClick={() => setOpenModal(name)} className="cursor-pointer hover:scale-105 transition-transform">
-                              <span className={`text-[13px] font-bold font-mono leading-none ${scoreColor(score)}`}>{score}</span>
+                              <span className={`text-[15px] font-semibold font-mono leading-none ${scoreColor(score)}`}>{score}</span>
                             </button>
                           </td>
                         );
                       })}
-                      <td className="px-3 py-3 text-center bg-muted/5">
-                        <span className={`text-[13px] font-bold font-mono leading-none ${scoreColor(overall)}`}>{overall}</span>
+                      <td className="px-3 py-4 text-center bg-muted/5">
+                        <span className={`text-[15px] font-semibold font-mono leading-none ${scoreColor(overall)}`}>{overall}</span>
                       </td>
                     </tr>
                   );
