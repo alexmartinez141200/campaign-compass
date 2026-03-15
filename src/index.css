@@ -6,23 +6,23 @@
 
 @layer base {
   :root {
-    --background: 220 15% 98%;
-    --foreground: 224 71% 4%;
+    --background: 0 0% 100%;
+    --foreground: 228 24% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
+    --card-foreground: 228 24% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
+    --popover-foreground: 228 24% 16%;
 
-    --primary: 217 91% 60%;
+    --primary: 227 71% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 95%;
-    --secondary-foreground: 224 71% 4%;
+    --secondary: 228 20% 96%;
+    --secondary-foreground: 228 24% 16%;
 
-    --muted: 220 15% 95%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 228 14% 95%;
+    --muted-foreground: 228 10% 52%;
 
     --accent: 174 100% 33%;
     --accent-foreground: 0 0% 100%;
@@ -30,27 +30,27 @@
     --destructive: 346 84% 61%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 10% 92%;
-    --input: 220 10% 92%;
-    --ring: 217 91% 60%;
+    --border: 228 14% 93%;
+    --input: 228 14% 93%;
+    --ring: 227 71% 55%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     --surface: 0 0% 100%;
     --accent-teal: 174 100% 33%;
     --accent-rose: 346 84% 61%;
 
-    --sidebar-background: 224 71% 4%;
-    --sidebar-foreground: 220 15% 85%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 224 50% 10%;
-    --sidebar-accent-foreground: 220 15% 92%;
-    --sidebar-border: 224 40% 12%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-background: 228 20% 98%;
+    --sidebar-foreground: 228 14% 35%;
+    --sidebar-primary: 227 71% 55%;
+    --sidebar-primary-foreground: 227 71% 55%;
+    --sidebar-accent: 227 85% 96%;
+    --sidebar-accent-foreground: 227 71% 55%;
+    --sidebar-border: 228 14% 93%;
+    --sidebar-ring: 227 71% 55%;
 
-    --shadow-card: 0 0 0 1px rgba(0,0,0,.05), 0 2px 4px rgba(0,0,0,.02), 0 10px 15px -3px rgba(0,0,0,.03);
-    --shadow-card-hover: 0 0 0 1px rgba(0,0,0,.08), 0 4px 8px rgba(0,0,0,.04), 0 14px 20px -3px rgba(0,0,0,.05);
+    --shadow-card: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.02);
+    --shadow-card-hover: 0 2px 8px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
   }
 }
 
