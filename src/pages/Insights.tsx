@@ -489,6 +489,63 @@ const Insights = () => {
             </table>
           </div>
         </div>
+
+        {/* ═══ Creative Profile Performance Summary ═══ */}
+        {correlationCards.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Layers className="w-4 h-4 text-primary" />
+              <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Creative Profile Performance Summary</h2>
+            </div>
+            <p className="text-[10px] text-muted-foreground mb-3">How each creative attribute correlates with performance. Click a row to see the full breakdown in a popup.</p>
+            <div className="rounded-lg border border-border overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-muted/20 border-b border-border/40">
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-4 py-2 text-left">Attribute</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-2 text-left">Best Value</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-2 text-left">Worst Value</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-2 text-right">ROAS Δ</th>
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-3 py-2 text-left">Insight</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {correlationCards.map(card => {
+                    const topGroup = card.groups[0];
+                    const botGroup = card.groups[card.groups.length - 1];
+                    const topAvgRoas = topGroup.assets.reduce((s, r) => s + r.asset.roas, 0) / topGroup.assets.length;
+                    const botAvgRoas = botGroup.assets.reduce((s, r) => s + r.asset.roas, 0) / botGroup.assets.length;
+                    const diff = botAvgRoas > 0 ? Math.round(((topAvgRoas - botAvgRoas) / botAvgRoas) * 100) : 0;
+                    const significant = diff > 10;
+                    return (
+                      <tr
+                        key={card.attr.key}
+                        onClick={() => setOpenModal("correlation")}
+                        className="border-b border-border/20 last:border-0 hover:bg-muted/10 transition-colors cursor-pointer"
+                      >
+                        <td className="px-4 py-2 text-[11px] font-semibold text-foreground">{card.attr.label}</td>
+                        <td className="px-3 py-2">
+                          <span className="text-[11px] font-mono font-semibold text-emerald-600">{topGroup.value}</span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <span className="text-[11px] font-mono font-semibold text-destructive">{botGroup.value}</span>
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <span className={`text-[11px] font-mono font-bold ${significant ? "text-emerald-600" : "text-muted-foreground"}`}>
+                            {diff > 0 ? "+" : ""}{diff}%
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <span className="text-[10px] text-muted-foreground italic">{card.takeaway || "Similar performance"}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ═══ MODAL POPUP ═══ */}
