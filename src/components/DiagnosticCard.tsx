@@ -27,13 +27,9 @@ const sorts: { value: SortOption; label: string }[] = [
 
 /** Column header row — render once above the list */
 export const DiagnosticHeader = ({ sort, onSortChange, showCheckbox = true }: { sort?: SortOption; onSortChange?: (s: SortOption) => void; showCheckbox?: boolean }) => (
-  <div className={`flex items-center h-8 ${showCheckbox ? "px-4" : "px-0"} text-[9px] uppercase tracking-wider font-semibold text-muted-foreground/60 select-none`}>
-    {showCheckbox ? (
-      <div className="w-[26px] flex-shrink-0" /> /* checkbox */
-    ) : (
-      <div className="w-0 flex-shrink-0" />
-    )}
-    <div className={`${showCheckbox ? "ml-3" : "ml-7"} min-w-[174px] max-w-[224px] flex-shrink-0`}>Creative Asset</div>
+  <div className={`flex items-center h-8 px-0 text-[9px] uppercase tracking-wider font-semibold text-muted-foreground/60 select-none`}>
+    <div className="w-8 flex-shrink-0" /> {/* fixed slot for number/checkbox */}
+    <div className="ml-2 min-w-[174px] max-w-[224px] flex-shrink-0">Creative Asset</div>
     <div className="ml-3 min-w-[60px] flex-shrink-0">Channel</div>
     <div className="flex-1" />
     <div className="mr-6 min-w-[70px] text-right flex-shrink-0">Spend</div>
