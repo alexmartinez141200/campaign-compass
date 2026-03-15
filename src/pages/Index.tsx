@@ -98,24 +98,36 @@ const Index = () => {
             {selectedCampaign ? (
               <>
                 <button
-                  onClick={() => { if (viewingAssetId) { setViewingAssetId(null); } else { setSelectedCampaignId(null); setViewingAssetId(null); } }}
-                  className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors mr-1"
+                  onClick={() => {
+                    if (fromCreativesTab) {
+                      setSelectedCampaignId(null); setViewingAssetId(null); setFromCreativesTab(false);
+                    } else if (viewingAssetId) {
+                      setViewingAssetId(null);
+                    } else {
+                      setSelectedCampaignId(null); setViewingAssetId(null);
+                    }
+                  }}
+                  className="flex items-center text-muted-foreground hover:text-foreground transition-colors mr-1"
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => { setSelectedCampaignId(null); setViewingAssetId(null); }}
+                  onClick={() => { setSelectedCampaignId(null); setViewingAssetId(null); setFromCreativesTab(false); }}
                   className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Campaigns
                 </button>
-                <span className="text-muted-foreground/30 text-xs">›</span>
-                <button
-                  onClick={() => setViewingAssetId(null)}
-                  className={`text-[13px] font-medium transition-colors ${viewingAssetId ? "text-muted-foreground hover:text-foreground" : "text-foreground"}`}
-                >
-                  Campaign Profile
-                </button>
+                {!fromCreativesTab && (
+                  <>
+                    <span className="text-muted-foreground/30 text-xs">›</span>
+                    <button
+                      onClick={() => setViewingAssetId(null)}
+                      className={`text-[13px] font-medium transition-colors ${viewingAssetId ? "text-muted-foreground hover:text-foreground" : "text-foreground"}`}
+                    >
+                      Campaign Profile
+                    </button>
+                  </>
+                )}
                 {viewingAssetId && (
                   <>
                     <span className="text-muted-foreground/30 text-xs">›</span>
