@@ -289,7 +289,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
       <div className="grid grid-cols-5 gap-3 mb-3">
         {/* Delivery stats */}
-        <div className="rounded-lg border border-border/60 bg-card p-4">
+        <div className="col-span-2 rounded-lg border border-border/60 bg-card p-4">
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
