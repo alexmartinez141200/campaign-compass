@@ -93,16 +93,16 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
         <span className="text-[11px] font-mono font-medium text-muted-foreground/50">{rank + 1}</span>
       </div>
 
-      {/* Thumbnail */}
-      <div className="ml-2 w-11 h-11 rounded-md overflow-hidden flex-shrink-0 bg-muted">
-        <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
-      </div>
-
-      {/* Name */}
-      <div className="ml-3 min-w-[130px] max-w-[180px] flex-shrink-0">
-        <p className="text-[13px] font-medium text-foreground truncate leading-tight">{asset.name}</p>
-        <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate">{asset.id}</p>
-        {campaignName && <p className="text-[9px] text-muted-foreground/60 mt-0.5 truncate">{campaignName}</p>}
+      {/* Thumbnail + Name group – name aligns to top of thumbnail */}
+      <div className="ml-2 flex items-start gap-3 min-w-[174px] max-w-[224px] flex-shrink-0">
+        <div className="w-11 h-11 rounded-md overflow-hidden flex-shrink-0 bg-muted">
+          <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
+        </div>
+        <div className="min-w-0 pt-0.5">
+          <p className="text-[13px] font-medium text-foreground truncate leading-tight">{asset.name}</p>
+          <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate">{asset.id}</p>
+          {campaignName && <p className="text-[9px] text-muted-foreground/60 mt-0.5 truncate">{campaignName}</p>}
+        </div>
       </div>
 
       {/* Channel */}
