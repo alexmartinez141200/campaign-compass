@@ -45,6 +45,8 @@ export const campaigns: Campaign[] = [
   {
     id: "camp-001",
     name: "Holiday 2024",
+    owner: "Alexandra Martinez",
+    createdAt: "2024-10-20",
     status: "active",
     startDate: "2024-11-15",
     endDate: "2024-12-31",
