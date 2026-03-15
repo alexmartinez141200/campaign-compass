@@ -20,7 +20,6 @@ const filters: { value: AssetFilter; label: string }[] = [
 const sorts: { value: SortOption; label: string }[] = [
   { value: "roas", label: "ROAS" },
   { value: "spend", label: "Spend" },
-  { value: "delta", label: "Perf Delta" },
 ];
 
 const FilterBar = ({ filter, sort, onFilterChange, onSortChange }: FilterBarProps) => {
