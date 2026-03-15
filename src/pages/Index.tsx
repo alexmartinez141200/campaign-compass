@@ -119,7 +119,7 @@ const Index = () => {
                   <>
                     <span className="text-muted-foreground/30 text-xs">›</span>
                     <span className="text-[13px] font-medium text-foreground">
-                      {selectedCampaign.assets.find(a => a.id === viewingAssetId)?.name}
+                      Creative Asset Profile
                     </span>
                   </>
                 )}
