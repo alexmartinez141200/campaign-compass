@@ -43,9 +43,11 @@ const Index = () => {
     });
   };
 
-  const visibleCampaigns = campaigns.filter((c) =>
-    campaignFilter === "all" ? true : campaignFilter === "active" ? c.status === "active" : c.status !== "active"
-  );
+  const visibleCampaigns = campaigns.filter((c) => {
+    const matchesFilter = campaignFilter === "all" ? true : campaignFilter === "active" ? c.status === "active" : c.status !== "active";
+    const matchesSearch = !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
   const selectedCampaign = selectedCampaignId
     ? campaigns.find((c) => c.id === selectedCampaignId)!
