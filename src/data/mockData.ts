@@ -7,18 +7,22 @@ export type Channel = "meta" | "tiktok" | "google" | "linkedin" | "amazon";
 
 export interface DailyMetric {
   date: string;
-  fullDate: string; // ISO date for filtering
+  fullDate: string;
   spend: number;
   impressions: number;
   clicks: number;
   conversions: number;
   purchaseValue: number;
-  roas: number; // daily ROAS (purchaseValue / spend)
+  roas: number;
   cumulativeSpend: number;
   cumulativePurchaseValue: number;
-  cumulativeRoas: number; // running total purchaseValue / running total spend
+  cumulativeRoas: number;
   ctr: number;
   cpm: number;
+  // Funnel metrics
+  landingPageViews: number;
+  addToCart: number;
+  initiateCheckout: number;
 }
 
 export interface CreativeAsset {
@@ -73,19 +77,20 @@ export interface CreativeAsset {
   dailyMetrics: DailyMetric[];
 }
 
-function generateDailyMetrics(totalSpend: number, totalImpressions: number, totalClicks: number, totalConversions: number, totalPurchaseValue: number, days: number = 30): DailyMetric[] {
+function generateDailyMetrics(totalSpend: number, totalImpressions: number, totalClicks: number, totalConversions: number, totalPurchaseValue: number, totalLPV: number, totalATC: number, totalIC: number, days: number = 30): DailyMetric[] {
   const metrics: DailyMetric[] = [];
   const now = new Date();
   let cumSpend = 0, cumPV = 0;
 
-  // Spend is relatively flat; revenue grows over time (learning phase → optimization)
   const avgDailySpend = totalSpend / days;
   const avgDailyPV = totalPurchaseValue / days;
   const avgDailyImpr = totalImpressions / days;
   const avgDailyClicks = totalClicks / days;
   const avgDailyConv = totalConversions / days;
+  const avgDailyLPV = totalLPV / days;
+  const avgDailyATC = totalATC / days;
+  const avgDailyIC = totalIC / days;
 
-  // Seeded pseudo-random for deterministic results
   let seed = totalSpend * 7 + totalConversions * 13;
   const seededRandom = () => { seed = (seed * 16807 + 0) % 2147483647; return (seed - 1) / 2147483646; };
 
@@ -93,18 +98,18 @@ function generateDailyMetrics(totalSpend: number, totalImpressions: number, tota
     const d = new Date(now);
     d.setDate(d.getDate() - (days - 1 - i));
 
-    // Progress 0→1 over the campaign
     const progress = i / (days - 1);
-    // ROAS multiplier: starts low (~0.4x of avg), ramps up to ~1.6x by end
     const roasMultiplier = 0.4 + progress * 1.2;
-    // Add small noise
     const noise = 0.85 + seededRandom() * 0.3;
 
-    const daySpend = Math.round(avgDailySpend * (0.9 + seededRandom() * 0.2)); // spend stays ~flat
+    const daySpend = Math.round(avgDailySpend * (0.9 + seededRandom() * 0.2));
     const dayPV = Math.round(avgDailyPV * roasMultiplier * noise);
     const dayImpr = Math.round(avgDailyImpr * (0.8 + progress * 0.4) * (0.9 + seededRandom() * 0.2));
     const dayClicks = Math.round(avgDailyClicks * (0.7 + progress * 0.6) * (0.9 + seededRandom() * 0.2));
     const dayConv = Math.round(avgDailyConv * roasMultiplier * noise);
+    const dayLPV = Math.round(avgDailyLPV * (0.7 + progress * 0.6) * (0.9 + seededRandom() * 0.2));
+    const dayATC = Math.round(avgDailyATC * roasMultiplier * (0.9 + seededRandom() * 0.2));
+    const dayIC = Math.round(avgDailyIC * roasMultiplier * (0.9 + seededRandom() * 0.2));
 
     const s = Math.max(1, daySpend);
     const pv = Math.max(0, dayPV);
@@ -125,6 +130,9 @@ function generateDailyMetrics(totalSpend: number, totalImpressions: number, tota
       cumulativeRoas: Math.round(cumPV / cumSpend * 100) / 100,
       ctr: dayImpr > 0 ? Math.round(dayClicks / dayImpr * 10000) / 100 : 0,
       cpm: dayImpr > 0 ? Math.round(s / dayImpr * 100000) / 100 : 0,
+      landingPageViews: Math.max(0, dayLPV),
+      addToCart: Math.max(0, dayATC),
+      initiateCheckout: Math.max(0, dayIC),
     });
   }
   return metrics;
@@ -305,6 +313,6 @@ export const campaigns: Campaign[] = rawCampaigns.map(c => ({
   ...c,
   assets: c.assets.map(a => ({
     ...a,
-    dailyMetrics: generateDailyMetrics(a.spend, a.impressions, a.clicks, a.conversions, a.purchaseValue),
+    dailyMetrics: generateDailyMetrics(a.spend, a.impressions, a.clicks, a.conversions, a.purchaseValue, a.landingPageViews, a.addToCart, a.initiateCheckout),
   })),
 }));

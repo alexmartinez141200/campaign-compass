@@ -387,10 +387,10 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </ChartCard>
       </div>
 
-      {/* Conversion Funnel Chart */}
+      {/* Conversion Funnel */}
       <SectionTitle>Conversion Funnel</SectionTitle>
       <div className="grid grid-cols-2 gap-3">
-        <ChartCard title="Funnel Drop-off">
+        <ChartCard title="Funnel Drop-off (Totals)">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={funnelData} layout="vertical" barSize={24}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
@@ -405,12 +405,52 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
-        <div className="grid grid-cols-2 gap-2.5">
-          <Stat icon={Eye} label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} />
-          <Stat icon={ShoppingCart} label="Add to Cart" value={asset.addToCart.toLocaleString()} sub={`${(asset.addToCart / asset.landingPageViews * 100).toFixed(1)}% of LPV`} />
-          <Stat icon={Crosshair} label="Initiate Checkout" value={asset.initiateCheckout.toLocaleString()} sub={`${(asset.initiateCheckout / asset.addToCart * 100).toFixed(1)}% of ATC`} />
-          <Stat icon={ShoppingCart} label="Purchases" value={asset.conversions.toLocaleString()} sub={`${(asset.conversions / asset.initiateCheckout * 100).toFixed(1)}% of IC`} />
+
+        <div className="rounded-lg border border-border/60 bg-surface p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Funnel Over Time</p>
+          <p className="text-[9px] text-muted-foreground mb-3">Daily LPV → ATC → Checkout → Purchase</p>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={filteredDaily}>
+                <defs>
+                  <linearGradient id="lpvGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="atcGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="icGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="purchGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+                <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+                <Tooltip {...chartTooltipStyle} />
+                <Legend iconSize={8} wrapperStyle={{ fontSize: '10px' }} />
+                <Area type="monotone" dataKey="landingPageViews" name="LPV" stroke="hsl(227, 71%, 55%)" fill="url(#lpvGrad)" strokeWidth={1.5} dot={false} />
+                <Area type="monotone" dataKey="addToCart" name="ATC" stroke="hsl(174, 100%, 33%)" fill="url(#atcGrad)" strokeWidth={1.5} dot={false} />
+                <Area type="monotone" dataKey="initiateCheckout" name="Checkout" stroke="hsl(45, 93%, 47%)" fill="url(#icGrad)" strokeWidth={1.5} dot={false} />
+                <Area type="monotone" dataKey="conversions" name="Purchase" stroke="hsl(142, 71%, 45%)" fill="url(#purchGrad)" strokeWidth={1.5} dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
+      </div>
+
+      {/* Funnel Stats */}
+      <div className="grid grid-cols-4 gap-2.5 mt-2.5">
+        <Stat icon={Eye} label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} />
+        <Stat icon={ShoppingCart} label="Add to Cart" value={asset.addToCart.toLocaleString()} sub={`${(asset.addToCart / asset.landingPageViews * 100).toFixed(1)}% of LPV`} />
+        <Stat icon={Crosshair} label="Initiate Checkout" value={asset.initiateCheckout.toLocaleString()} sub={`${(asset.initiateCheckout / asset.addToCart * 100).toFixed(1)}% of ATC`} />
+        <Stat icon={ShoppingCart} label="Purchases" value={asset.conversions.toLocaleString()} sub={`${(asset.conversions / asset.initiateCheckout * 100).toFixed(1)}% of IC`} />
       </div>
 
       {/* Delivery */}
