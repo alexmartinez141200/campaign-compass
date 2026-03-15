@@ -227,6 +227,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 312, purchaseValue: 18720, addToCart: 1020, initiateCheckout: 540, landingPageViews: 7100,
         roas: 3.6, ctr: 3.0, ctrAll: 4.0, cpc: 0.51, cpcAll: 0.40, cpm: 15.29, conversionRate: 3.1, costPerResult: 16.67,
         qualityRanking: "average", engagementRateRanking: "above_average", conversionRateRanking: "below_average",
+        profileVisits: 5200, follows: 340, paidLikes: 2200, paidShares: 410, videoViewRate: 85.6,
       },
       {
         id: "CRI-4410", name: "Static_Hero_Banner", type: "image", thumbnail: creative1, dimensions: "1200×628", channel: "google",
