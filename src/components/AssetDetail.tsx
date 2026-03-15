@@ -103,12 +103,90 @@ const chartTooltipStyle = {
   },
 };
 
+type DatePreset = "today" | "yesterday" | "7d" | "30d" | "custom";
+
 const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
+  const [datePreset, setDatePreset] = useState<DatePreset>("7d");
+  const [customRange, setCustomRange] = useState<DateRange | undefined>();
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
   const verdict = getVerdict(asset, campaignAssets);
   const insights = generateInsights(asset, campaignAssets);
   const rank = [...campaignAssets].sort((a, b) => b.roas - a.roas).findIndex(a => a.id === asset.id) + 1;
   const isVideo = asset.type === "video";
   const daily = asset.dailyMetrics;
+
+  // Filter daily metrics by date range
+  const filteredDaily = useMemo(() => {
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    let filtered: DailyMetric[];
+    switch (datePreset) {
+      case "today":
+        filtered = daily.filter(d => d.fullDate === todayStr);
+        break;
+      case "yesterday":
+        filtered = daily.filter(d => d.fullDate === yesterdayStr);
+        break;
+      case "7d": {
+        const start = new Date(now); start.setDate(now.getDate() - 6);
+        const startStr = start.toISOString().split('T')[0];
+        filtered = daily.filter(d => d.fullDate >= startStr && d.fullDate <= todayStr);
+        break;
+      }
+      case "30d":
+        filtered = daily;
+        break;
+      case "custom":
+        if (customRange?.from) {
+          const fromStr = customRange.from.toISOString().split('T')[0];
+          const toStr = customRange.to ? customRange.to.toISOString().split('T')[0] : fromStr;
+          filtered = daily.filter(d => d.fullDate >= fromStr && d.fullDate <= toStr);
+        } else {
+          filtered = daily;
+        }
+        break;
+      default:
+        filtered = daily;
+    }
+
+    // Recalculate cumulative ROAS for filtered range
+    let cumSpend = 0, cumPV = 0;
+    return filtered.map(d => {
+      cumSpend += d.spend;
+      cumPV += d.purchaseValue;
+      return {
+        ...d,
+        cumulativeRoas: cumSpend > 0 ? Math.round(cumPV / cumSpend * 100) / 100 : 0,
+      };
+    });
+  }, [daily, datePreset, customRange]);
+
+  // Summary stats for selected range
+  const rangeSummary = useMemo(() => {
+    const totalSpend = filteredDaily.reduce((s, d) => s + d.spend, 0);
+    const totalPV = filteredDaily.reduce((s, d) => s + d.purchaseValue, 0);
+    const totalConversions = filteredDaily.reduce((s, d) => s + d.conversions, 0);
+    return {
+      spend: totalSpend,
+      revenue: totalPV,
+      roas: totalSpend > 0 ? Math.round(totalPV / totalSpend * 100) / 100 : 0,
+      conversions: totalConversions,
+    };
+  }, [filteredDaily]);
+
+  const presetLabel: Record<DatePreset, string> = {
+    today: "Today",
+    yesterday: "Yesterday",
+    "7d": "Last 7 Days",
+    "30d": "Last 30 Days",
+    custom: customRange?.from
+      ? `${customRange.from.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}${customRange.to ? ` – ${customRange.to.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}`
+      : "Custom Range",
+  };
 
   // Funnel data for bar chart
   const funnelData = [
