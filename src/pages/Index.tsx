@@ -32,7 +32,7 @@ const Index = () => {
 
   const handleGetInsights = () => {
     const assets = filteredAssets.filter(a => selectedAssets.has(a.id));
-    navigate("/insights", { state: { assets } });
+    navigate("/insights", { state: { assets, campaignId: selectedCampaignId, campaignName: selectedCampaign?.name } });
   };
 
   const toggleAssetSelection = (id: string) => {
