@@ -251,7 +251,7 @@ const Index = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setCreativeFilterChannel("all")}
+                        onClick={() => { setCreativeFilterChannel("all"); setSelectedAssets(new Set()); }}
                         className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${creativeFilterChannel === "all" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
                       >
                         All
@@ -262,7 +262,7 @@ const Index = () => {
                         return (
                           <button
                             key={ch}
-                            onClick={() => setCreativeFilterChannel(ch)}
+                            onClick={() => { setCreativeFilterChannel(ch); setSelectedAssets(new Set()); }}
                             className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${creativeFilterChannel === ch ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
                           >
                             {cfg.label}
@@ -282,9 +282,29 @@ const Index = () => {
                     </div>
                   </div>
 
-                  {/* Creatives list — same style as campaign detail */}
+                  {/* Creative Diagnostics button */}
+                  {creativeFilterChannel !== "all" && (
+                    <div className="flex justify-end mb-4">
+                      <button
+                        disabled={selectedAssets.size < 2}
+                        onClick={() => {
+                          const assets = filteredCreatives.filter(r => selectedAssets.has(r.asset.id)).map(r => r.asset);
+                          navigate("/insights", { state: { assets } });
+                        }}
+                        className={`px-5 py-2 rounded-lg text-[13px] font-medium transition-colors border ${
+                          selectedAssets.size >= 2
+                            ? "border-primary text-primary hover:bg-primary/5"
+                            : "border-border text-muted-foreground cursor-not-allowed"
+                        }`}
+                      >
+                        Creative Diagnostics
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Creatives list */}
                   <div className="space-y-0.5">
-                    <DiagnosticHeader sort={sort} onSortChange={setSort} showCheckbox={false} />
+                    <DiagnosticHeader sort={sort} onSortChange={setSort} showCheckbox={creativeFilterChannel !== "all"} />
                     {filteredCreatives.map(({ asset, campaignName, campaignId }, i) => (
                       <DiagnosticCard
                         key={asset.id}
@@ -292,10 +312,10 @@ const Index = () => {
                         index={i}
                         rank={i}
                         maxRoas={Math.max(...filteredCreatives.map(r => r.asset.roas))}
-                        selected={false}
-                        showCheckbox={false}
+                        selected={selectedAssets.has(asset.id)}
+                        showCheckbox={creativeFilterChannel !== "all"}
                         campaignName={campaignName}
-                        onSelectToggle={() => {}}
+                        onSelectToggle={toggleAssetSelection}
                         onClick={() => { setSelectedCampaignId(campaignId); setViewingAssetId(asset.id); setFromCreativesTab(true); }}
                       />
                     ))}
