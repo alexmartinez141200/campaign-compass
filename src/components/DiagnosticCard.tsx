@@ -4,26 +4,11 @@ import type { CreativeAsset } from "@/data/mockData";
 import { Checkbox } from "@/components/ui/checkbox";
 import ChannelIcon from "./ChannelIcon";
 
-const rankColors: Record<number, string> = {
-  0: "text-yellow-500",
-  1: "text-muted-foreground/60",
-  2: "text-amber-600",
+const rankStyles: Record<number, string> = {
+  0: "bg-yellow-400/15 text-yellow-600 ring-1 ring-yellow-400/20",
+  1: "bg-muted text-muted-foreground",
+  2: "bg-amber-400/10 text-amber-600",
 };
-
-interface MetricProps {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}
-
-const Metric = ({ label, value, highlight }: MetricProps) => (
-  <div className="flex flex-col items-center min-w-[64px]">
-    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium mb-1">{label}</span>
-    <span className={`text-[13px] font-mono font-semibold ${highlight ? "text-foreground" : "text-foreground/80"}`}>
-      {value}
-    </span>
-  </div>
-);
 
 interface DiagnosticCardProps {
   asset: CreativeAsset;
@@ -38,103 +23,113 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
   const isTop = rank === 0;
   const roasPercent = Math.min((asset.roas / maxRoas) * 100, 100);
 
-  // Performance color based on ROAS relative to max
   const roasColor =
     roasPercent >= 75 ? "text-emerald-600" :
     roasPercent >= 40 ? "text-foreground" :
     "text-destructive";
 
+  const barColor =
+    roasPercent >= 75 ? "bg-emerald-500" :
+    roasPercent >= 40 ? "bg-primary" :
+    "bg-destructive";
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, delay: index * 0.03, ease: [0.25, 0.1, 0.25, 1] }}
-      className={`group grid grid-cols-[auto_auto_56px_1fr_auto_auto_auto] items-center gap-x-3 px-4 py-3.5 rounded-xl transition-all duration-150 cursor-pointer border ${
+      transition={{ duration: 0.2, delay: index * 0.025 }}
+      className={`group flex items-center h-[72px] px-4 rounded-lg cursor-pointer transition-all duration-100 border ${
         selected
-          ? "border-primary/30 bg-primary/[0.03] shadow-[0_0_0_1px_hsl(var(--primary)/0.1)]"
+          ? "border-primary/25 bg-primary/[0.02]"
           : isTop
-            ? "border-yellow-200/60 bg-gradient-to-r from-yellow-50/40 to-transparent"
-            : "border-border/60 bg-surface hover:border-border hover:shadow-card-hover"
+            ? "border-yellow-300/30 bg-yellow-50/30"
+            : "border-transparent bg-surface hover:bg-muted/30"
       }`}
     >
-      {/* Col 1: Rank + Checkbox */}
-      <div className="flex items-center gap-2">
-        <span className={`w-5 text-center text-[13px] font-semibold font-mono tabular-nums ${rankColors[rank] || "text-muted-foreground/30"}`}>
-          {rank + 1}
-        </span>
+      {/* Rank */}
+      <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold font-mono flex-shrink-0 ${
+        rankStyles[rank] || "text-muted-foreground/40"
+      }`}>
+        {rank + 1}
+      </div>
+
+      {/* Checkbox */}
+      <div className="ml-2.5 flex-shrink-0">
         <Checkbox
           checked={selected}
           onCheckedChange={() => onSelectToggle?.(asset.id)}
-          className="flex-shrink-0 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
         />
       </div>
 
-      {/* Col 2: Thumbnail */}
-      <div className="w-14 h-14 bg-muted rounded-lg overflow-hidden flex-shrink-0 ring-1 ring-border/40">
+      {/* Thumbnail */}
+      <div className="ml-3 w-11 h-11 rounded-md overflow-hidden flex-shrink-0 bg-muted">
         <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
       </div>
 
-      {/* Col 3: Channel badge */}
-      <div className="flex justify-center">
+      {/* Name block */}
+      <div className="ml-3 min-w-[130px] max-w-[180px] flex-shrink-0">
+        <p className="text-[13px] font-medium text-foreground truncate leading-tight">{asset.name}</p>
+        <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate">{asset.id}</p>
+      </div>
+
+      {/* Channel */}
+      <div className="ml-3 flex-shrink-0">
         <ChannelIcon channel={asset.channel} size="sm" />
       </div>
 
-      {/* Col 4: Name + ID */}
-      <div className="min-w-0 pr-4">
-        <h3 className="text-[13px] font-semibold text-foreground truncate leading-tight">{asset.name}</h3>
-        <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate">
-          {asset.id} · {asset.dimensions}
-        </p>
+      {/* Spacer */}
+      <div className="flex-1" />
+
+      {/* Spend (input) */}
+      <div className="mr-6 text-right min-w-[70px] flex-shrink-0">
+        <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium leading-none mb-1">Spend</p>
+        <p className="text-[13px] font-mono text-muted-foreground font-medium">${asset.spend.toLocaleString()}</p>
       </div>
 
-      {/* Col 5: Spend (INPUT metric) — visually distinct */}
-      <div className="flex flex-col items-center px-3 py-2 rounded-lg bg-muted/60 border border-dashed border-border min-w-[72px]">
-        <span className="text-[8px] uppercase tracking-widest text-muted-foreground/70 font-medium mb-0.5">Spend</span>
-        <span className="text-[14px] font-mono font-bold text-foreground/70">
-          ${asset.spend.toLocaleString()}
-        </span>
-      </div>
+      {/* Divider */}
+      <div className="w-px h-9 bg-border/60 mr-5 flex-shrink-0" />
 
-      {/* Arrow separator: input → output */}
-      <div className="flex items-center px-1">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-muted-foreground/30">
-          <path d="M3 8h10M10 5l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-
-      {/* Col 6: Output metrics */}
-      <div className="flex items-center gap-px bg-secondary/50 rounded-lg p-1.5">
-        {/* ROAS - hero metric */}
-        <div className="flex flex-col items-center min-w-[68px] px-2">
-          <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium mb-0.5">ROAS</span>
-          <span className={`text-lg font-mono font-bold leading-tight ${roasColor}`}>
-            {asset.roas}x
-          </span>
-          <div className="w-full h-[3px] bg-border/60 rounded-full overflow-hidden mt-1">
-            <motion.div
-              className={`h-full rounded-full ${
-                roasPercent >= 75 ? "bg-emerald-500" : roasPercent >= 40 ? "bg-primary" : "bg-destructive"
-              }`}
-              initial={{ width: 0 }}
-              animate={{ width: `${roasPercent}%` }}
-              transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-            />
-          </div>
+      {/* ROAS (hero) */}
+      <div className="min-w-[60px] mr-5 flex-shrink-0">
+        <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium leading-none mb-1">ROAS</p>
+        <p className={`text-[15px] font-mono font-bold leading-tight ${roasColor}`}>{asset.roas}x</p>
+        <div className="w-full h-[2px] bg-border/50 rounded-full overflow-hidden mt-1">
+          <motion.div
+            className={`h-full rounded-full ${barColor}`}
+            initial={{ width: 0 }}
+            animate={{ width: `${roasPercent}%` }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          />
         </div>
-
-        <div className="w-px h-8 bg-border/40 mx-1" />
-
-        <Metric label="CPM" value={`$${asset.cpm.toFixed(2)}`} />
-        <div className="w-px h-8 bg-border/40 mx-0.5" />
-        <Metric label="CTR" value={`${asset.ctr}%`} />
-        <div className="w-px h-8 bg-border/40 mx-0.5" />
-        <Metric label="CPC" value={`$${asset.cpc.toFixed(2)}`} />
-        <div className="w-px h-8 bg-border/40 mx-0.5" />
-        <Metric label="Conv." value={`${asset.conversionRate}%`} />
       </div>
 
-      {/* Col 6: Chevron */}
-      <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors" />
+      {/* CPM */}
+      <div className="min-w-[56px] mr-4 flex-shrink-0 text-center">
+        <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium leading-none mb-1">CPM</p>
+        <p className="text-[13px] font-mono font-medium text-foreground">${asset.cpm.toFixed(2)}</p>
+      </div>
+
+      {/* CTR */}
+      <div className="min-w-[40px] mr-4 flex-shrink-0 text-center">
+        <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium leading-none mb-1">CTR</p>
+        <p className="text-[13px] font-mono font-medium text-foreground">{asset.ctr}%</p>
+      </div>
+
+      {/* CPC */}
+      <div className="min-w-[48px] mr-4 flex-shrink-0 text-center">
+        <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium leading-none mb-1">CPC</p>
+        <p className="text-[13px] font-mono font-medium text-foreground">${asset.cpc.toFixed(2)}</p>
+      </div>
+
+      {/* Conv Rate */}
+      <div className="min-w-[44px] flex-shrink-0 text-center">
+        <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium leading-none mb-1">Conv.</p>
+        <p className="text-[13px] font-mono font-medium text-foreground">{asset.conversionRate}%</p>
+      </div>
+
+      {/* Chevron */}
+      <ChevronRight className="w-3.5 h-3.5 ml-4 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors flex-shrink-0" />
     </motion.div>
   );
 };
