@@ -19,6 +19,8 @@ export interface CreativeAsset {
   roas: number;
   ctr: number;
   cpc: number;
+  cpm: number;
+  conversionRate: number;
 }
 
 export interface Campaign {
@@ -53,7 +55,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative1,
         dimensions: "1080×1920",
         channel: "tiktok",
-        spend: 6800, impressions: 520000, clicks: 15600, conversions: 580, roas: 4.8, ctr: 3.0, cpc: 0.44,
+        spend: 6800, impressions: 520000, clicks: 15600, conversions: 580, roas: 4.8, ctr: 3.0, cpc: 0.44, cpm: 13.08, conversionRate: 3.7,
       },
       {
         id: "CRI-7734",
@@ -62,7 +64,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative2,
         dimensions: "1200×628",
         channel: "meta",
-        spend: 7200, impressions: 182000, clicks: 4550, conversions: 295, roas: 3.4, ctr: 2.5, cpc: 1.58,
+        spend: 7200, impressions: 182000, clicks: 4550, conversions: 295, roas: 3.4, ctr: 2.5, cpc: 1.58, cpm: 39.56, conversionRate: 6.5,
       },
       {
         id: "CRC-9901",
@@ -71,7 +73,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative3,
         dimensions: "1080×1080",
         channel: "meta",
-        spend: 6200, impressions: 310000, clicks: 9300, conversions: 620, roas: 6.2, ctr: 3.0, cpc: 0.67,
+        spend: 6200, impressions: 310000, clicks: 9300, conversions: 620, roas: 6.2, ctr: 3.0, cpc: 0.67, cpm: 20.00, conversionRate: 6.7,
       },
       {
         id: "CRV-5523",
@@ -80,7 +82,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative4,
         dimensions: "1080×1920",
         channel: "tiktok",
-        spend: 5200, impressions: 340000, clicks: 10200, conversions: 312, roas: 3.6, ctr: 3.0, cpc: 0.51,
+        spend: 5200, impressions: 340000, clicks: 10200, conversions: 312, roas: 3.6, ctr: 3.0, cpc: 0.51, cpm: 15.29, conversionRate: 3.1,
       },
       {
         id: "CRI-4410",
@@ -89,7 +91,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative1,
         dimensions: "1200×628",
         channel: "google",
-        spend: 3402, impressions: 89000, clicks: 2670, conversions: 98, roas: 1.2, ctr: 3.0, cpc: 1.27,
+        spend: 3402, impressions: 89000, clicks: 2670, conversions: 98, roas: 1.2, ctr: 3.0, cpc: 1.27, cpm: 38.22, conversionRate: 3.7,
       },
       {
         id: "CRV-6612",
@@ -98,7 +100,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative4,
         dimensions: "1080×1920",
         channel: "google",
-        spend: 4200, impressions: 112000, clicks: 2240, conversions: 134, roas: 2.4, ctr: 2.0, cpc: 1.88,
+        spend: 4200, impressions: 112000, clicks: 2240, conversions: 134, roas: 2.4, ctr: 2.0, cpc: 1.88, cpm: 37.50, conversionRate: 6.0,
       },
     ],
   },
@@ -120,7 +122,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative2,
         dimensions: "1200×628",
         channel: "meta",
-        spend: 8400, impressions: 195000, clicks: 5850, conversions: 340, roas: 3.8, ctr: 3.0, cpc: 1.44,
+        spend: 8400, impressions: 195000, clicks: 5850, conversions: 340, roas: 3.8, ctr: 3.0, cpc: 1.44, cpm: 43.08, conversionRate: 5.8,
       },
       {
         id: "CRV-4412",
@@ -129,7 +131,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative4,
         dimensions: "1080×1920",
         channel: "tiktok",
-        spend: 6800, impressions: 410000, clicks: 12300, conversions: 492, roas: 5.2, ctr: 3.0, cpc: 0.55,
+        spend: 6800, impressions: 410000, clicks: 12300, conversions: 492, roas: 5.2, ctr: 3.0, cpc: 0.55, cpm: 16.59, conversionRate: 4.0,
       },
       {
         id: "CRI-3311",
@@ -138,7 +140,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative3,
         dimensions: "1200×628",
         channel: "google",
-        spend: 2600, impressions: 98000, clicks: 2940, conversions: 142, roas: 3.9, ctr: 3.0, cpc: 0.88,
+        spend: 2600, impressions: 98000, clicks: 2940, conversions: 142, roas: 3.9, ctr: 3.0, cpc: 0.88, cpm: 26.53, conversionRate: 4.8,
       },
     ],
   },
@@ -160,7 +162,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative3,
         dimensions: "1080×1080",
         channel: "meta",
-        spend: 12400, impressions: 520000, clicks: 15600, conversions: 1120, roas: 7.4, ctr: 3.0, cpc: 0.79,
+        spend: 12400, impressions: 520000, clicks: 15600, conversions: 1120, roas: 7.4, ctr: 3.0, cpc: 0.79, cpm: 23.85, conversionRate: 7.2,
       },
       {
         id: "CRV-7788",
@@ -169,7 +171,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative1,
         dimensions: "1080×1920",
         channel: "tiktok",
-        spend: 8100, impressions: 490000, clicks: 14700, conversions: 588, roas: 4.8, ctr: 3.0, cpc: 0.55,
+        spend: 8100, impressions: 490000, clicks: 14700, conversions: 588, roas: 4.8, ctr: 3.0, cpc: 0.55, cpm: 16.53, conversionRate: 4.0,
       },
       {
         id: "CRI-7789",
@@ -178,7 +180,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative2,
         dimensions: "1200×628",
         channel: "google",
-        spend: 4300, impressions: 165000, clicks: 4950, conversions: 312, roas: 5.8, ctr: 3.0, cpc: 0.87,
+        spend: 4300, impressions: 165000, clicks: 4950, conversions: 312, roas: 5.8, ctr: 3.0, cpc: 0.87, cpm: 26.06, conversionRate: 6.3,
       },
     ],
   },
@@ -200,7 +202,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative2,
         dimensions: "1200×628",
         channel: "meta",
-        spend: 3200, impressions: 88000, clicks: 2640, conversions: 132, roas: 3.1, ctr: 3.0, cpc: 1.21,
+        spend: 3200, impressions: 88000, clicks: 2640, conversions: 132, roas: 3.1, ctr: 3.0, cpc: 1.21, cpm: 36.36, conversionRate: 5.0,
       },
       {
         id: "CRV-1134",
@@ -209,7 +211,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative4,
         dimensions: "1080×1920",
         channel: "tiktok",
-        spend: 4000, impressions: 280000, clicks: 8400, conversions: 252, roas: 3.8, ctr: 3.0, cpc: 0.48,
+        spend: 4000, impressions: 280000, clicks: 8400, conversions: 252, roas: 3.8, ctr: 3.0, cpc: 0.48, cpm: 14.29, conversionRate: 3.0,
       },
     ],
   },
