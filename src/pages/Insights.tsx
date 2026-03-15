@@ -464,113 +464,124 @@ const Insights = () => {
           );
         })}
 
-        {/* ═══ 2. Attribute × Metric Correlation ═══ */}
+        {/* ═══ 2. Attribute × Metric Correlation (Collapsible) ═══ */}
         <div ref={el => { sectionRefs.current["correlation"] = el; }} className="scroll-mt-4">
-          <div className="flex items-center gap-2 mb-3">
+          <button
+            onClick={() => toggleSection("correlation")}
+            className="flex items-center gap-2 mb-3 w-full text-left group hover:opacity-80 transition-opacity"
+          >
             <Layers className="w-4 h-4 text-primary" />
             <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Profile × Metric Correlation</h2>
-            <span className="text-[10px] text-muted-foreground">— how each creative attribute affects performance</span>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-4">
-            {correlationCards.map(card => (
-              <div key={card.attr.key} className="rounded-lg border border-border overflow-hidden">
-                <div className="bg-muted/20 px-3 py-2 border-b border-border/40">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">{card.attr.label}</span>
-                    <span className="text-[9px] text-muted-foreground">{card.groups.length} values</span>
+            {expandedSections.has("correlation") ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />}
+            {!expandedSections.has("correlation") && <span className="text-[9px] text-muted-foreground ml-auto">Click to expand</span>}
+          </button>
+          {expandedSections.has("correlation") && (
+            <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-1 duration-200">
+              {correlationCards.map(card => (
+                <div key={card.attr.key} className="rounded-lg border border-border overflow-hidden">
+                  <div className="bg-muted/20 px-3 py-2 border-b border-border/40">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">{card.attr.label}</span>
+                      <span className="text-[9px] text-muted-foreground">{card.groups.length} values</span>
+                    </div>
+                    {card.takeaway && (
+                      <p className="text-[10px] text-muted-foreground mt-0.5 italic">{card.takeaway}</p>
+                    )}
                   </div>
-                  {card.takeaway && (
-                    <p className="text-[10px] text-muted-foreground mt-0.5 italic">{card.takeaway}</p>
-                  )}
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[800px]">
-                    <thead>
-                      <tr className="border-b border-border/30">
-                        <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-3 py-1 text-left sticky left-0 bg-background z-10 min-w-[140px]">Asset</th>
-                        <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-left min-w-[70px]">{card.attr.label}</th>
-                        {metrics.map(m => (
-                          <th key={m.key} className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-1.5 py-1 text-right whitespace-nowrap">{m.label}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {card.groups.flatMap(group =>
-                        group.assets.map(row => (
-                          <tr key={row.asset.id} className="border-b border-border/15 last:border-0 hover:bg-muted/10 transition-colors">
-                            <td className="px-3 py-1.5 sticky left-0 bg-background z-10">
-                              <div className="flex items-center gap-1.5">
-                                <img src={row.asset.thumbnail} alt="" className="w-5 h-5 rounded object-cover flex-shrink-0" />
-                                <span className="text-[10px] font-semibold text-foreground truncate max-w-[100px]">{row.asset.name}</span>
-                              </div>
-                            </td>
-                            <td className="px-2 py-1.5 text-[10px] font-mono text-muted-foreground">{group.value}</td>
-                            {row.metrics.map((mc, mi) => (
-                              <td key={metrics[mi].key} className={`px-1.5 py-1.5 text-right ${cellStyles[mc.signal]}`}>
-                                <div className="flex flex-col items-end">
-                                  <span className="text-[10px] font-mono font-semibold whitespace-nowrap">{fmt(mc.value, metrics[mi].format)}</span>
-                                  {mc.signal !== "neutral" && (
-                                    <span className="text-[7px] font-mono opacity-70">
-                                      {mc.pctVsAvg > 0 ? "▲" : "▼"}{Math.abs(mc.pctVsAvg)}%
-                                    </span>
-                                  )}
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[800px]">
+                      <thead>
+                        <tr className="border-b border-border/30">
+                          <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-3 py-1 text-left sticky left-0 bg-background z-10 min-w-[140px]">Asset</th>
+                          <th className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-2 py-1 text-left min-w-[70px]">{card.attr.label}</th>
+                          {metrics.map(m => (
+                            <th key={m.key} className="text-[8px] uppercase tracking-wider text-muted-foreground/50 font-semibold px-1.5 py-1 text-right whitespace-nowrap">{m.label}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {card.groups.flatMap(group =>
+                          group.assets.map(row => (
+                            <tr key={row.asset.id} className="border-b border-border/15 last:border-0 hover:bg-muted/10 transition-colors">
+                              <td className="px-3 py-1.5 sticky left-0 bg-background z-10">
+                                <div className="flex items-center gap-1.5">
+                                  <img src={row.asset.thumbnail} alt="" className="w-5 h-5 rounded object-cover flex-shrink-0" />
+                                  <span className="text-[10px] font-semibold text-foreground truncate max-w-[100px]">{row.asset.name}</span>
                                 </div>
                               </td>
-                            ))}
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+                              <td className="px-2 py-1.5 text-[10px] font-mono text-muted-foreground">{group.value}</td>
+                              {row.metrics.map((mc, mi) => (
+                                <td key={metrics[mi].key} className={`px-1.5 py-1.5 text-right ${cellStyles[mc.signal]}`}>
+                                  <div className="flex flex-col items-end">
+                                    <span className="text-[10px] font-mono font-semibold whitespace-nowrap">{fmt(mc.value, metrics[mi].format)}</span>
+                                    {mc.signal !== "neutral" && (
+                                      <span className="text-[7px] font-mono opacity-70">
+                                        {mc.pctVsAvg > 0 ? "▲" : "▼"}{Math.abs(mc.pctVsAvg)}%
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                              ))}
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* ═══ 3. Per-Asset Profile Comparison ═══ */}
+        {/* ═══ 3. Per-Asset Profile Comparison (Collapsible) ═══ */}
         <div ref={el => { sectionRefs.current["profile"] = el; }} className="scroll-mt-4">
-          <div className="flex items-center gap-2 mb-3">
+          <button
+            onClick={() => toggleSection("profile")}
+            className="flex items-center gap-2 mb-3 w-full text-left group hover:opacity-80 transition-opacity"
+          >
             <BarChart3 className="w-4 h-4 text-primary" />
             <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Asset Profile Grid</h2>
-            <span className="text-[10px] text-muted-foreground">— sorted by ROAS · differences marked <span className="text-primary">●</span></span>
-          </div>
-          <div className="rounded-lg border border-border overflow-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border bg-muted/20">
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-4 py-2 text-left sticky left-0 bg-muted/20 w-[120px]">Attribute</th>
-                  {ranked.map(a => (
-                    <th key={a.id} className="text-[10px] font-semibold text-foreground px-3 py-2 text-center min-w-[80px]">
-                      <div className="flex flex-col items-center gap-0.5">
-                        <span className="truncate max-w-[80px] block">{a.name}</span>
-                        <span className={`text-[10px] font-mono ${a.roas >= 5 ? "text-emerald-600" : a.roas >= 3 ? "text-foreground" : "text-destructive"}`}>{a.roas}x</span>
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {PROFILE_ATTRS.map(attr => {
-                  const vals = ranked.map(a => attr.get(a));
-                  const diff = !vals.every(v => v === vals[0]);
-                  return (
-                    <tr key={attr.key} className={`border-b border-border/20 last:border-0 ${diff ? "bg-primary/[0.02]" : ""}`}>
-                      <td className={`px-4 py-1.5 text-[10px] font-semibold sticky left-0 ${diff ? "text-foreground bg-primary/[0.02]" : "text-muted-foreground bg-background"}`}>
-                        {attr.label}{diff && <span className="ml-1 text-primary text-[8px]">●</span>}
-                      </td>
-                      {ranked.map(a => (
-                        <td key={a.id} className={`px-3 py-1.5 text-center text-[11px] font-mono ${diff ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
-                          {attr.get(a)}
+            {expandedSections.has("profile") ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />}
+            {!expandedSections.has("profile") && <span className="text-[9px] text-muted-foreground ml-auto">Click to expand</span>}
+          </button>
+          {expandedSections.has("profile") && (
+            <div className="rounded-lg border border-border overflow-auto animate-in fade-in slide-in-from-top-1 duration-200">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border bg-muted/20">
+                    <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-4 py-2 text-left sticky left-0 bg-muted/20 w-[120px]">Attribute</th>
+                    {ranked.map(a => (
+                      <th key={a.id} className="text-[10px] font-semibold text-foreground px-3 py-2 text-center min-w-[80px]">
+                        <div className="flex flex-col items-center gap-0.5">
+                          <span className="truncate max-w-[80px] block">{a.name}</span>
+                          <span className={`text-[10px] font-mono ${a.roas >= 5 ? "text-emerald-600" : a.roas >= 3 ? "text-foreground" : "text-destructive"}`}>{a.roas}x</span>
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {PROFILE_ATTRS.map(attr => {
+                    const vals = ranked.map(a => attr.get(a));
+                    const diff = !vals.every(v => v === vals[0]);
+                    return (
+                      <tr key={attr.key} className={`border-b border-border/20 last:border-0 ${diff ? "bg-primary/[0.02]" : ""}`}>
+                        <td className={`px-4 py-1.5 text-[10px] font-semibold sticky left-0 ${diff ? "text-foreground bg-primary/[0.02]" : "text-muted-foreground bg-background"}`}>
+                          {attr.label}{diff && <span className="ml-1 text-primary text-[8px]">●</span>}
                         </td>
-                      ))}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        {ranked.map(a => (
+                          <td key={a.id} className={`px-3 py-1.5 text-center text-[11px] font-mono ${diff ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
+                            {attr.get(a)}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>
