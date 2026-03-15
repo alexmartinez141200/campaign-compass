@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import type { Campaign, Channel } from "@/data/mockData";
 import { channelConfig } from "./ChannelIcon";
-import ChannelIcon from "./ChannelIcon";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 interface CampaignHeaderProps {
@@ -36,8 +35,6 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
   const totalSpend = campaign.totalSpend;
   const spendPct = ((totalSpend / campaign.totalBudget) * 100);
   const remaining = campaign.totalBudget - totalSpend;
-
-  // Find best performer
   const bestRoas = channelBreakdown.length > 0 ? Math.max(...channelBreakdown.map(c => c.roas)) : 0;
 
   return (
@@ -92,110 +89,110 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
         </div>
       </div>
 
-      {/* Spend allocation bar — stacked horizontal */}
+      {/* Pie chart + performance table */}
       {channelBreakdown.length > 1 && (
-        <>
-          <div className="mb-2 flex items-center gap-2">
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-bold">Spend Allocation</p>
-            <div className="flex-1 h-px bg-border/40" />
-          </div>
-          <div className="flex h-2.5 rounded-full overflow-hidden mb-5 gap-0.5">
-            {channelBreakdown.map((row) => {
-              const pct = totalSpend > 0 ? (row.spend / totalSpend) * 100 : 0;
-              return (
-                <div
-                  key={row.channel}
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${pct}%`,
-                    backgroundColor: channelConfig[row.channel].color,
-                    opacity: 0.7,
+        <div className="flex gap-6 items-start">
+          {/* Pie Chart */}
+          <div className="flex-shrink-0 w-[200px]">
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-bold mb-3">Spend Allocation</p>
+            <ResponsiveContainer width={200} height={200}>
+              <PieChart>
+                <Pie
+                  data={channelBreakdown.map((row) => ({
+                    name: channelConfig[row.channel].label,
+                    value: row.spend,
+                  }))}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={52}
+                  outerRadius={85}
+                  paddingAngle={3}
+                  dataKey="value"
+                  strokeWidth={0}
+                >
+                  {channelBreakdown.map((row) => (
+                    <Cell key={row.channel} fill={channelConfig[row.channel].color} opacity={0.8} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: number) => [`$${value.toLocaleString()}`, "Spend"]}
+                  contentStyle={{
+                    background: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontFamily: "monospace",
                   }}
                 />
-              );
-            })}
-          </div>
-        </>
-      )}
-
-      {/* Platform performance cards */}
-      {channelBreakdown.length > 1 && (
-        <div className={`grid gap-3 ${channelBreakdown.length === 3 ? "grid-cols-3" : channelBreakdown.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
-          {channelBreakdown.map((row) => {
-            const pctOfTotal = totalSpend > 0 ? (row.spend / totalSpend) * 100 : 0;
-            const isBest = row.roas === bestRoas && channelBreakdown.length > 1;
-            const roasColor = row.roas >= 4 ? "text-emerald-600" : row.roas >= 2 ? "text-foreground" : "text-destructive";
-            const channelColor = channelConfig[row.channel].color;
-
-            return (
-              <div
-                key={row.channel}
-                className="relative rounded-lg border border-border/60 bg-card p-4 overflow-hidden"
-              >
-                {/* Top accent line */}
-                <div
-                  className="absolute top-0 left-0 right-0 h-[3px]"
-                  style={{ backgroundColor: channelColor, opacity: 0.6 }}
-                />
-
-                {/* Header */}
-                <div className="flex items-center justify-between mb-4 pt-1">
-                  <div className="flex items-center gap-2.5">
-                    <ChannelIcon channel={row.channel} size="sm" />
-                    <span className="text-[11px] text-muted-foreground font-mono">{row.assets} assets</span>
-                  </div>
-                  {isBest && (
-                    <span className="text-[9px] uppercase tracking-wider font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
-                      Best ROAS
-                    </span>
-                  )}
-                </div>
-
-                {/* Spend & allocation */}
-                <div className="mb-4">
-                  <div className="flex items-baseline justify-between mb-1.5">
-                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Spend</p>
-                    <span className="text-[11px] font-mono text-muted-foreground">{pctOfTotal.toFixed(0)}% of total</span>
-                  </div>
-                  <p className="text-lg font-mono font-bold text-foreground leading-none mb-2">${row.spend.toLocaleString()}</p>
-                  <div className="w-full h-1.5 bg-muted/50 rounded-full overflow-hidden">
+              </PieChart>
+            </ResponsiveContainer>
+            {/* Legend */}
+            <div className="flex flex-col gap-1.5 mt-2">
+              {channelBreakdown.map((row) => {
+                const pct = totalSpend > 0 ? (row.spend / totalSpend) * 100 : 0;
+                return (
+                  <div key={row.channel} className="flex items-center gap-2">
                     <div
-                      className="h-full rounded-full transition-all"
-                      style={{ width: `${pctOfTotal}%`, backgroundColor: channelColor, opacity: 0.5 }}
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: channelConfig[row.channel].color, opacity: 0.8 }}
                     />
+                    <span className="text-[11px] font-medium text-muted-foreground">{channelConfig[row.channel].label}</span>
+                    <span className="text-[11px] font-mono text-foreground ml-auto">{pct.toFixed(0)}%</span>
                   </div>
-                </div>
+                );
+              })}
+            </div>
+          </div>
 
-                {/* Key metrics grid */}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                  <div>
-                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">ROAS</p>
-                    <p className={`text-[15px] font-mono font-bold leading-none ${roasColor}`}>{row.roas.toFixed(1)}x</p>
-                  </div>
-                  <div>
-                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Conv.</p>
-                    <p className="text-[15px] font-mono font-bold text-foreground leading-none">{row.conversions.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">CTR</p>
-                    <p className="text-[13px] font-mono font-medium text-foreground leading-none">{row.ctr.toFixed(1)}%</p>
-                  </div>
-                  <div>
-                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">CPA</p>
-                    <p className="text-[13px] font-mono font-medium text-foreground leading-none">${row.cpa.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">CPM</p>
-                    <p className="text-[13px] font-mono font-medium text-foreground leading-none">${row.cpm.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Revenue</p>
-                    <p className="text-[13px] font-mono font-medium text-foreground leading-none">${row.revenue.toLocaleString()}</p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {/* Performance table */}
+          <div className="flex-1 overflow-hidden">
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-bold mb-3">Platform Performance</p>
+            <div className="rounded-lg border border-border/60 overflow-hidden">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-muted/30">
+                    {["Platform", "Spend", "ROAS", "Conv.", "CTR", "CPA", "CPM", "Revenue"].map((h, i) => (
+                      <th key={h} className={`text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2.5 ${i > 0 ? "text-right" : ""}`}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {channelBreakdown.map((row) => {
+                    const isBest = row.roas === bestRoas;
+                    const roasColor = row.roas >= 4 ? "text-emerald-600" : row.roas >= 2 ? "text-foreground" : "text-destructive";
+                    return (
+                      <tr key={row.channel} className="border-t border-border/40 hover:bg-muted/20 transition-colors">
+                        <td className="px-3 py-3">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-2 h-2 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: channelConfig[row.channel].color, opacity: 0.8 }}
+                            />
+                            <span className="text-xs font-semibold text-foreground">{channelConfig[row.channel].label}</span>
+                            <span className="text-[10px] text-muted-foreground font-mono">{row.assets}a</span>
+                            {isBest && (
+                              <span className="text-[8px] uppercase tracking-wider font-bold text-emerald-600 bg-emerald-500/10 px-1 py-0.5 rounded">
+                                Best
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-3 py-3 text-right text-xs font-mono font-medium text-foreground">${row.spend.toLocaleString()}</td>
+                        <td className={`px-3 py-3 text-right text-xs font-mono font-bold ${roasColor}`}>{row.roas.toFixed(1)}x</td>
+                        <td className="px-3 py-3 text-right text-xs font-mono font-medium text-foreground">{row.conversions.toLocaleString()}</td>
+                        <td className="px-3 py-3 text-right text-xs font-mono font-medium text-foreground">{row.ctr.toFixed(1)}%</td>
+                        <td className="px-3 py-3 text-right text-xs font-mono font-medium text-foreground">${row.cpa.toFixed(2)}</td>
+                        <td className="px-3 py-3 text-right text-xs font-mono font-medium text-foreground">${row.cpm.toFixed(2)}</td>
+                        <td className="px-3 py-3 text-right text-xs font-mono font-medium text-foreground">${row.revenue.toLocaleString()}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
     </div>
