@@ -138,10 +138,7 @@ const Index = () => {
                 )}
               </>
             ) : (
-              <>
-                <FolderOpen className="w-6 h-6 text-muted-foreground/40" strokeWidth={1.5} />
-                <h1 className="text-lg font-semibold text-foreground">Campaigns</h1>
-              </>
+              <span className="text-[13px] font-medium text-foreground">Campaigns</span>
             )}
           </div>
 
