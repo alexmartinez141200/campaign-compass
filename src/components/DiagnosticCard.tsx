@@ -41,23 +41,6 @@ export const DiagnosticHeader = ({ sort, onSortChange }: { sort?: SortOption; on
     <div className="min-w-[48px] mr-4 flex-shrink-0 text-center">CPC</div>
     <div className="min-w-[44px] flex-shrink-0 text-center">Conv.</div>
     <div className="w-3.5 ml-4 flex-shrink-0" />
-    {sort && onSortChange && (
-      <div className="flex items-center gap-1.5 ml-4 flex-shrink-0">
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold">Sort</span>
-        {sorts.map((s) => (
-          <button
-            key={s.value}
-            onClick={() => onSortChange(s.value)}
-            className={`px-2 py-0.5 text-[10px] font-medium rounded transition-all duration-150 ${
-              sort === s.value
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
     )}
   </div>
 );
