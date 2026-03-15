@@ -175,7 +175,7 @@ const Insights = () => {
   const assets = (location.state?.assets || []) as CreativeAsset[];
   const channel: Channel | null = assets.length > 0 ? assets[0].channel : null;
 
-  const { ranked, correlationTable } = useMemo(() => {
+  const { ranked, correlationCards } = useMemo(() => {
     const ranked = [...assets].sort((a, b) => b.roas - a.roas);
     const correlationCards = buildCorrelationCards(assets);
     return { ranked, correlationCards };
