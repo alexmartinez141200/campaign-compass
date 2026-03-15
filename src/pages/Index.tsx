@@ -171,7 +171,7 @@ const Index = () => {
               <CampaignHeader campaign={selectedCampaign} />
 
               <div className="mt-5 mb-4">
-                <FilterBar selectedChannels={selectedChannels} sort={sort} selectedCount={selectedAssets.size} showInsights={selectedChannels.length > 0} onChannelsChange={(ch) => { setSelectedChannels(ch); setSelectedAssets(new Set()); }} onSortChange={setSort} />
+                <FilterBar selectedChannels={selectedChannels} sort={sort} selectedCount={selectedAssets.size} showInsights={selectedChannels.length > 0} onChannelsChange={(ch) => { setSelectedChannels(ch); setSelectedAssets(new Set()); }} onSortChange={setSort} onGetInsights={handleGetInsights} />
               </div>
 
               <div className="space-y-0.5">
