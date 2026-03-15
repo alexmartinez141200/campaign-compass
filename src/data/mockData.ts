@@ -12,15 +12,47 @@ export interface CreativeAsset {
   thumbnail: string;
   dimensions: string;
   channel: Channel;
+  // Spend & Budget
   spend: number;
+  // Delivery
   impressions: number;
+  reach: number;
+  frequency: number;
+  // Engagement
   clicks: number;
+  linkClicks: number;
+  outboundClicks: number;
+  postReactions: number;
+  postComments: number;
+  postShares: number;
+  postSaves: number;
+  // Video (optional for non-video)
+  videoPlays?: number;
+  thruPlays?: number;
+  avgWatchTime?: number; // seconds
+  videoWatched25?: number;
+  videoWatched50?: number;
+  videoWatched75?: number;
+  videoWatched95?: number;
+  // Conversions
   conversions: number;
+  purchaseValue: number;
+  addToCart: number;
+  initiateCheckout: number;
+  landingPageViews: number;
+  // Computed rates & costs
   roas: number;
   ctr: number;
+  ctrAll: number;
   cpc: number;
+  cpcAll: number;
   cpm: number;
   conversionRate: number;
+  costPerResult: number;
+  // Quality (Meta Ad Relevance Diagnostics)
+  qualityRanking: "above_average" | "average" | "below_average";
+  engagementRateRanking: "above_average" | "average" | "below_average";
+  conversionRateRanking: "above_average" | "average" | "below_average";
 }
 
 export interface Campaign {
