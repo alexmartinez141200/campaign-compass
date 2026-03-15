@@ -1,9 +1,9 @@
 /* refreshed */
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, BarChart3, Layers, TrendingUp, MousePointerClick, ShoppingCart, Eye, Zap, Video } from "lucide-react";
+import { ArrowLeft, BarChart3, Layers, TrendingUp, MousePointerClick, ShoppingCart, Eye, Zap, Video, ChevronRight } from "lucide-react";
 import type { CreativeAsset, Channel } from "@/data/mockData";
 import { channelConfig } from "@/components/ChannelIcon";
-import { useMemo } from "react";
+import { useMemo, useRef, useCallback } from "react";
 
 /* ─── Helpers ─── */
 
@@ -217,11 +217,15 @@ const Insights = () => {
   const assets = (location.state?.assets || []) as CreativeAsset[];
   const channel: Channel | null = assets.length > 0 ? assets[0].channel : null;
 
-  const { ranked, correlationCards, metrics, metricGroups } = useMemo(() => {
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const scrollTo = useCallback((key: string) => {
+    sectionRefs.current[key]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const { ranked, correlationCards, metrics, metricGroups, groupScores, profileSummary } = useMemo(() => {
     const ranked = [...assets].sort((a, b) => b.roas - a.roas);
     const metrics = getActiveMetrics(assets);
     const correlationCards = buildCorrelationCards(assets, metrics);
-    // Group metrics by group name
     const metricGroups: { name: string; metrics: MetricDef[] }[] = [];
     const seen = new Set<string>();
     for (const m of metrics) {
@@ -230,7 +234,43 @@ const Insights = () => {
         metricGroups.push({ name: m.group, metrics: metrics.filter(x => x.group === m.group) });
       }
     }
-    return { ranked, correlationCards, metrics, metricGroups };
+
+    // Compute per-group scores (0-100) based on how top asset compares to worst
+    const groupScores: { name: string; score: number; topAsset: string; insight: string }[] = [];
+    for (const g of metricGroups) {
+      const perAsset = ranked.map(a => {
+        const vals = g.metrics.map(m => {
+          const allVals = assets.map(x => m.get(x));
+          const min = Math.min(...allVals);
+          const max = Math.max(...allVals);
+          const range = max - min;
+          if (range === 0) return 50;
+          const norm = (m.get(a) - min) / range;
+          return m.higherIsBetter ? norm * 100 : (1 - norm) * 100;
+        });
+        return { asset: a, avg: vals.reduce((s, v) => s + v, 0) / vals.length };
+      });
+      perAsset.sort((a, b) => b.avg - a.avg);
+      const topScore = Math.round(perAsset[0].avg);
+      const botScore = Math.round(perAsset[perAsset.length - 1].avg);
+      const spread = topScore - botScore;
+      const insight = spread > 30
+        ? `${perAsset[0].asset.name} leads by a wide margin`
+        : spread > 10
+        ? `${perAsset[0].asset.name} edges ahead`
+        : "Assets perform similarly";
+      groupScores.push({ name: g.name, score: topScore, topAsset: perAsset[0].asset.name, insight });
+    }
+
+    // Best creative profile attributes from top performer
+    const top = ranked[0];
+    const profileSummary = top ? PROFILE_ATTRS.map(attr => {
+      const topVal = attr.get(top);
+      const allSame = assets.every(a => attr.get(a) === topVal);
+      return { label: attr.label, value: topVal, differs: !allSame };
+    }) : [];
+
+    return { ranked, correlationCards, metrics, metricGroups, groupScores, profileSummary };
   }, [assets]);
 
   if (assets.length === 0) {
@@ -245,6 +285,13 @@ const Insights = () => {
   }
 
   const maxRoas = Math.max(...assets.map(a => a.roas));
+
+  const scoreColor = (s: number) =>
+    s >= 70 ? "text-emerald-600 dark:text-emerald-400" : s >= 40 ? "text-amber-600 dark:text-amber-400" : "text-destructive";
+  const scoreBg = (s: number) =>
+    s >= 70 ? "bg-emerald-500/10 border-emerald-500/20" : s >= 40 ? "bg-amber-500/10 border-amber-500/20" : "bg-destructive/10 border-destructive/20";
+  const scoreBar = (s: number) =>
+    s >= 70 ? "bg-emerald-500" : s >= 40 ? "bg-amber-500" : "bg-destructive";
 
   return (
     <div className="min-h-screen bg-background">
@@ -267,11 +314,66 @@ const Insights = () => {
 
       <div className="p-6 space-y-6">
 
+        {/* ═══ SUMMARY PANEL ═══ */}
+        <div className="space-y-3">
+          <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Performance Summary</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
+            {groupScores.map(gs => {
+              const Icon = groupIcons[gs.name] || BarChart3;
+              return (
+                <button
+                  key={gs.name}
+                  onClick={() => scrollTo(gs.name)}
+                  className={`rounded-lg border p-3 text-left transition-all hover:shadow-md hover:scale-[1.01] cursor-pointer ${scoreBg(gs.score)}`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">{gs.name}</span>
+                    </div>
+                    <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
+                  </div>
+                  <div className={`text-xl font-bold font-mono ${scoreColor(gs.score)}`}>{gs.score}</div>
+                  <div className="w-full h-1 bg-muted/30 rounded-full mt-1.5 mb-1.5 overflow-hidden">
+                    <div className={`h-full rounded-full transition-all ${scoreBar(gs.score)}`} style={{ width: `${gs.score}%` }} />
+                  </div>
+                  <p className="text-[9px] text-muted-foreground leading-tight truncate">{gs.insight}</p>
+                </button>
+              );
+            })}
+            {/* Creative Profile card */}
+            <button
+              onClick={() => scrollTo("profile")}
+              className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-left transition-all hover:shadow-md hover:scale-[1.01] cursor-pointer"
+            >
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Profile</span>
+                </div>
+                <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
+              </div>
+              <div className="space-y-0.5 mt-1">
+                {profileSummary.filter(p => p.differs).slice(0, 3).map(p => (
+                  <div key={p.label} className="flex items-center justify-between">
+                    <span className="text-[9px] text-muted-foreground">{p.label}</span>
+                    <span className="text-[9px] font-mono font-semibold text-primary">{p.value}</span>
+                  </div>
+                ))}
+                {profileSummary.filter(p => p.differs).length === 0 && (
+                  <p className="text-[9px] text-muted-foreground">All attributes identical</p>
+                )}
+              </div>
+              <p className="text-[8px] text-muted-foreground mt-1 italic">Top performer traits</p>
+            </button>
+          </div>
+        </div>
+
         {/* ═══ 1. Full Performance Comparison by Metric Group ═══ */}
         {metricGroups.map(group => {
           const Icon = groupIcons[group.name] || BarChart3;
           return (
-            <div key={group.name}>
+            <div key={group.name} ref={el => { sectionRefs.current[group.name] = el; }} className="scroll-mt-4">
               <div className="flex items-center gap-2 mb-2">
                 <Icon className="w-4 h-4 text-primary" />
                 <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">{group.name}</h2>
@@ -343,7 +445,7 @@ const Insights = () => {
         })}
 
         {/* ═══ 2. Attribute × Metric Correlation ═══ */}
-        <div>
+        <div ref={el => { sectionRefs.current["correlation"] = el; }} className="scroll-mt-4">
           <div className="flex items-center gap-2 mb-3">
             <Layers className="w-4 h-4 text-primary" />
             <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Profile × Metric Correlation</h2>
@@ -408,7 +510,7 @@ const Insights = () => {
         </div>
 
         {/* ═══ 3. Per-Asset Profile Comparison ═══ */}
-        <div>
+        <div ref={el => { sectionRefs.current["profile"] = el; }} className="scroll-mt-4">
           <div className="flex items-center gap-2 mb-3">
             <BarChart3 className="w-4 h-4 text-primary" />
             <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Asset Profile Grid</h2>
