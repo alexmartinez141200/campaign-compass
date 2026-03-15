@@ -32,9 +32,15 @@ const kpiInfo: Record<string, string> = {
   "Revenue": "Total purchase value attributed to this ad within the conversion window.",
   "CPA": "Cost Per Acquisition — how much you pay for each purchase. Lower CPA means more efficient conversion spend.",
   "Plays": "Total number of times the video started playing, including auto-plays in feed.",
-  "ThruPlays": "Number of times the video was played to completion or for at least 15 seconds.",
+  "ThruPlays": "Number of times the video was played to completion or for at least 15 seconds. Meta metric.",
   "Avg Watch": "Average duration a viewer watched the video before scrolling or closing.",
   "ThruPlay Rate": "Percentage of total plays that counted as ThruPlays. Higher rate indicates more engaging content.",
+  "Video Views": "Total 2-second+ video views. TikTok's primary video metric.",
+  "Video View Rate": "Percentage of impressions that resulted in a 2s+ video view. Higher = stronger hook.",
+  "Profile Visits": "Number of times users visited your TikTok profile after seeing this ad.",
+  "Follows": "New followers attributed to this ad. Measures brand-building effectiveness.",
+  "Paid Likes": "Likes from paid impressions only, excluding organic engagement.",
+  "Paid Shares": "Shares from paid impressions only. High shares indicate viral potential.",
 };
 
 // ─── Insights Generator ───
@@ -160,6 +166,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const insights = generateInsights(asset, campaignAssets);
   const rank = [...campaignAssets].sort((a, b) => b.roas - a.roas).findIndex(a => a.id === asset.id) + 1;
   const isVideo = asset.type === "video";
+  const isTikTok = asset.channel === "tiktok";
+  const isMeta = asset.channel === "meta";
   const daily = asset.dailyMetrics;
 
   // Filter daily metrics
@@ -211,8 +219,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const ctrHealth: "good" | "warning" | "critical" = asset.ctr > ctrAvg * 1.1 ? "good" : asset.ctr < ctrAvg * 0.8 ? "critical" : "warning";
   const roasHealth: "good" | "warning" | "critical" = asset.roas > 2 ? "good" : asset.roas > 1 ? "warning" : "critical";
 
-  // Engagement data
-  const engagementData = [
+  // Engagement data — platform-aware labels
+  const engagementData = isTikTok ? [
+    { name: "Likes", value: asset.postReactions, color: "hsl(227, 71%, 55%)" },
+    { name: "Comments", value: asset.postComments, color: "hsl(174, 100%, 33%)" },
+    { name: "Shares", value: asset.postShares, color: "hsl(45, 93%, 47%)" },
+    { name: "Favorites", value: asset.postSaves, color: "hsl(346, 84%, 61%)" },
+  ] : [
     { name: "Reactions", value: asset.postReactions, color: "hsl(227, 71%, 55%)" },
     { name: "Comments", value: asset.postComments, color: "hsl(174, 100%, 33%)" },
     { name: "Shares", value: asset.postShares, color: "hsl(45, 93%, 47%)" },
@@ -389,27 +402,65 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
           </div>
 
-          {/* Platform quality signals */}
-          <div className="rounded-lg border border-border/60 bg-card p-4">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Platform Quality Signals</p>
-            <div className="space-y-3">
-              {([
-                ["Quality Ranking", asset.qualityRanking, "Ad creative quality vs competitors"],
-                ["Engagement Ranking", asset.engagementRateRanking, "Expected engagement vs competitors"],
-                ["Conversion Ranking", asset.conversionRateRanking, "Expected conversion vs competitors"],
-              ] as const).map(([label, val, desc]) => (
-                <div key={label} className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[11px] font-medium text-foreground">{label}</p>
-                    <p className="text-[9px] text-muted-foreground">{desc}</p>
+          {/* Right panel — platform-specific */}
+          {isMeta ? (
+            <div className="rounded-lg border border-border/60 bg-card p-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Platform Quality Signals</p>
+              <div className="space-y-3">
+                {([
+                  ["Quality Ranking", asset.qualityRanking, "Ad creative quality vs competitors"],
+                  ["Engagement Ranking", asset.engagementRateRanking, "Expected engagement vs competitors"],
+                  ["Conversion Ranking", asset.conversionRateRanking, "Expected conversion vs competitors"],
+                ] as const).map(([label, val, desc]) => (
+                  <div key={label} className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] font-medium text-foreground">{label}</p>
+                      <p className="text-[9px] text-muted-foreground">{desc}</p>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-md text-[11px] font-semibold ${rankingColor(val)}`}>
+                      {rankingLabel(val)}
+                    </span>
                   </div>
-                  <span className={`px-2.5 py-1 rounded-md text-[11px] font-semibold ${rankingColor(val)}`}>
-                    {rankingLabel(val)}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          ) : isTikTok ? (
+            <div className="rounded-lg border border-border/60 bg-card p-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">TikTok Growth Signals</p>
+              <div className="grid grid-cols-2 gap-3">
+                <KpiCard label="Profile Visits" value={(asset.profileVisits || 0).toLocaleString()} sub="From this ad" />
+                <KpiCard label="Follows" value={(asset.follows || 0).toLocaleString()} sub="New followers" />
+                <KpiCard label="Paid Likes" value={(asset.paidLikes || 0).toLocaleString()} sub="From paid reach" />
+                <KpiCard label="Paid Shares" value={(asset.paidShares || 0).toLocaleString()} sub="Viral potential" />
+              </div>
+              {asset.videoViewRate && (
+                <div className="mt-3 pt-3 border-t border-border/30">
+                  <KpiCard label="Video View Rate" value={`${asset.videoViewRate}%`} sub="2s+ views / impressions" />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-border/60 bg-card p-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Platform Quality Signals</p>
+              <div className="space-y-3">
+                {([
+                  ["Quality Ranking", asset.qualityRanking, "Ad creative quality vs competitors"],
+                  ["Engagement Ranking", asset.engagementRateRanking, "Expected engagement vs competitors"],
+                  ["Conversion Ranking", asset.conversionRateRanking, "Expected conversion vs competitors"],
+                ] as const).map(([label, val, desc]) => (
+                  <div key={label} className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] font-medium text-foreground">{label}</p>
+                      <p className="text-[9px] text-muted-foreground">{desc}</p>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-md text-[11px] font-semibold ${rankingColor(val)}`}>
+                      {rankingLabel(val)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ═══ C. TRAFFIC ═══ */}
@@ -507,13 +558,21 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         {/* ═══ E. VIDEO PERFORMANCE (conditional) ═══ */}
         {isVideo && (
           <>
-            <SectionHeader title="Video Performance" description="Retention analysis — where viewers drop off reveals content quality." />
+            <SectionHeader title="Video Performance" description={isTikTok ? "TikTok video metrics — view rate and retention show content quality and hook strength." : "Retention analysis — where viewers drop off reveals content quality."} />
             <div className="grid grid-cols-2 gap-3">
               <div className="grid grid-cols-2 gap-3">
-                <KpiCard label="Plays" value={(asset.videoPlays || 0).toLocaleString()} />
-                <KpiCard label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} />
+                <KpiCard label={isTikTok ? "Video Views" : "Plays"} value={(asset.videoPlays || 0).toLocaleString()} />
+                {isTikTok ? (
+                  <KpiCard label="Video View Rate" value={`${asset.videoViewRate || 0}%`} sub="2s+ views / impressions" />
+                ) : (
+                  <KpiCard label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} />
+                )}
                 <KpiCard label="Avg Watch" value={`${asset.avgWatchTime || 0}s`} />
-                <KpiCard label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
+                {isTikTok ? (
+                  <KpiCard label="Completion Rate" value={`${((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} sub="Watched to 95%" />
+                ) : (
+                  <KpiCard label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
+                )}
               </div>
               <ChartCard title="Retention Curve" height="h-[140px]">
                 <ResponsiveContainer width="100%" height="100%">

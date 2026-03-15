@@ -89,10 +89,16 @@ export interface CreativeAsset {
   cpm: number;
   conversionRate: number;
   costPerResult: number;
-  // Quality (Meta Ad Relevance Diagnostics)
+  // Quality (Meta Ad Relevance Diagnostics — Meta only)
   qualityRanking: "above_average" | "average" | "below_average";
   engagementRateRanking: "above_average" | "average" | "below_average";
   conversionRateRanking: "above_average" | "average" | "below_average";
+  // TikTok-specific metrics
+  profileVisits?: number;
+  follows?: number;
+  paidLikes?: number;
+  paidShares?: number;
+  videoViewRate?: number; // % of impressions that resulted in 2s+ view
   // Daily breakdown
   dailyMetrics: DailyMetric[];
 }
@@ -192,6 +198,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 580, purchaseValue: 32640, addToCart: 1820, initiateCheckout: 920, landingPageViews: 10800,
         roas: 4.8, ctr: 3.0, ctrAll: 4.2, cpc: 0.44, cpcAll: 0.35, cpm: 13.08, conversionRate: 3.7, costPerResult: 11.72,
         qualityRanking: "above_average", engagementRateRanking: "above_average", conversionRateRanking: "average",
+        profileVisits: 8400, follows: 620, paidLikes: 3100, paidShares: 680, videoViewRate: 92.3,
       },
       {
         id: "CRI-7734", name: "Static_Product_03", type: "image", thumbnail: creative2, dimensions: "1200×628", channel: "meta",
@@ -220,6 +227,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 312, purchaseValue: 18720, addToCart: 1020, initiateCheckout: 540, landingPageViews: 7100,
         roas: 3.6, ctr: 3.0, ctrAll: 4.0, cpc: 0.51, cpcAll: 0.40, cpm: 15.29, conversionRate: 3.1, costPerResult: 16.67,
         qualityRanking: "average", engagementRateRanking: "above_average", conversionRateRanking: "below_average",
+        profileVisits: 5200, follows: 340, paidLikes: 2200, paidShares: 410, videoViewRate: 85.6,
       },
       {
         id: "CRI-4410", name: "Static_Hero_Banner", type: "image", thumbnail: creative1, dimensions: "1200×628", channel: "google",
@@ -264,6 +272,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 492, purchaseValue: 35360, addToCart: 1580, initiateCheckout: 840, landingPageViews: 8200,
         roas: 5.2, ctr: 3.0, ctrAll: 4.4, cpc: 0.55, cpcAll: 0.42, cpm: 16.59, conversionRate: 4.0, costPerResult: 13.82,
         qualityRanking: "above_average", engagementRateRanking: "above_average", conversionRateRanking: "average",
+        profileVisits: 9800, follows: 810, paidLikes: 4200, paidShares: 1050, videoViewRate: 89.1,
       },
       {
         id: "CRI-3311", name: "Static_Lookbook_02", type: "image", thumbnail: creative3, dimensions: "1200×628", channel: "google",
@@ -298,6 +307,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 588, purchaseValue: 38880, addToCart: 1900, initiateCheckout: 1020, landingPageViews: 9800,
         roas: 4.8, ctr: 3.0, ctrAll: 4.3, cpc: 0.55, cpcAll: 0.43, cpm: 16.53, conversionRate: 4.0, costPerResult: 13.78,
         qualityRanking: "above_average", engagementRateRanking: "above_average", conversionRateRanking: "average",
+        profileVisits: 7600, follows: 520, paidLikes: 4800, paidShares: 1100, videoViewRate: 91.8,
       },
       {
         id: "CRI-7789", name: "Static_Summer_Hero", type: "image", thumbnail: creative2, dimensions: "1200×628", channel: "google",
