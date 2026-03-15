@@ -62,29 +62,24 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
             {campaign.startDate} → {campaign.endDate} · {campaign.assets.length} assets
           </p>
         </div>
-        <div className="flex items-center gap-5 px-5 py-3.5 rounded-lg border border-border/60 bg-card">
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Budget</p>
-            <p className="text-base font-mono font-bold text-foreground">${campaign.totalBudget.toLocaleString()}</p>
-          </div>
-          <div className="w-px h-8 bg-border/60" />
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Spent</p>
-            <div className="flex items-baseline gap-1.5">
-              <p className="text-base font-mono font-bold text-foreground">${totalSpend.toLocaleString()}</p>
-              <span className="text-[11px] font-mono font-medium text-accent-teal">{spendPct.toFixed(0)}%</span>
+        <div className="px-5 py-3.5 rounded-lg border border-border/60 bg-card min-w-[360px]">
+          {/* Labels + values row */}
+          <div className="flex justify-between items-end mb-2">
+            <div>
+              <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Spent</p>
+              <p className="text-lg font-mono font-bold text-foreground leading-none">${totalSpend.toLocaleString()}</p>
+            </div>
+            <p className="text-[11px] font-mono font-medium text-accent-teal">{spendPct.toFixed(0)}% used</p>
+            <div className="text-right">
+              <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Budget</p>
+              <p className="text-lg font-mono font-bold text-foreground leading-none">${campaign.totalBudget.toLocaleString()}</p>
             </div>
           </div>
-          <div className="w-px h-8 bg-border/60" />
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Remaining</p>
-            <p className="text-base font-mono font-bold text-foreground">${remaining.toLocaleString()}</p>
+          {/* Single budget bar */}
+          <div className="w-full h-3 bg-muted/40 rounded-full overflow-hidden">
+            <div className="h-full rounded-full bg-primary/70 transition-all" style={{ width: `${Math.min(spendPct, 100)}%` }} />
           </div>
-          <div className="w-20">
-            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.min(spendPct, 100)}%` }} />
-            </div>
-          </div>
+          <p className="text-[10px] font-mono text-muted-foreground mt-1.5 text-right">${remaining.toLocaleString()} remaining</p>
         </div>
       </div>
 
