@@ -239,13 +239,20 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const engagementTotal = engagementData.reduce((s, d) => s + d.value, 0);
 
   // Video retention
-  const videoRetentionData = isVideo ? [
+  const videoRetentionData = isVideo ? (isTikTok ? [
+    { point: "Start", pct: 100 },
+    { point: "6s", pct: Math.round((asset.videoViews6s || 0) / (asset.videoPlays || 1) * 100) },
+    { point: "25%", pct: Math.round((asset.videoWatched25 || 0) / (asset.videoPlays || 1) * 100) },
+    { point: "50%", pct: Math.round((asset.videoWatched50 || 0) / (asset.videoPlays || 1) * 100) },
+    { point: "75%", pct: Math.round((asset.videoWatched75 || 0) / (asset.videoPlays || 1) * 100) },
+    { point: "100%", pct: Math.round((asset.completedViews || 0) / (asset.videoPlays || 1) * 100) },
+  ] : [
     { point: "Start", pct: 100 },
     { point: "25%", pct: Math.round((asset.videoWatched25 || 0) / (asset.videoPlays || 1) * 100) },
     { point: "50%", pct: Math.round((asset.videoWatched50 || 0) / (asset.videoPlays || 1) * 100) },
     { point: "75%", pct: Math.round((asset.videoWatched75 || 0) / (asset.videoPlays || 1) * 100) },
     { point: "95%", pct: Math.round((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100) },
-  ] : [];
+  ]) : [];
 
   // Funnel steps
   const funnelSteps = [
