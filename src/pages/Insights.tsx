@@ -427,49 +427,8 @@ const Insights = () => {
           </div>
         </div>
 
-        {/* ═══ Profile Comparison Table ═══ */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <BarChart3 className="w-4 h-4 text-primary" />
-            <h2 className="text-xs uppercase tracking-wider font-bold text-foreground">Asset Profile Grid</h2>
-            <span className="text-[10px] text-muted-foreground ml-1">— sorted by ROAS · differences highlighted</span>
-          </div>
-          <div className="rounded-lg border border-border overflow-auto shadow-[var(--shadow-card)]">
-            <table className="w-full table-fixed">
-              <thead>
-                <tr className="border-b border-border bg-muted/20">
-                  <th className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-5 py-3 text-left sticky left-0 bg-muted/20 w-[160px]">Attribute</th>
-                  {ranked.map(a => (
-                    <th key={a.id} className="text-[11px] font-semibold text-foreground px-4 py-3 text-center">
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="truncate max-w-[120px] block">{a.name}</span>
-                        <span className={`text-[10px] font-mono ${a.roas >= 5 ? "text-accent" : a.roas >= 3 ? "text-foreground" : "text-destructive"}`}>{a.roas}x</span>
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {PROFILE_ATTRS.map(attr => {
-                  const vals = ranked.map(a => attr.get(a));
-                  const diff = !vals.every(v => v === vals[0]);
-                  return (
-                    <tr key={attr.key} className={`border-b border-border/15 last:border-0 ${diff ? "bg-primary/[0.02]" : ""}`}>
-                      <td className={`px-5 py-3 text-[11px] font-semibold sticky left-0 ${diff ? "text-foreground bg-primary/[0.02]" : "text-muted-foreground bg-background"}`}>
-                        {attr.label}{diff && <span className="ml-1.5 text-primary text-[7px]">●</span>}
-                      </td>
-                      {ranked.map(a => (
-                        <td key={a.id} className={`px-4 py-3 text-center text-[12px] font-mono ${diff ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
-                          {attr.get(a)}
-                        </td>
-                      ))}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+
+
 
         {/* ═══ Creative Profile Performance Summary ═══ */}
         {correlationCards.length > 0 && (
