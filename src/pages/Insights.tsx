@@ -340,7 +340,8 @@ const Insights = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      <AppSidebar />
+      <main className="ml-[232px]">
       <div className="px-6 py-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium">
