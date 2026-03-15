@@ -23,7 +23,7 @@ const sorts: { value: SortOption; label: string }[] = [
   { value: "spend", label: "Spend" },
 ];
 
-const FilterBar = ({ selectedChannels, sort, selectedCount, onChannelsChange, onSortChange }: FilterBarProps) => {
+const FilterBar = ({ selectedChannels, sort, selectedCount, showInsights, onChannelsChange, onSortChange }: FilterBarProps) => {
   const activeTab = selectedChannels.length === 0 ? "all" : selectedChannels.length === 1 ? selectedChannels[0] : "all";
 
   const handleTab = (value: Channel | "all") => {
