@@ -92,13 +92,13 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
         </div>
       </div>
 
-      {/* Compact comparison table with inline bars */}
       {channelBreakdown.length > 1 && (
         <div className="rounded-lg border border-border/60 overflow-hidden bg-card">
           <table className="w-full">
             <thead>
               <tr className="bg-muted/30 border-b border-border/40">
-                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-2 text-left w-[140px]">Platform</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-4 py-2 text-left w-[160px]">Platform</th>
+                <th className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2 text-left w-[140px]">Spend vs Revenue</th>
                 {columns.map((col) => (
                   <th key={col.key} className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2 text-right">{col.label}</th>
                 ))}
@@ -108,37 +108,40 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
               {channelBreakdown.map((row) => {
                 const isBest = row.roas === bestRoas;
                 const color = channelConfig[row.channel].color;
+                const maxVal = Math.max(row.spend, row.revenue);
+                const spendW = maxVal > 0 ? (row.spend / maxVal) * 100 : 0;
+                const revW = maxVal > 0 ? (row.revenue / maxVal) * 100 : 0;
                 return (
                   <tr key={row.channel} className="border-b border-border/30 last:border-0 hover:bg-muted/10 transition-colors">
-                    <td className="px-4 py-2.5">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
                         <span className="text-[13px] font-semibold text-foreground">{channelConfig[row.channel].label}</span>
                         {isBest && (
-                          <span className="text-[7px] uppercase tracking-wider font-bold text-emerald-600 bg-emerald-500/10 px-1 py-px rounded leading-tight">
-                            ★
-                          </span>
+                          <span className="text-[7px] uppercase tracking-wider font-bold text-emerald-600 bg-emerald-500/10 px-1 py-px rounded leading-tight">★</span>
                         )}
+                      </div>
+                    </td>
+                    {/* Dual bar: spend (muted) vs revenue (colored) */}
+                    <td className="px-3 py-3">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-full h-[5px] bg-muted/20 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-muted-foreground/20 transition-all" style={{ width: `${spendW}%` }} />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-full h-[5px] bg-muted/20 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full transition-all" style={{ width: `${revW}%`, backgroundColor: color, opacity: 0.55 }} />
+                          </div>
+                        </div>
                       </div>
                     </td>
                     {columns.map((col) => {
                       const textColor = col.colorFn ? col.colorFn(row) : "text-foreground";
-                      const barPct = col.bar ? (col.val(row) / col.max) * 100 : 0;
                       return (
-                        <td key={col.key} className="px-3 py-2.5">
-                          <div className="flex flex-col items-end gap-0.5">
-                            <span className={`text-xs font-mono font-semibold ${textColor} ${col.key === "roas" ? "font-bold" : ""}`}>
-                              {col.format(row)}
-                            </span>
-                            {col.bar && (
-                              <div className="w-full h-[3px] bg-muted/30 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full rounded-full transition-all"
-                                  style={{ width: `${barPct}%`, backgroundColor: color, opacity: 0.4 }}
-                                />
-                              </div>
-                            )}
-                          </div>
+                        <td key={col.key} className="px-3 py-3 text-right">
+                          <span className={`text-xs font-mono font-semibold ${textColor}`}>{col.format(row)}</span>
                         </td>
                       );
                     })}
