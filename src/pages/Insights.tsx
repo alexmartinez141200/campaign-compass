@@ -364,8 +364,16 @@ const Insights = () => {
           <button onClick={() => navigate("/")} className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">
             Campaigns
           </button>
+          {campaignId && (
+            <>
+              <span className="text-muted-foreground/30 text-xs">›</span>
+              <button onClick={() => navigate(-1)} className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">
+                Campaign Profile
+              </button>
+            </>
+          )}
           <span className="text-muted-foreground/30 text-xs">›</span>
-          <h1 className="text-[13px] font-medium text-foreground">Creative Diagnostics</h1>
+          <span className="text-[13px] font-medium text-foreground">Creative Diagnostics</span>
         </div>
         <div className="flex items-center gap-2">
           <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${channelConfig[channel!]?.bgClass}`}>
