@@ -140,7 +140,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative3,
         dimensions: "1200×628",
         channel: "google",
-        spend: 2600, impressions: 98000, clicks: 2940, conversions: 142, roas: 3.9, ctr: 3.0, cpc: 0.88,
+        spend: 2600, impressions: 98000, clicks: 2940, conversions: 142, roas: 3.9, ctr: 3.0, cpc: 0.88, cpm: 26.53, conversionRate: 4.8,
       },
     ],
   },
