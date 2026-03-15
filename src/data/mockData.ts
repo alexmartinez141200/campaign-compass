@@ -316,6 +316,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
     assets: [
       {
         id: "CRI-9902", name: "Static_Backpack_Hero", type: "image", thumbnail: creative2, dimensions: "1200×628", channel: "meta",
+        creativeProfile: { aspectRatio: "16:9", motionIntensity: "None", colorContrast: "Medium", brandProminence: "Balanced", brandConsistency: "Medium", funnelStage: "Consideration", callToAction: "Shop Now", productInFirst3s: true },
         spend: 3200, impressions: 88000, reach: 70000, frequency: 1.26, clicks: 2640, linkClicks: 2112, outboundClicks: 1848,
         postReactions: 890, postComments: 62, postShares: 145, postSaves: 340,
         conversions: 132, purchaseValue: 9920, addToCart: 420, initiateCheckout: 240, landingPageViews: 1800,
