@@ -235,29 +235,28 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        {/* Bottom: Creative profile strip */}
-        <div className="border-t border-border/40 bg-muted/20 px-4 py-2.5 flex items-center gap-0">
-          {[
-            ["Platform", asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : "Google"],
-            ["Format", asset.type.charAt(0).toUpperCase() + asset.type.slice(1)],
-            ...(asset.creativeProfile.videoDuration ? [["Duration", `${asset.creativeProfile.videoDuration}s`]] : []),
-            ["Ratio", asset.creativeProfile.aspectRatio],
-            ["Motion", asset.creativeProfile.motionIntensity],
-            ["Contrast", asset.creativeProfile.colorContrast],
-            ["Brand", asset.creativeProfile.brandProminence],
-            ["Consistency", asset.creativeProfile.brandConsistency],
-            ["Funnel", asset.creativeProfile.funnelStage],
-            ["CTA", asset.creativeProfile.callToAction],
-            ["Product 3s", asset.creativeProfile.productInFirst3s ? "Yes" : "No"],
-          ].map(([label, value], i, arr) => (
-            <div key={label} className="flex items-center">
-              <div className="flex flex-col items-center px-3">
-                <span className="text-[8px] uppercase tracking-wider text-muted-foreground/70 font-medium">{label}</span>
-                <span className="text-[11px] font-semibold text-foreground leading-tight mt-0.5">{value}</span>
+        {/* Creative profile list */}
+        <div className="border-t border-border/40 bg-muted/20 px-5 py-3">
+          <div className="grid grid-cols-5 gap-x-6 gap-y-1.5">
+            {[
+              ["Platform", asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : "Google"],
+              ["Format", asset.type.charAt(0).toUpperCase() + asset.type.slice(1)],
+              ...(asset.creativeProfile.videoDuration ? [["Duration", `${asset.creativeProfile.videoDuration}s`]] : []),
+              ["Ratio", asset.creativeProfile.aspectRatio],
+              ["Motion", asset.creativeProfile.motionIntensity],
+              ["Contrast", asset.creativeProfile.colorContrast],
+              ["Brand", asset.creativeProfile.brandProminence],
+              ["Consistency", asset.creativeProfile.brandConsistency],
+              ["Funnel", asset.creativeProfile.funnelStage],
+              ["CTA", asset.creativeProfile.callToAction],
+              ["Product 3s", asset.creativeProfile.productInFirst3s ? "Yes" : "No"],
+            ].map(([label, value]) => (
+              <div key={label} className="flex items-center justify-between py-0.5">
+                <span className="text-[10px] text-muted-foreground font-medium">{label}</span>
+                <span className="text-[11px] font-semibold text-foreground">{value}</span>
               </div>
-              {i < arr.length - 1 && <div className="h-6 w-px bg-border/30 flex-shrink-0" />}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
