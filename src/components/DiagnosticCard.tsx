@@ -15,14 +15,23 @@ interface DiagnosticCardProps {
   onSelectToggle?: (id: string) => void;
 }
 
-const DiagnosticCard = ({ asset, index, maxRoas }: DiagnosticCardProps) => {
+const DiagnosticCard = ({ asset, index, maxRoas, selected = false, onSelectToggle }: DiagnosticCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.04, ease: [0.25, 0.1, 0.25, 1] }}
-      className="group flex items-center gap-4 p-3 bg-surface rounded-lg shadow-card hover:shadow-card-hover transition-shadow duration-150 border border-border"
+      className={`group flex items-center gap-4 p-3 rounded-lg shadow-card hover:shadow-card-hover transition-all duration-150 border ${
+        selected ? "border-primary bg-primary/5" : "border-border bg-surface"
+      }`}
     >
+      {/* Checkbox */}
+      <Checkbox
+        checked={selected}
+        onCheckedChange={() => onSelectToggle?.(asset.id)}
+        className="flex-shrink-0"
+      />
+
       {/* Thumbnail */}
       <div className="w-16 h-16 bg-muted rounded-md overflow-hidden relative flex-shrink-0">
         <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
