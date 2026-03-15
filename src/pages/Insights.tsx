@@ -373,7 +373,7 @@ const Insights = () => {
         {metricGroups.map(group => {
           const Icon = groupIcons[group.name] || BarChart3;
           return (
-            <div key={group.name}>
+            <div key={group.name} ref={el => { sectionRefs.current[group.name] = el; }} className="scroll-mt-4">
               <div className="flex items-center gap-2 mb-2">
                 <Icon className="w-4 h-4 text-primary" />
                 <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">{group.name}</h2>
