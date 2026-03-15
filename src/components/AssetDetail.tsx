@@ -290,10 +290,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   return (
     <TooltipProvider delayDuration={200}>
       <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
-        {/* Back */}
-        <button onClick={onBack} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium mb-5">
-          <ArrowLeft className="w-4 h-4" /> Back to assets
-        </button>
 
         {/* ─── ASSET HEADER ─── */}
         <div className="rounded-xl border border-border/60 bg-card mb-6 overflow-hidden flex shadow-card">
