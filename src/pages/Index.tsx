@@ -92,42 +92,58 @@ const Index = () => {
 
       <main className="ml-[232px]">
         {/* Page header */}
-        <div className="px-6 py-4 border-b border-border flex items-center gap-2.5">
-          {selectedCampaign ? (
-            <>
-              <button
-                onClick={() => { if (viewingAssetId) { setViewingAssetId(null); } else { setSelectedCampaignId(null); setViewingAssetId(null); } }}
-                className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors mr-1"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => { setSelectedCampaignId(null); setViewingAssetId(null); }}
-                className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Campaigns
-              </button>
-              <span className="text-muted-foreground/30 text-xs">›</span>
-              <button
-                onClick={() => setViewingAssetId(null)}
-                className={`text-[13px] font-medium transition-colors ${viewingAssetId ? "text-muted-foreground hover:text-foreground" : "text-foreground"}`}
-              >
-                Campaign Profile
-              </button>
-              {viewingAssetId && (
-                <>
-                  <span className="text-muted-foreground/30 text-xs">›</span>
-                  <span className="text-[13px] font-medium text-foreground">
-                    {selectedCampaign.assets.find(a => a.id === viewingAssetId)?.name}
-                  </span>
-                </>
-              )}
-            </>
-          ) : (
-            <>
-              <FolderOpen className="w-6 h-6 text-muted-foreground/40" strokeWidth={1.5} />
-              <h1 className="text-lg font-semibold text-foreground">Campaigns</h1>
-            </>
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            {selectedCampaign ? (
+              <>
+                <button
+                  onClick={() => { if (viewingAssetId) { setViewingAssetId(null); } else { setSelectedCampaignId(null); setViewingAssetId(null); } }}
+                  className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors mr-1"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => { setSelectedCampaignId(null); setViewingAssetId(null); }}
+                  className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Campaigns
+                </button>
+                <span className="text-muted-foreground/30 text-xs">›</span>
+                <button
+                  onClick={() => setViewingAssetId(null)}
+                  className={`text-[13px] font-medium transition-colors ${viewingAssetId ? "text-muted-foreground hover:text-foreground" : "text-foreground"}`}
+                >
+                  Campaign Profile
+                </button>
+                {viewingAssetId && (
+                  <>
+                    <span className="text-muted-foreground/30 text-xs">›</span>
+                    <span className="text-[13px] font-medium text-foreground">
+                      {selectedCampaign.assets.find(a => a.id === viewingAssetId)?.name}
+                    </span>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                <FolderOpen className="w-6 h-6 text-muted-foreground/40" strokeWidth={1.5} />
+                <h1 className="text-lg font-semibold text-foreground">Campaigns</h1>
+              </>
+            )}
+          </div>
+
+          {/* Search */}
+          {!selectedCampaign && (
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50" />
+              <input
+                type="text"
+                placeholder="Search campaigns or assets..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 pr-3 py-1.5 text-[13px] bg-muted/30 border border-border rounded-md w-64 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-colors"
+              />
+            </div>
           )}
         </div>
 
