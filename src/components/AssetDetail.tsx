@@ -215,43 +215,51 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       </button>
 
       {/* ─── ASSET HEADER ─── */}
-      <div className="rounded-lg border border-border/60 bg-card mb-5 overflow-hidden">
-        {/* Top: Identity row */}
-        <div className="flex items-center gap-4 px-5 py-4">
-          <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-            <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
+      <div className="rounded-lg border border-border/60 bg-card mb-5 overflow-hidden flex">
+        {/* Left: Identity — constrained width */}
+        <div className="w-1/3 p-4 flex flex-col justify-between">
+          {/* Channel badge + Rank */}
+          <div className="flex items-center justify-between mb-3">
+            <ChannelIcon channel={asset.channel} size="md" />
+            <div className="text-right">
+              <p className="text-lg font-mono font-bold text-foreground leading-none">#{rank}</p>
+              <p className="text-[9px] text-muted-foreground">of {campaignAssets.length}</p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-base font-semibold text-foreground leading-tight">{asset.name}</h2>
-            <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{asset.id} · {asset.dimensions}</p>
-          </div>
-          <ChannelIcon channel={asset.channel} size="md" />
-          <div className="text-center pl-2 border-l border-border/40">
-            <p className="text-lg font-mono font-bold text-foreground leading-none">#{rank}</p>
-            <p className="text-[9px] text-muted-foreground">of {campaignAssets.length}</p>
+          {/* Thumbnail + Name */}
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+              <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-lg font-semibold text-foreground leading-tight">{asset.name}</h2>
+              <p className="text-xs text-muted-foreground font-mono mt-1">{asset.id} · {asset.dimensions}</p>
+            </div>
           </div>
         </div>
 
-        {/* Bottom: Profile attributes as horizontal strip */}
-        <div className="border-t border-border/40 bg-muted/30 px-5 py-2 flex items-center justify-between">
-          {[
-            ["Platform", asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : "Google"],
-            ["Format", asset.type.charAt(0).toUpperCase() + asset.type.slice(1)],
-            ...(asset.creativeProfile.videoDuration ? [["Duration", `${asset.creativeProfile.videoDuration}s`]] : []),
-            ["Ratio", asset.creativeProfile.aspectRatio],
-            ["Motion", asset.creativeProfile.motionIntensity],
-            ["Contrast", asset.creativeProfile.colorContrast],
-            ["Brand", asset.creativeProfile.brandProminence],
-            ["Consistency", asset.creativeProfile.brandConsistency],
-            ["Funnel", asset.creativeProfile.funnelStage],
-            ["CTA", asset.creativeProfile.callToAction],
-            ["Product 3s", asset.creativeProfile.productInFirst3s ? "Yes" : "No"],
-          ].map(([label, value]) => (
-            <div key={label} className="flex flex-col items-center">
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-medium">{label}</span>
-              <span className="text-[12px] font-semibold text-foreground mt-0.5">{value}</span>
-            </div>
-          ))}
+        {/* Right: Creative Profile List — takes 2/3 */}
+        <div className="flex-1 border-l border-border/40 bg-muted/20 px-5 py-3">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-1">
+            {[
+              ["Platform", asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : "Google"],
+              ["Format", asset.type.charAt(0).toUpperCase() + asset.type.slice(1)],
+              ...(asset.creativeProfile.videoDuration ? [["Duration", `${asset.creativeProfile.videoDuration}s`]] : []),
+              ["Ratio", asset.creativeProfile.aspectRatio],
+              ["Motion", asset.creativeProfile.motionIntensity],
+              ["Contrast", asset.creativeProfile.colorContrast],
+              ["Brand", asset.creativeProfile.brandProminence],
+              ["Consistency", asset.creativeProfile.brandConsistency],
+              ["Funnel", asset.creativeProfile.funnelStage],
+              ["CTA", asset.creativeProfile.callToAction],
+              ["Product 3s", asset.creativeProfile.productInFirst3s ? "Yes" : "No"],
+            ].map(([label, value]) => (
+              <div key={label} className="flex items-center justify-between py-0.5">
+                <span className="text-[10px] text-muted-foreground">{label}</span>
+                <span className="text-[11px] font-semibold text-foreground">{value}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
