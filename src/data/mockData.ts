@@ -291,6 +291,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 142, purchaseValue: 10140, addToCart: 460, initiateCheckout: 260, landingPageViews: 2000,
         roas: 3.9, ctr: 3.0, ctrAll: 3.6, cpc: 0.88, cpcAll: 0.72, cpm: 26.53, conversionRate: 4.8, costPerResult: 18.31,
         qualityRanking: "average", engagementRateRanking: "average", conversionRateRanking: "average",
+        viewThroughConversions: 64, interactionRate: 3.6,
       },
     ],
   },
