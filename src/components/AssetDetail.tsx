@@ -315,10 +315,21 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
                 <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
                 <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `${v}x`} />
-                <Tooltip {...chartTooltipStyle} formatter={(value: number, name: string) => [
-                  name === "roas" ? `${value}x` : `$${value.toLocaleString()}`,
-                  name === "roas" ? "ROAS" : name === "spend" ? "Spend" : "Revenue"
-                ]} />
+                <Tooltip
+                  {...chartTooltipStyle}
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload?.length) return null;
+                    const data = payload[0]?.payload;
+                    return (
+                      <div style={chartTooltipStyle.contentStyle} className="p-2.5">
+                        <p className="text-[11px] font-semibold text-foreground mb-1.5">{label}</p>
+                        <p className="text-[11px]" style={{ color: "hsl(174, 100%, 33%)" }}>ROAS: {data.roas}x</p>
+                        <p className="text-[11px]" style={{ color: "hsl(227, 71%, 55%)" }}>Spend: ${data.spend.toLocaleString()}</p>
+                        <p className="text-[11px]" style={{ color: "hsl(142, 71%, 45%)" }}>Revenue: ${data.purchaseValue.toLocaleString()}</p>
+                      </div>
+                    );
+                  }}
+                />
                 <ReferenceLine y={rangeSummary.roas} stroke="hsl(346, 84%, 61%)" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: `Avg ${rangeSummary.roas}x`, position: "right", fontSize: 9, fill: "hsl(346, 84%, 61%)" }} />
                 <Bar dataKey="roas" name="roas" fill="hsl(174, 100%, 33%)" radius={[2, 2, 0, 0]} />
               </BarChart>
