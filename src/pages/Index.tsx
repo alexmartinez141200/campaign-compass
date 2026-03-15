@@ -251,7 +251,7 @@ const Index = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setCreativeFilterChannel("all")}
+                        onClick={() => { setCreativeFilterChannel("all"); setSelectedAssets(new Set()); }}
                         className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${creativeFilterChannel === "all" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
                       >
                         All
