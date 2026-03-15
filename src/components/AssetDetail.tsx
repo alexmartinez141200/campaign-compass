@@ -527,10 +527,10 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <>
           <SectionTitle>Video Performance</SectionTitle>
           <div className="grid grid-cols-4 gap-2.5">
-            <Stat icon={Play} label="Video Plays" value={(asset.videoPlays || 0).toLocaleString()} />
-            <Stat icon={Play} label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} sub="15s+ or complete" />
-            <Stat icon={Clock} label="Avg. Watch Time" value={`${asset.avgWatchTime || 0}s`} />
-            <Stat icon={Eye} label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
+            <Stat label="Video Plays" value={(asset.videoPlays || 0).toLocaleString()} />
+            <Stat label="ThruPlays" value={(asset.thruPlays || 0).toLocaleString()} sub="15s+ or complete" />
+            <Stat label="Avg. Watch Time" value={`${asset.avgWatchTime || 0}s`} />
+            <Stat label="ThruPlay Rate" value={`${((asset.thruPlays || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} />
           </div>
           <div className="mt-3">
             <ChartCard title="Video Retention Curve">
