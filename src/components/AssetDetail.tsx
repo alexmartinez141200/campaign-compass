@@ -379,6 +379,14 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
             <KpiCard label="ROAS" value={`${asset.roas}x`} trend={trends.roas} health={roasHealth} />
           </div>
+        ) : isGoogle ? (
+          <div className="grid grid-cols-5 gap-3 mb-2">
+            <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
+            <KpiCard label="Clicks" value={asset.clicks.toLocaleString()} trend={trends.clicks} />
+            <KpiCard label="CTR" value={`${asset.ctr}%`} trend={trends.ctr} health={ctrHealth} />
+            <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
+            <KpiCard label="ROAS" value={`${asset.roas}x`} trend={trends.roas} health={roasHealth} />
+          </div>
         ) : (
           <div className="grid grid-cols-5 gap-3 mb-2">
             <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
