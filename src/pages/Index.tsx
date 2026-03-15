@@ -12,7 +12,8 @@ import { campaigns } from "@/data/mockData";
 import { channelConfig } from "@/components/ChannelIcon";
 
 type SortOption = "roas" | "spend";
-type CampaignTab = "active" | "archived" | "creatives";
+type TopTab = "campaigns" | "creatives";
+type CampaignFilter = "active" | "past" | "all";
 type CreativeSortKey = "name" | "roas" | "spend" | "conversions";
 
 const Index = () => {
