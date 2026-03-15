@@ -185,6 +185,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
     assets: [
       {
         id: "CRV-4821", name: "Video_Hero_01", type: "video", thumbnail: creative1, dimensions: "1080×1920", channel: "tiktok",
+        creativeProfile: { aspectRatio: "9:16", videoDuration: 15, motionIntensity: "High", colorContrast: "High", brandProminence: "Balanced", brandConsistency: "High", funnelStage: "Awareness", callToAction: "Shop Now", productInFirst3s: true },
         spend: 6800, impressions: 520000, reach: 385000, frequency: 1.35, clicks: 15600, linkClicks: 12480, outboundClicks: 11200,
         postReactions: 4200, postComments: 380, postShares: 920, postSaves: 1450,
         videoPlays: 480000, thruPlays: 312000, avgWatchTime: 8.4, videoWatched25: 420000, videoWatched50: 310000, videoWatched75: 198000, videoWatched95: 124000,
