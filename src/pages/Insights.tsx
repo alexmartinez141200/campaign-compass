@@ -367,7 +367,7 @@ const Insights = () => {
           {campaignId && (
             <>
               <span className="text-muted-foreground/30 text-xs">›</span>
-              <button onClick={() => navigate(-1)} className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <button onClick={() => navigate("/", { state: { returnToCampaignId: campaignId } })} className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Campaign Profile
               </button>
             </>
