@@ -204,6 +204,8 @@ export const campaigns: Campaign[] = [
   {
     id: "camp-004",
     name: "Back to School 2025",
+    owner: "Alexandra Martinez",
+    createdAt: "2025-06-10",
     status: "active",
     startDate: "2025-08-01",
     endDate: "2025-09-30",
