@@ -549,18 +549,18 @@ const Insights = () => {
       {/* ═══ MODAL POPUP ═══ */}
       {openModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setOpenModal(null)} />
-          <div className="relative bg-background border border-border rounded-xl shadow-2xl w-[90vw] max-w-[1200px] max-h-[80vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-              <div className="flex items-center gap-2">
+          <div className="absolute inset-0 bg-foreground/20 backdrop-blur-[2px]" onClick={() => setOpenModal(null)} />
+          <div className="relative bg-background border border-border rounded-xl shadow-2xl w-[92vw] max-w-[1200px] max-h-[85vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-muted/10">
+              <div className="flex items-center gap-2.5">
                 <ModalIcon className="w-4 h-4 text-primary" />
-                <h3 className="text-sm font-bold text-foreground">{modalTitle} — Detailed Breakdown</h3>
+                <h3 className="text-[13px] font-bold text-foreground">{modalTitle} — Detailed Breakdown</h3>
               </div>
-              <button onClick={() => setOpenModal(null)} className="p-1 rounded-md hover:bg-muted transition-colors">
+              <button onClick={() => setOpenModal(null)} className="p-1.5 rounded-md hover:bg-muted transition-colors">
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
-            <div className="p-5 overflow-auto max-h-[calc(80vh-52px)]">
+            <div className="p-5 overflow-auto max-h-[calc(85vh-56px)]">
               {modalGroup && renderGroupTable(modalGroup)}
               {isCorrelationModal && correlationCard && (
                 <div className="rounded-lg border border-border overflow-hidden">
