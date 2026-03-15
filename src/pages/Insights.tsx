@@ -177,8 +177,8 @@ const Insights = () => {
 
   const { ranked, correlationTable } = useMemo(() => {
     const ranked = [...assets].sort((a, b) => b.roas - a.roas);
-    const correlationTable = buildCorrelationTable(assets);
-    return { ranked, correlationTable };
+    const correlationCards = buildCorrelationCards(assets);
+    return { ranked, correlationCards };
   }, [assets]);
 
   if (assets.length === 0) {
