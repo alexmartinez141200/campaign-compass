@@ -36,10 +36,8 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
   const remaining = campaign.totalBudget - totalSpend;
   const bestRoas = channelBreakdown.length > 0 ? Math.max(...channelBreakdown.map(c => c.roas)) : 0;
 
-  // Max values for inline comparison bars
-  const maxSpend = Math.max(...channelBreakdown.map(c => c.spend), 1);
-  const maxConv = Math.max(...channelBreakdown.map(c => c.conversions), 1);
-  const maxRev = Math.max(...channelBreakdown.map(c => c.revenue), 1);
+
+
 
   const columns = [
     { key: "spend", label: "Spend", format: (r: typeof channelBreakdown[0]) => `$${r.spend.toLocaleString()}` },
