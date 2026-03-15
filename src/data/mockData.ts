@@ -291,6 +291,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRV-7788", name: "Video_Pool_Party", type: "video", thumbnail: creative1, dimensions: "1080×1920", channel: "tiktok",
+        creativeProfile: { aspectRatio: "9:16", videoDuration: 12, motionIntensity: "High", colorContrast: "High", brandProminence: "Subtle", brandConsistency: "Medium", funnelStage: "Awareness", callToAction: "Shop Now", productInFirst3s: true },
         spend: 8100, impressions: 490000, reach: 380000, frequency: 1.29, clicks: 14700, linkClicks: 11760, outboundClicks: 10290,
         postReactions: 6100, postComments: 540, postShares: 1500, postSaves: 2400,
         videoPlays: 450000, thruPlays: 292500, avgWatchTime: 7.8, videoWatched25: 410000, videoWatched50: 300000, videoWatched75: 190000, videoWatched95: 112000,
