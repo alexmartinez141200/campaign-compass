@@ -1,6 +1,7 @@
 /* refreshed */
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, BarChart3, Layers, TrendingUp, MousePointerClick, ShoppingCart, Eye, Zap, Video, X, Rocket, Paintbrush } from "lucide-react";
+import AppSidebar from "@/components/AppSidebar";
 import type { CreativeAsset, Channel } from "@/data/mockData";
 import { channelConfig } from "@/components/ChannelIcon";
 import { useMemo, useRef, useCallback, useState } from "react";
