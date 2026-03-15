@@ -5,6 +5,7 @@ type SortOption = "roas" | "spend";
 interface FilterBarProps {
   selectedChannels: Channel[];
   sort: SortOption;
+  selectedCount: number;
   onChannelsChange: (channels: Channel[]) => void;
   onSortChange: (s: SortOption) => void;
 }
@@ -21,7 +22,7 @@ const sorts: { value: SortOption; label: string }[] = [
   { value: "spend", label: "Spend" },
 ];
 
-const FilterBar = ({ selectedChannels, sort, onChannelsChange, onSortChange }: FilterBarProps) => {
+const FilterBar = ({ selectedChannels, sort, selectedCount, onChannelsChange, onSortChange }: FilterBarProps) => {
   const activeTab = selectedChannels.length === 0 ? "all" : selectedChannels.length === 1 ? selectedChannels[0] : "all";
 
   const handleTab = (value: Channel | "all") => {
@@ -52,7 +53,14 @@ const FilterBar = ({ selectedChannels, sort, onChannelsChange, onSortChange }: F
       </div>
 
       {/* Get Insights */}
-      <button className="px-4 py-1.5 text-xs font-semibold rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+      <button
+        disabled={selectedCount < 2}
+        className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+          selectedCount >= 2
+            ? "bg-primary text-primary-foreground hover:bg-primary/90"
+            : "bg-muted text-muted-foreground cursor-not-allowed"
+        }`}
+      >
         Get Insights
       </button>
     </div>
