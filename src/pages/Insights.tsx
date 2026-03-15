@@ -273,7 +273,7 @@ const Insights = () => {
   const maxRoas = Math.max(...assets.map(a => a.roas));
 
   const scoreColor = (s: number) =>
-    s >= 70 ? "text-emerald-600 dark:text-emerald-400" : s >= 40 ? "text-amber-600 dark:text-amber-400" : "text-destructive";
+    s >= 70 ? "text-accent" : s >= 40 ? "text-amber-500" : "text-destructive";
   const scoreBg = (s: number) =>
     s >= 70 ? "bg-emerald-500/10" : s >= 40 ? "bg-amber-500/10" : "bg-destructive/10";
 
