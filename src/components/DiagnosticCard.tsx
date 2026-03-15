@@ -12,6 +12,7 @@ interface DiagnosticCardProps {
   rank: number;
   maxRoas: number;
   selected?: boolean;
+  showCheckbox?: boolean;
   onSelectToggle?: (id: string) => void;
   onClick?: () => void;
 }
