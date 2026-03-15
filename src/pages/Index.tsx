@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { FolderOpen, ArrowLeft } from "lucide-react";
+import type { Channel } from "@/data/mockData";
 import AppSidebar from "@/components/AppSidebar";
 import CampaignHeader from "@/components/CampaignHeader";
 import CampaignList from "@/components/CampaignList";
@@ -7,14 +8,13 @@ import DiagnosticCard, { DiagnosticHeader } from "@/components/DiagnosticCard";
 import FilterBar from "@/components/FilterBar";
 import { campaigns } from "@/data/mockData";
 
-type ChannelFilter = "all" | "meta" | "tiktok" | "google" | "linkedin" | "amazon";
 type SortOption = "roas" | "spend";
 type CampaignTab = "active" | "archived";
 
 const Index = () => {
   const [campaignTab, setCampaignTab] = useState<CampaignTab>("active");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
-  const [channelFilter, setChannelFilter] = useState<ChannelFilter>("all");
+  const [selectedChannels, setSelectedChannels] = useState<Channel[]>([]);
   const [sort, setSort] = useState<SortOption>("roas");
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
 
@@ -38,14 +38,14 @@ const Index = () => {
   const filteredAssets = useMemo(() => {
     if (!selectedCampaign) return [];
     let assets = selectedCampaign.assets;
-    if (channelFilter !== "all") assets = assets.filter((a) => a.channel === channelFilter);
+    if (selectedChannels.length > 0) assets = assets.filter((a) => selectedChannels.includes(a.channel));
 
     return [...assets].sort((a, b) => {
       if (sort === "roas") return b.roas - a.roas;
       if (sort === "spend") return b.spend - a.spend;
       return 0;
     });
-  }, [selectedCampaign, channelFilter, sort]);
+  }, [selectedCampaign, selectedChannels, sort]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,7 +143,7 @@ const Index = () => {
               <CampaignHeader campaign={selectedCampaign} />
 
               <div className="mt-5 mb-4">
-                <FilterBar channelFilter={channelFilter} sort={sort} onChannelFilterChange={setChannelFilter} onSortChange={setSort} />
+                <FilterBar selectedChannels={selectedChannels} sort={sort} onChannelsChange={setSelectedChannels} onSortChange={setSort} />
               </div>
 
               <div className="space-y-0.5">
