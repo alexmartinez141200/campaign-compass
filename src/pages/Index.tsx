@@ -14,12 +14,18 @@ type SortOption = "roas" | "spend";
 type CampaignTab = "active" | "archived";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [campaignTab, setCampaignTab] = useState<CampaignTab>("active");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>([]);
   const [sort, setSort] = useState<SortOption>("roas");
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
   const [viewingAssetId, setViewingAssetId] = useState<string | null>(null);
+
+  const handleGetInsights = () => {
+    const assets = filteredAssets.filter(a => selectedAssets.has(a.id));
+    navigate("/insights", { state: { assets } });
+  };
 
   const toggleAssetSelection = (id: string) => {
     setSelectedAssets((prev) => {
