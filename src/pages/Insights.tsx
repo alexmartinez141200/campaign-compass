@@ -610,7 +610,6 @@ const Insights = () => {
           </button>
         </div>
       </div>
-      )}
       </main>
     </div>
   );
