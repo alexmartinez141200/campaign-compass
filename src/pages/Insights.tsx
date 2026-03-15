@@ -7,25 +7,74 @@ import { useMemo } from "react";
 
 /* ─── Helpers ─── */
 
-function fmt(v: number, type: "pct" | "dollar" | "x" | "num" | "dollar2"): string {
+function fmt(v: number, type: "pct" | "dollar" | "x" | "num" | "dollar2" | "sec" | "rank"): string {
   if (type === "pct") return `${v.toFixed(1)}%`;
   if (type === "dollar") return `$${v.toFixed(0)}`;
   if (type === "dollar2") return `$${v.toFixed(2)}`;
   if (type === "x") return `${v.toFixed(1)}x`;
-  return v.toFixed(0);
+  if (type === "sec") return `${v.toFixed(1)}s`;
+  if (type === "rank") return v >= 2 ? "Above" : v >= 1 ? "Avg" : "Below";
+  return v.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
-type MetricDef = { key: string; label: string; get: (a: CreativeAsset) => number; format: "pct" | "dollar" | "x" | "num" | "dollar2"; higherIsBetter: boolean };
+type MetricFormat = "pct" | "dollar" | "x" | "num" | "dollar2" | "sec" | "rank";
+type MetricDef = { key: string; label: string; group: string; get: (a: CreativeAsset) => number; format: MetricFormat; higherIsBetter: boolean; videoOnly?: boolean };
 
-const METRICS: MetricDef[] = [
-  { key: "roas", label: "ROAS", get: a => a.roas, format: "x", higherIsBetter: true },
-  { key: "ctr", label: "CTR", get: a => a.ctr, format: "pct", higherIsBetter: true },
-  { key: "cpm", label: "CPM", get: a => a.cpm, format: "dollar2", higherIsBetter: false },
-  { key: "cpc", label: "CPC", get: a => a.cpc, format: "dollar2", higherIsBetter: false },
-  { key: "conv", label: "Conv%", get: a => a.conversionRate, format: "pct", higherIsBetter: true },
-  { key: "cpa", label: "CPA", get: a => a.costPerResult, format: "dollar2", higherIsBetter: false },
-  { key: "eng", label: "Eng%", get: a => (a.postReactions + a.postShares + a.postSaves) / a.impressions * 100, format: "pct", higherIsBetter: true },
-  { key: "freq", label: "Freq", get: a => a.frequency, format: "num", higherIsBetter: false },
+const rankVal = (r: "above_average" | "average" | "below_average") => r === "above_average" ? 2 : r === "average" ? 1 : 0;
+
+const ALL_METRICS: MetricDef[] = [
+  // Efficiency
+  { key: "roas", label: "ROAS", group: "Efficiency", get: a => a.roas, format: "x", higherIsBetter: true },
+  { key: "cpa", label: "CPA", group: "Efficiency", get: a => a.costPerResult, format: "dollar2", higherIsBetter: false },
+  { key: "cpm", label: "CPM", group: "Efficiency", get: a => a.cpm, format: "dollar2", higherIsBetter: false },
+  { key: "cpc", label: "CPC", group: "Efficiency", get: a => a.cpc, format: "dollar2", higherIsBetter: false },
+  { key: "cpcAll", label: "CPC All", group: "Efficiency", get: a => a.cpcAll, format: "dollar2", higherIsBetter: false },
+  
+  // Delivery
+  { key: "impressions", label: "Impr", group: "Delivery", get: a => a.impressions, format: "num", higherIsBetter: true },
+  { key: "reach", label: "Reach", group: "Delivery", get: a => a.reach, format: "num", higherIsBetter: true },
+  { key: "freq", label: "Freq", group: "Delivery", get: a => a.frequency, format: "num", higherIsBetter: false },
+
+  // Click & Traffic
+  { key: "ctr", label: "CTR", group: "Click", get: a => a.ctr, format: "pct", higherIsBetter: true },
+  { key: "ctrAll", label: "CTR All", group: "Click", get: a => a.ctrAll, format: "pct", higherIsBetter: true },
+  { key: "clicks", label: "Clicks", group: "Click", get: a => a.clicks, format: "num", higherIsBetter: true },
+  { key: "linkClicks", label: "Link Clicks", group: "Click", get: a => a.linkClicks, format: "num", higherIsBetter: true },
+  { key: "outbound", label: "Outbound", group: "Click", get: a => a.outboundClicks, format: "num", higherIsBetter: true },
+
+  // Engagement
+  { key: "engRate", label: "Eng%", group: "Engagement", get: a => (a.postReactions + a.postShares + a.postSaves) / a.impressions * 100, format: "pct", higherIsBetter: true },
+  { key: "reactions", label: "React.", group: "Engagement", get: a => a.postReactions, format: "num", higherIsBetter: true },
+  { key: "comments", label: "Comm.", group: "Engagement", get: a => a.postComments, format: "num", higherIsBetter: true },
+  { key: "shares", label: "Shares", group: "Engagement", get: a => a.postShares, format: "num", higherIsBetter: true },
+  { key: "saves", label: "Saves", group: "Engagement", get: a => a.postSaves, format: "num", higherIsBetter: true },
+
+  // Funnel (raw)
+  { key: "lpv", label: "LPV", group: "Funnel", get: a => a.landingPageViews, format: "num", higherIsBetter: true },
+  { key: "atc", label: "ATC", group: "Funnel", get: a => a.addToCart, format: "num", higherIsBetter: true },
+  { key: "ic", label: "Checkout", group: "Funnel", get: a => a.initiateCheckout, format: "num", higherIsBetter: true },
+  { key: "conv", label: "Purch.", group: "Funnel", get: a => a.conversions, format: "num", higherIsBetter: true },
+  { key: "revenue", label: "Revenue", group: "Funnel", get: a => a.purchaseValue, format: "dollar", higherIsBetter: true },
+
+  // Funnel rates
+  { key: "clickToLpv", label: "Click→LPV", group: "Funnel Rates", get: a => a.linkClicks > 0 ? (a.landingPageViews / a.linkClicks) * 100 : 0, format: "pct", higherIsBetter: true },
+  { key: "lpvToAtc", label: "LPV→ATC", group: "Funnel Rates", get: a => a.landingPageViews > 0 ? (a.addToCart / a.landingPageViews) * 100 : 0, format: "pct", higherIsBetter: true },
+  { key: "atcToIc", label: "ATC→IC", group: "Funnel Rates", get: a => a.addToCart > 0 ? (a.initiateCheckout / a.addToCart) * 100 : 0, format: "pct", higherIsBetter: true },
+  { key: "icToPurch", label: "IC→Purch", group: "Funnel Rates", get: a => a.initiateCheckout > 0 ? (a.conversions / a.initiateCheckout) * 100 : 0, format: "pct", higherIsBetter: true },
+  { key: "convRate", label: "Conv%", group: "Funnel Rates", get: a => a.conversionRate, format: "pct", higherIsBetter: true },
+
+  // Video
+  { key: "avgWatch", label: "Avg Watch", group: "Video", get: a => a.avgWatchTime || 0, format: "sec", higherIsBetter: true, videoOnly: true },
+  { key: "thruRate", label: "ThruPlay%", group: "Video", get: a => a.videoPlays && a.thruPlays ? (a.thruPlays / a.videoPlays) * 100 : 0, format: "pct", higherIsBetter: true, videoOnly: true },
+  { key: "vw25", label: "25%", group: "Video", get: a => a.videoPlays && a.videoWatched25 ? (a.videoWatched25 / a.videoPlays) * 100 : 0, format: "pct", higherIsBetter: true, videoOnly: true },
+  { key: "vw50", label: "50%", group: "Video", get: a => a.videoPlays && a.videoWatched50 ? (a.videoWatched50 / a.videoPlays) * 100 : 0, format: "pct", higherIsBetter: true, videoOnly: true },
+  { key: "vw75", label: "75%", group: "Video", get: a => a.videoPlays && a.videoWatched75 ? (a.videoWatched75 / a.videoPlays) * 100 : 0, format: "pct", higherIsBetter: true, videoOnly: true },
+  { key: "vw95", label: "95%", group: "Video", get: a => a.videoPlays && a.videoWatched95 ? (a.videoWatched95 / a.videoPlays) * 100 : 0, format: "pct", higherIsBetter: true, videoOnly: true },
+
+  // Quality Rankings (Meta)
+  { key: "qualRank", label: "Quality", group: "Quality", get: a => rankVal(a.qualityRanking), format: "rank", higherIsBetter: true },
+  { key: "engRank", label: "Eng Rank", group: "Quality", get: a => rankVal(a.engagementRateRanking), format: "rank", higherIsBetter: true },
+  { key: "convRank", label: "Conv Rank", group: "Quality", get: a => rankVal(a.conversionRateRanking), format: "rank", higherIsBetter: true },
 ];
 
 type AttrDef = { key: string; label: string; get: (a: CreativeAsset) => string };
