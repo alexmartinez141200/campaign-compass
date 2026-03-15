@@ -42,17 +42,14 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
   const maxRev = Math.max(...channelBreakdown.map(c => c.revenue), 1);
 
   const columns = [
-    // Investment
-    { key: "spend", label: "Spend", format: (r: typeof channelBreakdown[0]) => `$${r.spend.toLocaleString()}`, max: maxSpend, val: (r: typeof channelBreakdown[0]) => r.spend, bar: true },
-    // Outcomes
-    { key: "revenue", label: "Revenue", format: (r: typeof channelBreakdown[0]) => `$${r.revenue.toLocaleString()}`, max: maxRev, val: (r: typeof channelBreakdown[0]) => r.revenue, bar: true },
-    { key: "roas", label: "ROAS", format: (r: typeof channelBreakdown[0]) => `${r.roas.toFixed(1)}x`, max: 0, val: () => 0, bar: false, colorFn: (r: typeof channelBreakdown[0]) => r.roas >= 4 ? "text-emerald-600" : r.roas >= 2 ? "text-foreground" : "text-destructive" },
-    { key: "conv", label: "Conv.", format: (r: typeof channelBreakdown[0]) => r.conversions.toLocaleString(), max: maxConv, val: (r: typeof channelBreakdown[0]) => r.conversions, bar: false },
-    // Efficiency
-    { key: "cpa", label: "CPA", format: (r: typeof channelBreakdown[0]) => `$${r.cpa.toFixed(2)}`, max: 0, val: () => 0, bar: false },
-    { key: "ctr", label: "CTR", format: (r: typeof channelBreakdown[0]) => `${r.ctr.toFixed(1)}%`, max: 0, val: () => 0, bar: false },
-    { key: "cpm", label: "CPM", format: (r: typeof channelBreakdown[0]) => `$${r.cpm.toFixed(2)}`, max: 0, val: () => 0, bar: false },
-  ];
+    { key: "spend", label: "Spend", format: (r: typeof channelBreakdown[0]) => `$${r.spend.toLocaleString()}` },
+    { key: "revenue", label: "Revenue", format: (r: typeof channelBreakdown[0]) => `$${r.revenue.toLocaleString()}` },
+    { key: "roas", label: "ROAS", format: (r: typeof channelBreakdown[0]) => `${r.roas.toFixed(1)}x`, colorFn: (r: typeof channelBreakdown[0]) => r.roas >= 4 ? "text-emerald-600" : r.roas >= 2 ? "text-foreground" : "text-destructive" },
+    { key: "conv", label: "Conv.", format: (r: typeof channelBreakdown[0]) => r.conversions.toLocaleString() },
+    { key: "cpa", label: "CPA", format: (r: typeof channelBreakdown[0]) => `$${r.cpa.toFixed(2)}` },
+    { key: "ctr", label: "CTR", format: (r: typeof channelBreakdown[0]) => `${r.ctr.toFixed(1)}%` },
+    { key: "cpm", label: "CPM", format: (r: typeof channelBreakdown[0]) => `$${r.cpm.toFixed(2)}` },
+  ] as { key: string; label: string; format: (r: typeof channelBreakdown[0]) => string; colorFn?: (r: typeof channelBreakdown[0]) => string }[];
 
   return (
     <div>
