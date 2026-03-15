@@ -313,6 +313,6 @@ export const campaigns: Campaign[] = rawCampaigns.map(c => ({
   ...c,
   assets: c.assets.map(a => ({
     ...a,
-    dailyMetrics: generateDailyMetrics(a.spend, a.impressions, a.clicks, a.conversions, a.purchaseValue),
+    dailyMetrics: generateDailyMetrics(a.spend, a.impressions, a.clicks, a.conversions, a.purchaseValue, a.landingPageViews, a.addToCart, a.initiateCheckout),
   })),
 }));
