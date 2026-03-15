@@ -325,6 +325,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRV-1134", name: "Video_Student_UGC", type: "video", thumbnail: creative4, dimensions: "1080×1920", channel: "tiktok",
+        creativeProfile: { aspectRatio: "9:16", videoDuration: 20, motionIntensity: "High", colorContrast: "Medium", brandProminence: "Subtle", brandConsistency: "Low", funnelStage: "Awareness", callToAction: "Shop Now", productInFirst3s: false },
         spend: 4000, impressions: 280000, reach: 215000, frequency: 1.30, clicks: 8400, linkClicks: 6720, outboundClicks: 5880,
         postReactions: 2800, postComments: 240, postShares: 620, postSaves: 980,
         videoPlays: 260000, thruPlays: 156000, avgWatchTime: 6.8, videoWatched25: 230000, videoWatched50: 165000, videoWatched75: 102000, videoWatched95: 58000,
