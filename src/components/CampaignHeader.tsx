@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import type { Campaign, Channel } from "@/data/mockData";
 import { channelConfig } from "./ChannelIcon";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 interface CampaignHeaderProps {
   campaign: Campaign;
@@ -36,6 +35,11 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
   const spendPct = ((totalSpend / campaign.totalBudget) * 100);
   const remaining = campaign.totalBudget - totalSpend;
   const bestRoas = channelBreakdown.length > 0 ? Math.max(...channelBreakdown.map(c => c.roas)) : 0;
+
+  // Compute max values for relative bar widths
+  const maxSpend = Math.max(...channelBreakdown.map(c => c.spend), 1);
+  const maxConversions = Math.max(...channelBreakdown.map(c => c.conversions), 1);
+  const maxRevenue = Math.max(...channelBreakdown.map(c => c.revenue), 1);
 
   return (
     <div>
@@ -89,110 +93,85 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
         </div>
       </div>
 
-      {/* Pie chart + performance table */}
+      {/* Platform performance cards with mini bars */}
       {channelBreakdown.length > 1 && (
-        <div className="flex gap-6 items-start">
-          {/* Pie Chart */}
-          <div className="flex-shrink-0 w-[200px]">
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-bold mb-3">Spend Allocation</p>
-            <ResponsiveContainer width={200} height={200}>
-              <PieChart>
-                <Pie
-                  data={channelBreakdown.map((row) => ({
-                    name: channelConfig[row.channel].label,
-                    value: row.spend,
-                  }))}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={52}
-                  outerRadius={85}
-                  paddingAngle={3}
-                  dataKey="value"
-                  strokeWidth={0}
-                >
-                  {channelBreakdown.map((row) => (
-                    <Cell key={row.channel} fill={channelConfig[row.channel].color} opacity={0.8} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, "Spend"]}
-                  contentStyle={{
-                    background: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                    fontFamily: "monospace",
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            {/* Legend */}
-            <div className="flex flex-col gap-1.5 mt-2">
-              {channelBreakdown.map((row) => {
-                const pct = totalSpend > 0 ? (row.spend / totalSpend) * 100 : 0;
-                return (
-                  <div key={row.channel} className="flex items-center gap-2">
-                    <div
-                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: channelConfig[row.channel].color, opacity: 0.8 }}
-                    />
-                    <span className="text-[11px] font-medium text-muted-foreground">{channelConfig[row.channel].label}</span>
-                    <span className="text-[11px] font-mono text-foreground ml-auto">{pct.toFixed(0)}%</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+        <div className={`grid gap-4 ${channelBreakdown.length === 3 ? "grid-cols-3" : channelBreakdown.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
+          {channelBreakdown.map((row) => {
+            const pctOfTotal = totalSpend > 0 ? (row.spend / totalSpend) * 100 : 0;
+            const isBest = row.roas === bestRoas;
+            const roasColor = row.roas >= 4 ? "text-emerald-600" : row.roas >= 2 ? "text-foreground" : "text-destructive";
+            const color = channelConfig[row.channel].color;
 
-          {/* Performance table */}
-          <div className="flex-1 overflow-hidden">
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-bold mb-3">Platform Performance</p>
-            <div className="rounded-lg border border-border/60 overflow-hidden">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-muted/30">
-                    {["Platform", "Spend", "ROAS", "Conv.", "CTR", "CPA", "CPM", "Revenue"].map((h, i) => (
-                      <th key={h} className={`text-[9px] uppercase tracking-wider text-muted-foreground font-semibold px-3 py-2.5 ${i > 0 ? "text-right" : ""}`}>
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {channelBreakdown.map((row) => {
-                    const isBest = row.roas === bestRoas;
-                    const roasColor = row.roas >= 4 ? "text-emerald-600" : row.roas >= 2 ? "text-foreground" : "text-destructive";
-                    return (
-                      <tr key={row.channel} className="border-t border-border/40 hover:bg-muted/20 transition-colors">
-                        <td className="px-3 py-3">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-2 h-2 rounded-full flex-shrink-0"
-                              style={{ backgroundColor: channelConfig[row.channel].color, opacity: 0.8 }}
-                            />
-                            <span className="text-xs font-semibold text-foreground">{channelConfig[row.channel].label}</span>
-                            <span className="text-[10px] text-muted-foreground font-mono">{row.assets}a</span>
-                            {isBest && (
-                              <span className="text-[8px] uppercase tracking-wider font-bold text-emerald-600 bg-emerald-500/10 px-1 py-0.5 rounded">
-                                Best
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-3 py-3 text-right text-xs font-mono font-medium text-foreground">${row.spend.toLocaleString()}</td>
-                        <td className={`px-3 py-3 text-right text-xs font-mono font-bold ${roasColor}`}>{row.roas.toFixed(1)}x</td>
-                        <td className="px-3 py-3 text-right text-xs font-mono font-medium text-foreground">{row.conversions.toLocaleString()}</td>
-                        <td className="px-3 py-3 text-right text-xs font-mono font-medium text-foreground">{row.ctr.toFixed(1)}%</td>
-                        <td className="px-3 py-3 text-right text-xs font-mono font-medium text-foreground">${row.cpa.toFixed(2)}</td>
-                        <td className="px-3 py-3 text-right text-xs font-mono font-medium text-foreground">${row.cpm.toFixed(2)}</td>
-                        <td className="px-3 py-3 text-right text-xs font-mono font-medium text-foreground">${row.revenue.toLocaleString()}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+            const metrics = [
+              { label: "Spend", value: `$${row.spend.toLocaleString()}`, barPct: (row.spend / maxSpend) * 100, showBar: true },
+              { label: "ROAS", value: `${row.roas.toFixed(1)}x`, barPct: null, showBar: false, colorClass: roasColor },
+              { label: "Conversions", value: row.conversions.toLocaleString(), barPct: (row.conversions / maxConversions) * 100, showBar: true },
+              { label: "Revenue", value: `$${row.revenue.toLocaleString()}`, barPct: (row.revenue / maxRevenue) * 100, showBar: true },
+            ];
+
+            return (
+              <div
+                key={row.channel}
+                className="relative rounded-lg border border-border/60 bg-card overflow-hidden"
+              >
+                {/* Color accent */}
+                <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ backgroundColor: color, opacity: 0.6 }} />
+
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 pt-4 pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color, opacity: 0.8 }} />
+                    <span className="text-sm font-bold text-foreground">{channelConfig[row.channel].label}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{row.assets} assets</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isBest && (
+                      <span className="text-[8px] uppercase tracking-wider font-bold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                        Best ROAS
+                      </span>
+                    )}
+                    <span className="text-[10px] font-mono text-muted-foreground">{pctOfTotal.toFixed(0)}% of budget</span>
+                  </div>
+                </div>
+
+                {/* Metrics with bars */}
+                <div className="px-4 pb-4 space-y-3">
+                  {metrics.map((m) => (
+                    <div key={m.label}>
+                      <div className="flex items-baseline justify-between mb-1">
+                        <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">{m.label}</span>
+                        <span className={`text-sm font-mono font-bold ${m.colorClass || "text-foreground"}`}>{m.value}</span>
+                      </div>
+                      {m.showBar && m.barPct !== null && (
+                        <div className="w-full h-1.5 bg-muted/40 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{ width: `${m.barPct}%`, backgroundColor: color, opacity: 0.45 }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Secondary metrics row */}
+                  <div className="flex gap-4 pt-2 border-t border-border/40">
+                    <div className="flex-1">
+                      <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">CTR</p>
+                      <p className="text-xs font-mono font-medium text-foreground">{row.ctr.toFixed(1)}%</p>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">CPA</p>
+                      <p className="text-xs font-mono font-medium text-foreground">${row.cpa.toFixed(2)}</p>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">CPM</p>
+                      <p className="text-xs font-mono font-medium text-foreground">${row.cpm.toFixed(2)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
