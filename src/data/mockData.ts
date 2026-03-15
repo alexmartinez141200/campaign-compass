@@ -257,6 +257,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRV-4412", name: "Video_BTS_Shoot", type: "video", thumbnail: creative4, dimensions: "1080×1920", channel: "tiktok",
+        creativeProfile: { aspectRatio: "9:16", videoDuration: 18, motionIntensity: "High", colorContrast: "Medium", brandProminence: "Subtle", brandConsistency: "Medium", funnelStage: "Awareness", callToAction: "Follow Us", productInFirst3s: false },
         spend: 6800, impressions: 410000, reach: 320000, frequency: 1.28, clicks: 12300, linkClicks: 9840, outboundClicks: 8610,
         postReactions: 5800, postComments: 520, postShares: 1400, postSaves: 2100,
         videoPlays: 380000, thruPlays: 247000, avgWatchTime: 9.2, videoWatched25: 350000, videoWatched50: 260000, videoWatched75: 168000, videoWatched95: 98000,
