@@ -93,15 +93,14 @@ const Index = () => {
                 onClick={() => { setSelectedCampaignId(null); setViewingAssetId(null); }}
                 className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium"
               >
-                <ArrowLeft className="w-4 h-4" />
                 Campaigns
               </button>
-              <span className="text-muted-foreground/40">/</span>
+              <span className="text-muted-foreground/40">{'>'}</span>
               <button
                 onClick={() => setViewingAssetId(null)}
                 className={`text-[13px] font-medium transition-colors ${viewingAssetId ? "text-muted-foreground hover:text-foreground" : "text-foreground"}`}
               >
-                {selectedCampaign.name}
+                Campaign Profile
               </button>
               {viewingAssetId && (
                 <>
