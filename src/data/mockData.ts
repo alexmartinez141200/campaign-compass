@@ -301,6 +301,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRI-7789", name: "Static_Summer_Hero", type: "image", thumbnail: creative2, dimensions: "1200×628", channel: "google",
+        creativeProfile: { aspectRatio: "16:9", motionIntensity: "None", colorContrast: "Medium", brandProminence: "Balanced", brandConsistency: "High", funnelStage: "Conversion", callToAction: "Buy Now", productInFirst3s: true },
         spend: 4300, impressions: 165000, reach: 132000, frequency: 1.25, clicks: 4950, linkClicks: 3960, outboundClicks: 3465,
         postReactions: 1200, postComments: 85, postShares: 220, postSaves: 520,
         conversions: 312, purchaseValue: 24940, addToCart: 980, initiateCheckout: 560, landingPageViews: 3400,
