@@ -132,19 +132,6 @@ const Index = () => {
             )}
           </div>
 
-          {/* Search */}
-          {!selectedCampaign && (
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50" />
-              <input
-                type="text"
-                placeholder="Search campaigns or assets..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 text-[13px] bg-muted/30 border border-border rounded-md w-64 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-colors"
-              />
-            </div>
-          )}
         </div>
 
         <div className="p-6">
@@ -211,22 +198,34 @@ const Index = () => {
               {topTab === "campaigns" ? (
                 <>
                   {/* Sub-filters */}
-                  <div className="flex items-center gap-2 mb-4">
-                    {([
-                      { key: "all" as CampaignFilter, label: "All" },
-                      { key: "active" as CampaignFilter, label: "Active" },
-                      { key: "past" as CampaignFilter, label: "Past" },
-                    ]).map(({ key, label }) => (
-                      <button
-                        key={key}
-                        onClick={() => setCampaignFilter(key)}
-                        className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${
-                          campaignFilter === key ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    ))}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      {([
+                        { key: "all" as CampaignFilter, label: "All" },
+                        { key: "active" as CampaignFilter, label: "Active" },
+                        { key: "past" as CampaignFilter, label: "Past" },
+                      ]).map(({ key, label }) => (
+                        <button
+                          key={key}
+                          onClick={() => setCampaignFilter(key)}
+                          className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${
+                            campaignFilter === key ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50" />
+                      <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-8 pr-3 py-1.5 text-[13px] bg-muted/30 border border-border rounded-md w-52 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-colors"
+                      />
+                    </div>
                   </div>
                   <CampaignList
                     campaigns={visibleCampaigns}
