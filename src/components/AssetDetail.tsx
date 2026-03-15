@@ -240,7 +240,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
         {/* Right: Creative Profile List — takes 2/3 */}
         <div className="flex-1 border-l border-border/40 bg-muted/20 px-5 py-3">
-          <p className="text-[8px] uppercase tracking-wider text-muted-foreground/60 font-semibold mb-2">Creative Profile</p>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-1">
           <div className="grid grid-cols-2 gap-x-8 gap-y-1">
             {[
               ["Platform", asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : "Google"],
