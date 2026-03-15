@@ -487,27 +487,7 @@ const Insights = () => {
           </div>
         )}
 
-        {/* ═══ ACTION CTAs ═══ */}
-        <div className="grid grid-cols-2 gap-4 pt-2 pb-4">
-          <button className="group flex items-center gap-4 p-5 rounded-lg border border-border bg-surface shadow-card hover:shadow-card-hover hover:border-primary/30 transition-all duration-150 text-left">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors">
-              <Rocket className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-[13px] font-semibold text-foreground">Launch New Campaign</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Apply these winning insights to a new campaign</p>
-            </div>
-          </button>
-          <button className="group flex items-center gap-4 p-5 rounded-lg border border-border bg-surface shadow-card hover:shadow-card-hover hover:border-accent/30 transition-all duration-150 text-left">
-            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0 group-hover:bg-accent/15 transition-colors">
-              <Paintbrush className="w-5 h-5 text-accent" />
-            </div>
-            <div>
-              <p className="text-[13px] font-semibold text-foreground">Design New Creative</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Start a new design based on top-performing attributes</p>
-            </div>
-          </button>
-        </div>
+
       </div>
 
       {/* ═══ MODAL POPUP ═══ */}
