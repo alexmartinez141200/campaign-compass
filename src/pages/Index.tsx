@@ -233,45 +233,47 @@ const Index = () => {
                   </div>
 
                   {/* Creatives table */}
-                  <div className="rounded-lg border border-border overflow-hidden shadow-[var(--shadow-card)]">
+                  <div className="rounded-lg border border-border overflow-auto shadow-[var(--shadow-card)]">
                     <table className="w-full">
                       <thead>
                         <tr className="bg-muted/30 border-b border-border">
-                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left cursor-pointer hover:text-foreground transition-colors" style={{ minWidth: 200 }} onClick={() => setCreativeSortKey("name")}>Asset</th>
-                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Campaign</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-5 py-2.5 text-left" style={{ minWidth: 240 }}>Creative Asset</th>
                           <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Channel</th>
-                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-left">Type</th>
                           <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => setCreativeSortKey("spend")}>Spend</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right">Revenue</th>
                           <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => setCreativeSortKey("roas")}>ROAS</th>
-                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => setCreativeSortKey("conversions")}>Conv.</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right">CPM</th>
                           <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right">CTR</th>
-                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right">CPA</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right">CPC</th>
+                          <th className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-4 py-2.5 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => setCreativeSortKey("conversions")}>Conv.</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredCreatives.map(({ campaignName, asset }) => (
+                        {filteredCreatives.map(({ asset }) => (
                           <tr key={asset.id} className="border-b border-border/30 last:border-0 hover:bg-muted/10 transition-colors cursor-pointer">
-                            <td className="px-4 py-3">
+                            <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
-                                <img src={asset.thumbnail} alt={asset.name} className="w-8 h-8 rounded-lg object-cover flex-shrink-0 border border-border/40" />
+                                <img src={asset.thumbnail} alt={asset.name} className="w-11 h-11 rounded-lg object-cover flex-shrink-0 border border-border/40" />
                                 <div className="min-w-0">
-                                  <p className="text-[12px] font-semibold text-foreground truncate">{asset.name}</p>
+                                  <p className="text-[13px] font-semibold text-foreground truncate">{asset.name}</p>
                                   <p className="text-[10px] font-mono text-muted-foreground/50">{asset.id}</p>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-[11px] text-muted-foreground">{campaignName}</td>
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-4">
                               <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${channelConfig[asset.channel]?.bgClass}`}>
                                 {channelConfig[asset.channel]?.label}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-[11px] text-muted-foreground capitalize">{asset.type}</td>
-                            <td className="px-4 py-3 text-right text-[12px] font-mono text-foreground">${asset.spend.toLocaleString()}</td>
-                            <td className="px-4 py-3 text-right text-[12px] font-mono font-semibold text-accent">{asset.roas.toFixed(1)}x</td>
-                            <td className="px-4 py-3 text-right text-[12px] font-mono text-foreground">{asset.conversions.toLocaleString()}</td>
-                            <td className="px-4 py-3 text-right text-[12px] font-mono text-foreground">{asset.ctr.toFixed(1)}%</td>
-                            <td className="px-4 py-3 text-right text-[12px] font-mono text-foreground">${asset.costPerResult.toFixed(2)}</td>
+                            <td className="px-4 py-4 text-right text-[13px] font-mono text-foreground">${asset.spend.toLocaleString()}</td>
+                            <td className="px-4 py-4 text-right text-[13px] font-mono text-foreground">${asset.purchaseValue.toLocaleString()}</td>
+                            <td className="px-4 py-4 text-right">
+                              <span className="text-[14px] font-mono font-semibold text-accent border-b-2 border-accent/40 pb-0.5">{asset.roas.toFixed(1)}x</span>
+                            </td>
+                            <td className="px-4 py-4 text-right text-[13px] font-mono text-foreground">${asset.cpm.toFixed(2)}</td>
+                            <td className="px-4 py-4 text-right text-[13px] font-mono text-foreground">{asset.ctr.toFixed(0)}%</td>
+                            <td className="px-4 py-4 text-right text-[13px] font-mono text-foreground">${asset.cpc.toFixed(2)}</td>
+                            <td className="px-4 py-4 text-right text-[13px] font-mono text-foreground">{asset.conversions.toLocaleString()}</td>
                           </tr>
                         ))}
                       </tbody>
