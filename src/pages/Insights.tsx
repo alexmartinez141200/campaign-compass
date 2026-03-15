@@ -609,6 +609,7 @@ const Insights = () => {
             </div>
           </button>
         </div>
+      </div>
       )}
       </main>
     </div>
