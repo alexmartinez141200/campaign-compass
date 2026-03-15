@@ -257,6 +257,15 @@ const Insights = () => {
     return { ranked, correlationCards, metrics, metricGroups, assetGroupScores };
   }, [assets]);
 
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const toggleSection = (key: string) => {
+    setExpandedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
   if (assets.length === 0) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -269,7 +278,6 @@ const Insights = () => {
   }
 
   const maxRoas = Math.max(...assets.map(a => a.roas));
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const toggleSection = (key: string) => {
     setExpandedSections(prev => {
       const next = new Set(prev);
