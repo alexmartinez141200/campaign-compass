@@ -379,6 +379,47 @@ const Insights = () => {
 
       <div className="p-6 space-y-8">
 
+        {/* ═══ Performance Ranking ═══ */}
+        <div className="rounded-lg border border-border overflow-hidden bg-card">
+          <div className="px-4 py-2 bg-muted/20 border-b border-border/40">
+            <h2 className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Performance Ranking</h2>
+          </div>
+          <div className="divide-y divide-border/30">
+            {diagnoses.map((d, i) => {
+              const asset = assets.find(a => a.id === d.assetId)!;
+              const roasColor = d.roas >= 5 ? "text-emerald-600" : d.roas >= 3 ? "text-foreground" : "text-destructive";
+              const maxRoas = Math.max(...assets.map(a => a.roas));
+              const barW = maxRoas > 0 ? (d.roas / maxRoas) * 100 : 0;
+              return (
+                <div key={d.assetId} className="flex items-center gap-4 px-4 py-2.5">
+                  <img src={d.thumbnail} alt={d.assetName} className="w-9 h-9 rounded-md object-cover flex-shrink-0" />
+                  <div className="min-w-[120px] max-w-[160px] flex-shrink-0">
+                    <p className="text-[12px] font-semibold text-foreground truncate">{d.assetName}</p>
+                    <p className="text-[9px] font-mono text-muted-foreground">{d.assetId}</p>
+                  </div>
+                  <div className="flex-1 flex items-center gap-3">
+                    <div className="flex-1 h-1.5 bg-muted/40 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${d.roas >= 5 ? "bg-emerald-500" : d.roas >= 3 ? "bg-primary" : "bg-destructive"}`}
+                        style={{ width: `${barW}%` }}
+                      />
+                    </div>
+                    <span className={`text-[14px] font-mono font-bold min-w-[50px] text-right ${roasColor}`}>{d.roas}x</span>
+                  </div>
+                  <div className="flex items-center gap-4 ml-2 text-[11px] font-mono text-muted-foreground flex-shrink-0">
+                    <span>${asset.spend.toLocaleString()}<span className="text-[8px] ml-0.5 uppercase tracking-wider">spend</span></span>
+                    <span>${asset.purchaseValue.toLocaleString()}<span className="text-[8px] ml-0.5 uppercase tracking-wider">rev</span></span>
+                    <span>{asset.conversionRate}%<span className="text-[8px] ml-0.5 uppercase tracking-wider">conv</span></span>
+                  </div>
+                  <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border flex-shrink-0 ${assessmentStyle[d.overallAssessment].class}`}>
+                    {assessmentStyle[d.overallAssessment].label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* ═══ Cross-Asset Patterns ═══ */}
         {patterns.length > 0 && (
           <div>
