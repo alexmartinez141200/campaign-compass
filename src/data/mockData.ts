@@ -64,7 +64,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative2,
         dimensions: "1200×628",
         channel: "meta",
-        spend: 7200, impressions: 182000, clicks: 4550, conversions: 295, roas: 3.4, ctr: 2.5, cpc: 1.58,
+        spend: 7200, impressions: 182000, clicks: 4550, conversions: 295, roas: 3.4, ctr: 2.5, cpc: 1.58, cpm: 39.56, conversionRate: 6.5,
       },
       {
         id: "CRC-9901",
