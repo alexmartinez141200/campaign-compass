@@ -4,11 +4,7 @@ import type { CreativeAsset } from "@/data/mockData";
 import { Checkbox } from "@/components/ui/checkbox";
 import ChannelIcon from "./ChannelIcon";
 
-const rankStyles: Record<number, string> = {
-  0: "bg-yellow-400/15 text-yellow-600 ring-1 ring-yellow-400/20",
-  1: "bg-muted text-muted-foreground",
-  2: "bg-amber-400/10 text-amber-600",
-};
+const rankStyle = "text-muted-foreground/60";
 
 interface DiagnosticCardProps {
   asset: CreativeAsset;
@@ -41,7 +37,6 @@ export const DiagnosticHeader = () => (
 );
 
 const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelectToggle, onClick }: DiagnosticCardProps) => {
-  const isTop = rank === 0;
   const roasPercent = Math.min((asset.roas / maxRoas) * 100, 100);
 
   const roasColor =
@@ -63,15 +58,11 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
       className={`group flex items-center h-[68px] px-4 rounded-lg cursor-pointer transition-all duration-100 border ${
         selected
           ? "border-primary/25 bg-primary/[0.02]"
-          : isTop
-            ? "border-yellow-300/30 bg-yellow-50/30"
-            : "border-transparent bg-surface hover:bg-muted/30"
+          : "border-transparent bg-surface hover:bg-muted/30"
       }`}
     >
       {/* Rank */}
-      <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold font-mono flex-shrink-0 ${
-        rankStyles[rank] || "text-muted-foreground/40"
-      }`}>
+      <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold font-mono flex-shrink-0 ${rankStyle}`}>
         {rank + 1}
       </div>
 
