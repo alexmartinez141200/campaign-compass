@@ -49,7 +49,7 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, delay: index * 0.03, ease: [0.25, 0.1, 0.25, 1] }}
-      className={`group grid grid-cols-[auto_auto_56px_1fr_auto_auto] items-center gap-x-3 px-4 py-3.5 rounded-xl transition-all duration-150 cursor-pointer border ${
+      className={`group grid grid-cols-[auto_auto_56px_1fr_auto_auto_auto] items-center gap-x-3 px-4 py-3.5 rounded-xl transition-all duration-150 cursor-pointer border ${
         selected
           ? "border-primary/30 bg-primary/[0.03] shadow-[0_0_0_1px_hsl(var(--primary)/0.1)]"
           : isTop
@@ -87,15 +87,29 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
         </p>
       </div>
 
-      {/* Col 5: Metrics row */}
+      {/* Col 5: Spend (INPUT metric) — visually distinct */}
+      <div className="flex flex-col items-center px-3 py-2 rounded-lg bg-muted/60 border border-dashed border-border min-w-[72px]">
+        <span className="text-[8px] uppercase tracking-widest text-muted-foreground/70 font-medium mb-0.5">Spend</span>
+        <span className="text-[14px] font-mono font-bold text-foreground/70">
+          ${asset.spend.toLocaleString()}
+        </span>
+      </div>
+
+      {/* Arrow separator: input → output */}
+      <div className="flex items-center px-1">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-muted-foreground/30">
+          <path d="M3 8h10M10 5l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+
+      {/* Col 6: Output metrics */}
       <div className="flex items-center gap-px bg-secondary/50 rounded-lg p-1.5">
         {/* ROAS - hero metric */}
-        <div className="flex flex-col items-center min-w-[72px] px-2">
+        <div className="flex flex-col items-center min-w-[68px] px-2">
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium mb-0.5">ROAS</span>
           <span className={`text-lg font-mono font-bold leading-tight ${roasColor}`}>
             {asset.roas}x
           </span>
-          {/* Mini bar */}
           <div className="w-full h-[3px] bg-border/60 rounded-full overflow-hidden mt-1">
             <motion.div
               className={`h-full rounded-full ${
