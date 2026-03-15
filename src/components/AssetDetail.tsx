@@ -1,8 +1,12 @@
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, DollarSign, Eye, MousePointerClick, ShoppingCart, Target, BarChart3, Heart, MessageCircle, Share2, Bookmark, Play, Clock, Users, Repeat, ExternalLink, Crosshair } from "lucide-react";
-import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import type { CreativeAsset } from "@/data/mockData";
+import { ArrowLeft, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, DollarSign, Eye, MousePointerClick, ShoppingCart, Target, BarChart3, Heart, MessageCircle, Share2, Bookmark, Play, Clock, Users, Repeat, ExternalLink, Crosshair, CalendarDays } from "lucide-react";
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
+import type { CreativeAsset, DailyMetric } from "@/data/mockData";
 import ChannelIcon from "./ChannelIcon";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import type { DateRange } from "react-day-picker";
 
 interface AssetDetailProps {
   asset: CreativeAsset;
