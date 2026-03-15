@@ -31,6 +31,8 @@ export interface CreativeAsset {
 export interface Campaign {
   id: string;
   name: string;
+  owner: string;
+  createdAt: string;
   status: "active" | "paused" | "completed";
   startDate: string;
   endDate: string;
