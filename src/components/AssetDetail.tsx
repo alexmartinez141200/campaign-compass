@@ -446,7 +446,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
 
         {/* ROAS chart + Funnel side by side */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-5 gap-3">
+          <div className="col-span-3">
           <ChartCard title="ROAS Over Time" height="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
