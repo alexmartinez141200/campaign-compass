@@ -60,7 +60,7 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
 
   return (
     <motion.div
-      onClick={onClick}
+      onClick={showCheckbox ? () => onSelectToggle?.(asset.id) : onClick}
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.025 }}
@@ -153,8 +153,13 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
         <p className="text-[13px] font-mono font-medium text-foreground">{asset.conversionRate}%</p>
       </div>
 
-      {/* Chevron */}
-      <ChevronRight className="w-3.5 h-3.5 ml-4 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors flex-shrink-0" />
+      {/* Chevron - navigates to detail */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onClick?.(); }}
+        className="ml-4 p-1 rounded hover:bg-muted/50 transition-colors flex-shrink-0"
+      >
+        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors" />
+      </button>
     </motion.div>
   );
 };
