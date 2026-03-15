@@ -490,14 +490,14 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
               <KpiCard label="Website Clicks" value={asset.outboundClicks.toLocaleString()} sub="To your site" />
             </div>
-            <ChartCard title="CTR % Over Time" height="h-[200px]">
+            <ChartCard title="Video View Rate % Over Time" height="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={filteredDaily}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} />
+                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} domain={['dataMin - 5', 'dataMax + 2']} />
                   <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
-                  <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="videoViewRate" name="Video View Rate" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </ChartCard>
