@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Trophy, Medal, Award } from "lucide-react";
 import type { CreativeAsset } from "@/data/mockData";
 import { Checkbox } from "@/components/ui/checkbox";
 import ChannelIcon from "./ChannelIcon";
@@ -7,9 +8,16 @@ import PerformanceBar from "./PerformanceBar";
 const formatCurrency = (n: number) => `$${n.toLocaleString()}`;
 const channelVariant = (ch: string) => ch === "meta" ? "blue" : ch === "tiktok" ? "teal" : "rose";
 
+const rankConfig: Record<number, { icon: typeof Trophy; color: string; bg: string; label: string }> = {
+  0: { icon: Trophy, color: "text-yellow-500", bg: "bg-yellow-50 border-yellow-200", label: "Top Performer" },
+  1: { icon: Medal, color: "text-gray-400", bg: "bg-gray-50 border-gray-200", label: "#2" },
+  2: { icon: Award, color: "text-amber-600", bg: "bg-orange-50 border-orange-200", label: "#3" },
+};
+
 interface DiagnosticCardProps {
   asset: CreativeAsset;
   index: number;
+  rank: number;
   maxRoas: number;
   selected?: boolean;
   onSelectToggle?: (id: string) => void;
