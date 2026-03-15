@@ -155,7 +155,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
   // Trend calculations (compare first half vs second half of range)
   const trends = useMemo(() => {
-    if (filteredDaily.length < 4) return { impressions: 0, cpm: 0, ctr: 0, cpc: 0, roas: 0, linkClicks: 0 };
+    if (filteredDaily.length < 4) return { impressions: 0, cpm: 0, ctr: 0, roas: 0, clicks: 0 };
     const mid = Math.floor(filteredDaily.length / 2);
     const first = filteredDaily.slice(0, mid);
     const second = filteredDaily.slice(mid);
@@ -165,9 +165,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       impressions: pctChange(avgOf(second, 'impressions'), avgOf(first, 'impressions')),
       cpm: pctChange(avgOf(second, 'cpm'), avgOf(first, 'cpm')),
       ctr: pctChange(avgOf(second, 'ctr'), avgOf(first, 'ctr')),
-      cpc: pctChange(avgOf(second, 'cpc'), avgOf(first, 'cpc')),
       roas: pctChange(avgOf(second, 'roas'), avgOf(first, 'roas')),
-      linkClicks: pctChange(avgOf(second, 'linkClicks'), avgOf(first, 'linkClicks')),
+      clicks: pctChange(avgOf(second, 'clicks'), avgOf(first, 'clicks')),
     };
   }, [filteredDaily]);
 
