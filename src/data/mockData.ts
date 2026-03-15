@@ -204,6 +204,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRC-9901", name: "Carousel_Gift_Guide", type: "carousel", thumbnail: creative3, dimensions: "1080×1080", channel: "meta",
+        creativeProfile: { aspectRatio: "1:1", motionIntensity: "Subtle", colorContrast: "High", brandProminence: "Balanced", brandConsistency: "High", funnelStage: "Consideration", callToAction: "Learn More", productInFirst3s: true },
         spend: 6200, impressions: 310000, reach: 248000, frequency: 1.25, clicks: 9300, linkClicks: 7440, outboundClicks: 6510,
         postReactions: 5100, postComments: 480, postShares: 1200, postSaves: 2800,
         conversions: 620, purchaseValue: 38440, addToCart: 2100, initiateCheckout: 1180, landingPageViews: 6200,
