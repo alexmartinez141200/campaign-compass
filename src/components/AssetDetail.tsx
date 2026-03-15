@@ -190,7 +190,19 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       default: filtered = daily;
     }
     let cumSpend = 0, cumPV = 0;
-    return filtered.map(d => { cumSpend += d.spend; cumPV += d.purchaseValue; return { ...d, cumulativeRoas: cumSpend > 0 ? Math.round(cumPV / cumSpend * 100) / 100 : 0 }; });
+    return filtered.map(d => {
+      cumSpend += d.spend;
+      cumPV += d.purchaseValue;
+      // For TikTok, compute daily video view rate (simulated: base rate + noise from CTR variation)
+      const baseVvr = asset.videoViewRate || 88;
+      const vvrNoise = (d.ctr - (asset.ctr || 3)) * 2; // correlate slightly with CTR variance
+      const videoViewRate = Math.round((baseVvr + vvrNoise) * 10) / 10;
+      return {
+        ...d,
+        cumulativeRoas: cumSpend > 0 ? Math.round(cumPV / cumSpend * 100) / 100 : 0,
+        videoViewRate: Math.max(60, Math.min(99, videoViewRate)),
+      };
+    });
   }, [daily, datePreset, customRange]);
 
   // Trend calculations
@@ -472,20 +484,20 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
 
             {/* ═══ D. TRAFFIC ═══ */}
-            <SectionHeader title="Traffic" description="Users clicking through to your site. CTR trends reveal creative effectiveness over time." />
+            <SectionHeader title="Traffic" description="Video view rate trend shows hook effectiveness over time. CPC and website clicks measure off-platform traffic quality." />
             <div className="grid grid-cols-3 gap-3 mb-3">
               <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
               <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
               <KpiCard label="Website Clicks" value={asset.outboundClicks.toLocaleString()} sub="To your site" />
             </div>
-            <ChartCard title="CTR % Over Time" height="h-[200px]">
+            <ChartCard title="Video View Rate % Over Time" height="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={filteredDaily}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} />
+                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} domain={['dataMin - 5', 'dataMax + 2']} />
                   <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
-                  <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="videoViewRate" name="Video View Rate" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </ChartCard>

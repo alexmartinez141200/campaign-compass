@@ -19,6 +19,7 @@ export interface DailyMetric {
   cumulativeRoas: number;
   ctr: number;
   cpm: number;
+  videoViewRate?: number; // TikTok: % of impressions resulting in 2s+ view
   // Funnel metrics
   landingPageViews: number;
   addToCart: number;
