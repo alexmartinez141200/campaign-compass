@@ -26,6 +26,7 @@ export const DiagnosticHeader = () => (
     <div className="ml-3 min-w-[60px] flex-shrink-0">Channel</div>
     <div className="flex-1" />
     <div className="mr-6 min-w-[70px] text-right flex-shrink-0">Spend</div>
+    <div className="mr-4 min-w-[70px] text-right flex-shrink-0">Revenue</div>
     <div className="w-px mr-5 flex-shrink-0" />
     <div className="min-w-[60px] mr-5 flex-shrink-0">ROAS</div>
     <div className="min-w-[56px] mr-4 flex-shrink-0 text-center">CPM</div>
