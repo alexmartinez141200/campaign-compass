@@ -63,33 +63,29 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.025 }}
-      className={`group flex items-center h-[68px] ${showCheckbox ? "px-4" : "px-0"} rounded-lg cursor-pointer transition-all duration-100 border ${
+      className={`group flex items-center h-[68px] px-0 rounded-lg cursor-pointer transition-all duration-100 border ${
         selected
           ? "border-primary/25 bg-primary/[0.02]"
           : "border-transparent bg-surface hover:bg-muted/30"
       }`}
     >
-      {/* Checkbox */}
-      {showCheckbox && (
-        <div
-          className="ml-2.5 flex-shrink-0"
-          onClick={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          <Checkbox
-            checked={selected}
-            onCheckedChange={() => onSelectToggle?.(asset.id)}
-            className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-          />
-        </div>
-      )}
-
-      {/* Number – only in "All" view (no checkbox) */}
-      {!showCheckbox && (
-        <div className="ml-0 w-5 flex-shrink-0 text-center">
+      {/* Fixed-width slot for checkbox or number */}
+      <div className="w-8 flex-shrink-0 flex items-center justify-center">
+        {showCheckbox ? (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <Checkbox
+              checked={selected}
+              onCheckedChange={() => onSelectToggle?.(asset.id)}
+              className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+            />
+          </div>
+        ) : (
           <span className="text-[11px] font-mono font-medium text-muted-foreground/50">{rank + 1}</span>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Thumbnail + Name group – name aligns to top of thumbnail */}
       <div className="ml-2 flex items-start gap-3 min-w-[174px] max-w-[224px] flex-shrink-0">
