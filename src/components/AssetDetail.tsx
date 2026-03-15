@@ -403,32 +403,14 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           })}
         </div>
 
-        {/* Overall funnel efficiency bar */}
+        {/* Overall funnel efficiency */}
         <div className="mt-4 pt-3 border-t border-border/40">
-          <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center justify-between">
             <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Overall Funnel Efficiency</span>
             <span className="text-[11px] font-mono font-bold text-foreground">
               {(asset.conversions / asset.landingPageViews * 100).toFixed(1)}% LPV → Purchase
             </span>
           </div>
-          <div className="h-2 bg-muted rounded-full overflow-hidden flex">
-            {[
-              { width: 100, color: "hsl(227, 71%, 55%)", opacity: 0.2 },
-              { width: asset.addToCart / asset.landingPageViews * 100, color: "hsl(174, 100%, 33%)", opacity: 0.3 },
-              { width: asset.initiateCheckout / asset.landingPageViews * 100, color: "hsl(45, 93%, 47%)", opacity: 0.4 },
-              { width: asset.conversions / asset.landingPageViews * 100, color: "hsl(142, 71%, 45%)", opacity: 1 },
-            ].map((seg, i) => (
-              <motion.div
-                key={i}
-                className="h-full rounded-full absolute"
-                style={{ background: seg.color, opacity: seg.opacity, left: 0 }}
-                initial={{ width: 0 }}
-                animate={{ width: `${seg.width}%` }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
-              />
-            ))}
-          </div>
-          <div className="relative h-2" />
         </div>
       </div>
 
