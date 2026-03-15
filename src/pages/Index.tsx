@@ -143,7 +143,7 @@ const Index = () => {
               <CampaignHeader campaign={selectedCampaign} />
 
               <div className="mt-5 mb-4">
-                <FilterBar channelFilter={channelFilter} sort={sort} onChannelFilterChange={setChannelFilter} onSortChange={setSort} />
+                <FilterBar selectedChannels={selectedChannels} sort={sort} onChannelsChange={setSelectedChannels} onSortChange={setSort} />
               </div>
 
               <div className="space-y-0.5">
