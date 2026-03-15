@@ -417,7 +417,7 @@ const Insights = () => {
                         );
                       })}
                       <td className="px-3 py-4 text-center bg-muted/5">
-                        <span className={`text-[15px] font-semibold font-mono leading-none ${scoreColor(overall)}`}>{overall}</span>
+                        <span className={`text-[12px] font-semibold font-mono leading-none ${scoreColor(overall)}`}>{overall}</span>
                       </td>
                     </tr>
                   );
