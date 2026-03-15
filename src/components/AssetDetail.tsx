@@ -241,7 +241,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         {/* Right: Creative Profile List — takes 2/3 */}
         <div className="flex-1 border-l border-border/40 bg-muted/20 px-5 py-3">
           <div className="grid grid-cols-2 gap-x-8 gap-y-1">
-          <div className="grid grid-cols-2 gap-x-8 gap-y-1">
             {[
               ["Platform", asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : "Google"],
               ["Format", asset.type.charAt(0).toUpperCase() + asset.type.slice(1)],
