@@ -26,6 +26,7 @@ export const DiagnosticHeader = () => (
     <div className="ml-3 min-w-[60px] flex-shrink-0">Channel</div>
     <div className="flex-1" />
     <div className="mr-6 min-w-[70px] text-right flex-shrink-0">Spend</div>
+    <div className="mr-4 min-w-[70px] text-right flex-shrink-0">Revenue</div>
     <div className="w-px mr-5 flex-shrink-0" />
     <div className="min-w-[60px] mr-5 flex-shrink-0">ROAS</div>
     <div className="min-w-[56px] mr-4 flex-shrink-0 text-center">CPM</div>
@@ -97,6 +98,11 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, onSelec
       {/* Spend */}
       <div className="mr-6 text-right min-w-[70px] flex-shrink-0">
         <p className="text-[13px] font-mono text-muted-foreground font-medium">${asset.spend.toLocaleString()}</p>
+      </div>
+
+      {/* Revenue */}
+      <div className="mr-4 text-right min-w-[70px] flex-shrink-0">
+        <p className="text-[13px] font-mono text-foreground font-semibold">${asset.purchaseValue.toLocaleString()}</p>
       </div>
 
       {/* Divider */}
