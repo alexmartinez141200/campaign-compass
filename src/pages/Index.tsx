@@ -180,7 +180,7 @@ const Index = () => {
                 )}
               </div>
             </>
-          )}
+          ) : null}
         </div>
       </main>
     </div>
