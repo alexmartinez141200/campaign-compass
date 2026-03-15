@@ -445,7 +445,7 @@ const Insights = () => {
         })}
 
         {/* ═══ 2. Attribute × Metric Correlation ═══ */}
-        <div>
+        <div ref={el => { sectionRefs.current["correlation"] = el; }} className="scroll-mt-4">
           <div className="flex items-center gap-2 mb-3">
             <Layers className="w-4 h-4 text-primary" />
             <h2 className="text-[11px] uppercase tracking-wider font-bold text-foreground">Profile × Metric Correlation</h2>
