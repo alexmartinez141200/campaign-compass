@@ -235,26 +235,38 @@ const Index = () => {
               ) : (
                 <>
                   {/* Channel filters */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <button
-                      onClick={() => setCreativeFilterChannel("all")}
-                      className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${creativeFilterChannel === "all" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
-                    >
-                      All
-                    </button>
-                    {(["meta", "tiktok", "google"] as Channel[]).map(ch => {
-                      const cfg = channelConfig[ch];
-                      if (!cfg) return null;
-                      return (
-                        <button
-                          key={ch}
-                          onClick={() => setCreativeFilterChannel(ch)}
-                          className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${creativeFilterChannel === ch ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
-                        >
-                          {cfg.label}
-                        </button>
-                      );
-                    })}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setCreativeFilterChannel("all")}
+                        className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${creativeFilterChannel === "all" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                      >
+                        All
+                      </button>
+                      {(["meta", "tiktok", "google"] as Channel[]).map(ch => {
+                        const cfg = channelConfig[ch];
+                        if (!cfg) return null;
+                        return (
+                          <button
+                            key={ch}
+                            onClick={() => setCreativeFilterChannel(ch)}
+                            className={`px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${creativeFilterChannel === ch ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                          >
+                            {cfg.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50" />
+                      <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-8 pr-3 py-1.5 text-[13px] bg-muted/30 border border-border rounded-md w-52 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-colors"
+                      />
+                    </div>
                   </div>
 
                   {/* Creatives list — same style as campaign detail */}
