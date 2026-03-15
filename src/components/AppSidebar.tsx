@@ -14,17 +14,18 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface NavItem {
   icon: React.ElementType;
   label: string;
-  active?: boolean;
+  path?: string;
 }
 
 const mainNav: NavItem[] = [
   { icon: Search, label: "Search" },
-  { icon: FolderOpen, label: "Campaigns", active: true },
-  { icon: Box, label: "Toolkits" },
+  { icon: FolderOpen, label: "Campaigns", path: "/" },
+  { icon: Box, label: "All Creatives", path: "/creatives" },
   { icon: Sparkles, label: "AI Creative Flows" },
   { icon: BarChart3, label: "Performance" },
   { icon: Clock, label: "Platform Utilization" },
@@ -34,6 +35,9 @@ const mainNav: NavItem[] = [
 ];
 
 const AppSidebar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   return (
     <aside className="w-[232px] h-screen bg-sidebar flex flex-col fixed left-0 top-0 z-40 border-r border-sidebar-border">
       {/* Logo */}
@@ -46,20 +50,24 @@ const AppSidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 space-y-0.5">
-        {mainNav.map((item) => (
-          <button
-            key={item.label}
-            className={cn(
-              "w-full flex items-center gap-3 px-3 py-[7px] rounded-md text-[13px] font-medium transition-colors duration-100",
-              item.active
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-sidebar-foreground hover:bg-muted hover:text-foreground"
-            )}
-          >
-            <item.icon className="w-[18px] h-[18px]" strokeWidth={1.8} />
-            {item.label}
-          </button>
-        ))}
+        {mainNav.map((item) => {
+          const isActive = item.path ? location.pathname === item.path : false;
+          return (
+            <button
+              key={item.label}
+              onClick={() => item.path && navigate(item.path)}
+              className={cn(
+                "w-full flex items-center gap-3 px-3 py-[7px] rounded-md text-[13px] font-medium transition-colors duration-100",
+                isActive
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              <item.icon className="w-[18px] h-[18px]" strokeWidth={1.8} />
+              {item.label}
+            </button>
+          );
+        })}
       </nav>
 
       {/* Footer */}
