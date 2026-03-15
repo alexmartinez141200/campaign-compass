@@ -9,6 +9,7 @@ interface FilterBarProps {
   showInsights: boolean;
   onChannelsChange: (channels: Channel[]) => void;
   onSortChange: (s: SortOption) => void;
+  onGetInsights?: () => void;
 }
 
 const channelTabs: { value: Channel | "all"; label: string }[] = [
