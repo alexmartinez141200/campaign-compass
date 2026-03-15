@@ -359,68 +359,76 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       <SectionTitle>Conversion Funnel</SectionTitle>
 
       {/* Funnel Over Time Chart with integrated legend */}
-      <div className="rounded-lg border border-border/60 bg-surface p-4">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">Funnel Over Time</p>
-        <div className="flex gap-4">
-          <div className="flex-1 h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={filteredDaily}>
-                <defs>
-                  <linearGradient id="lpvGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="atcGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="icGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="purchGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
-                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
-                <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
-                <Tooltip {...chartTooltipStyle} />
-                <Area type="monotone" dataKey="landingPageViews" name="LPV" stroke="hsl(227, 71%, 55%)" fill="url(#lpvGrad)" strokeWidth={1.5} dot={false} />
-                <Area type="monotone" dataKey="addToCart" name="ATC" stroke="hsl(174, 100%, 33%)" fill="url(#atcGrad)" strokeWidth={1.5} dot={false} />
-                <Area type="monotone" dataKey="initiateCheckout" name="Checkout" stroke="hsl(45, 93%, 47%)" fill="url(#icGrad)" strokeWidth={1.5} dot={false} />
-                <Area type="monotone" dataKey="conversions" name="Purchase" stroke="hsl(142, 71%, 45%)" fill="url(#purchGrad)" strokeWidth={1.5} dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
+      <div className="rounded-lg border border-border/60 bg-surface p-5">
+        <div className="flex gap-6">
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Funnel Over Time</p>
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={filteredDaily}>
+                  <defs>
+                    <linearGradient id="lpvGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0.12} />
+                      <stop offset="95%" stopColor="hsl(227, 71%, 55%)" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="atcGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0.12} />
+                      <stop offset="95%" stopColor="hsl(174, 100%, 33%)" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="icGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0.12} />
+                      <stop offset="95%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="purchGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0.12} />
+                      <stop offset="95%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+                  <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
+                  <Tooltip {...chartTooltipStyle} />
+                  <Area type="monotone" dataKey="landingPageViews" name="LPV" stroke="hsl(227, 71%, 55%)" fill="url(#lpvGrad)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="addToCart" name="ATC" stroke="hsl(174, 100%, 33%)" fill="url(#atcGrad)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="initiateCheckout" name="Checkout" stroke="hsl(45, 93%, 47%)" fill="url(#icGrad)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="conversions" name="Purchase" stroke="hsl(142, 71%, 45%)" fill="url(#purchGrad)" strokeWidth={2} dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          {/* Legend with totals and percentages */}
-          <div className="w-36 flex flex-col justify-center gap-3.5 flex-shrink-0 border-l border-border/40 pl-4">
+          {/* Legend */}
+          <div className="w-44 flex flex-col justify-center gap-1 flex-shrink-0">
             {[
-              { name: "LPV", full: "Landing Page Views", value: asset.landingPageViews, color: "hsl(227, 71%, 55%)" },
-              { name: "ATC", full: "Add to Cart", value: asset.addToCart, color: "hsl(174, 100%, 33%)" },
-              { name: "Checkout", full: "Initiate Checkout", value: asset.initiateCheckout, color: "hsl(45, 93%, 47%)" },
-              { name: "Purchase", full: "Purchases", value: asset.conversions, color: "hsl(142, 71%, 45%)" },
-            ].map((item) => {
+              { full: "Landing Page Views", value: asset.landingPageViews, color: "hsl(227, 71%, 55%)" },
+              { full: "Add to Cart", value: asset.addToCart, color: "hsl(174, 100%, 33%)" },
+              { full: "Initiate Checkout", value: asset.initiateCheckout, color: "hsl(45, 93%, 47%)" },
+              { full: "Purchases", value: asset.conversions, color: "hsl(142, 71%, 45%)" },
+            ].map((item, i, arr) => {
               const pct = (item.value / asset.landingPageViews * 100).toFixed(1);
+              const stepRate = i > 0 ? (item.value / arr[i - 1].value * 100).toFixed(1) : null;
               return (
-                <div key={item.name} className="flex items-start gap-2">
-                  <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background: item.color }} />
-                  <div className="min-w-0">
+                <div key={item.full} className="py-2.5 px-3 rounded-md hover:bg-muted/40 transition-colors">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <div className="w-3 h-[3px] rounded-full flex-shrink-0" style={{ background: item.color }} />
                     <p className="text-[10px] text-muted-foreground font-medium leading-tight">{item.full}</p>
-                    <p className="text-[13px] font-mono font-bold text-foreground leading-tight">{item.value.toLocaleString()}</p>
-                    <p className="text-[9px] text-muted-foreground">{pct}%</p>
                   </div>
+                  <div className="flex items-baseline gap-2 pl-5">
+                    <p className="text-[15px] font-mono font-bold text-foreground leading-tight">{item.value.toLocaleString()}</p>
+                    <p className="text-[10px] text-muted-foreground font-mono">{pct}%</p>
+                  </div>
+                  {stepRate && (
+                    <p className="text-[9px] text-muted-foreground/60 pl-5 mt-0.5 font-mono">{stepRate}% step conv.</p>
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
         {/* Overall funnel efficiency */}
-        <div className="mt-3 pt-3 border-t border-border/40">
+        <div className="mt-4 pt-3 border-t border-border/40">
           <div className="flex items-center justify-between">
             <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Overall Funnel Efficiency</span>
-            <span className="text-[11px] font-mono font-bold text-foreground">
+            <span className="text-[12px] font-mono font-bold text-foreground">
               {(asset.conversions / asset.landingPageViews * 100).toFixed(1)}% LPV → Purchase
             </span>
           </div>
