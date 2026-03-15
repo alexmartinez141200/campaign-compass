@@ -276,24 +276,27 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           ═══════════════════════════════════════════════════ */}
       <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
 
-      <div className="grid grid-cols-4 gap-2.5 mb-3">
-        <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
-        <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub={freqHealth === "critical" ? "⚠ Ad fatigue risk" : freqHealth === "warning" ? "Monitor closely" : "Healthy range"} />
-        <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
-        <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total budget used" />
+      <div className="grid grid-cols-5 gap-3">
+        <div className="col-span-2 grid grid-cols-2 gap-2.5">
+          <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
+          <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub={freqHealth === "critical" ? "⚠ Ad fatigue risk" : freqHealth === "warning" ? "Monitor closely" : "Healthy range"} />
+          <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
+          <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total budget used" />
+        </div>
+        <div className="col-span-3">
+          <ChartCard title="CPM Over Time" height="h-[168px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={filteredDaily}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `$${v}`} />
+                <Tooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
+                <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        </div>
       </div>
-
-      <ChartCard title="CPM Over Time" height="h-40">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={filteredDaily}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-            <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `$${v}`} />
-            <Tooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
-            <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={false} />
-          </LineChart>
-        </ResponsiveContainer>
-      </ChartCard>
 
       {/* ═══════════════════════════════════════════════════
           B. ENGAGEMENT — On-platform response
