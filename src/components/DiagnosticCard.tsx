@@ -27,7 +27,7 @@ const sorts: { value: SortOption; label: string }[] = [
 /** Column header row — render once above the list */
 export const DiagnosticHeader = ({ sort, onSortChange, showCheckbox = true }: { sort?: SortOption; onSortChange?: (s: SortOption) => void; showCheckbox?: boolean }) => (
   <div className="flex items-center h-8 px-4 text-[9px] uppercase tracking-wider font-semibold text-muted-foreground/60 select-none">
-    <div className="w-6 flex-shrink-0" /> {/* rank */}
+    {!showCheckbox && <div className="w-6 flex-shrink-0" />} {/* rank only in All */}
     {showCheckbox && <div className="ml-2.5 w-4 flex-shrink-0" />} {/* checkbox */}
     <div className="ml-3 w-11 flex-shrink-0" /> {/* thumbnail */}
     <div className="ml-3 min-w-[130px] max-w-[180px] flex-shrink-0">Creative Asset</div>
@@ -70,10 +70,12 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
           : "border-transparent bg-surface hover:bg-muted/30"
       }`}
     >
-      {/* Rank */}
-      <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold font-mono flex-shrink-0 ${rankStyle}`}>
-        {rank + 1}
-      </div>
+      {/* Rank - only in All view */}
+      {!showCheckbox && (
+        <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold font-mono flex-shrink-0 ${rankStyle}`}>
+          {rank + 1}
+        </div>
+      )}
 
       {/* Checkbox */}
       {showCheckbox && (
