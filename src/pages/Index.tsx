@@ -132,19 +132,6 @@ const Index = () => {
             )}
           </div>
 
-          {/* Search */}
-          {!selectedCampaign && (
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50" />
-              <input
-                type="text"
-                placeholder="Search campaigns or assets..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 text-[13px] bg-muted/30 border border-border rounded-md w-64 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-colors"
-              />
-            </div>
-          )}
         </div>
 
         <div className="p-6">
