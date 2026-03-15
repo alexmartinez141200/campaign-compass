@@ -520,7 +520,7 @@ const Insights = () => {
                     return (
                       <tr
                         key={card.attr.key}
-                        onClick={() => setOpenModal("correlation")}
+                        onClick={() => setOpenModal(`correlation:${card.attr.key}`)}
                         className="border-b border-border/20 last:border-0 hover:bg-muted/10 transition-colors cursor-pointer"
                       >
                         <td className="px-4 py-2 text-[11px] font-semibold text-foreground">{card.attr.label}</td>
