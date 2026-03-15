@@ -171,7 +171,7 @@ export const campaigns: Campaign[] = [
         thumbnail: creative1,
         dimensions: "1080×1920",
         channel: "tiktok",
-        spend: 8100, impressions: 490000, clicks: 14700, conversions: 588, roas: 4.8, ctr: 3.0, cpc: 0.55,
+        spend: 8100, impressions: 490000, clicks: 14700, conversions: 588, roas: 4.8, ctr: 3.0, cpc: 0.55, cpm: 16.53, conversionRate: 4.0,
       },
       {
         id: "CRI-7789",
