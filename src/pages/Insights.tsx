@@ -257,14 +257,7 @@ const Insights = () => {
     return { ranked, correlationCards, metrics, metricGroups, assetGroupScores };
   }, [assets]);
 
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const toggleSection = (key: string) => {
-    setExpandedSections(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key); else next.add(key);
-      return next;
-    });
-  };
+  const [openModal, setOpenModal] = useState<string | null>(null);
 
   if (assets.length === 0) {
     return (
