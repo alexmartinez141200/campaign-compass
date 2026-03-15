@@ -40,8 +40,6 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
 
 
   const columns = [
-    { key: "spend", label: "Spend", format: (r: typeof channelBreakdown[0]) => `$${r.spend.toLocaleString()}` },
-    { key: "revenue", label: "Revenue", format: (r: typeof channelBreakdown[0]) => `$${r.revenue.toLocaleString()}` },
     { key: "roas", label: "ROAS", format: (r: typeof channelBreakdown[0]) => `${r.roas.toFixed(1)}x`, colorFn: (r: typeof channelBreakdown[0]) => r.roas >= 4 ? "text-emerald-600" : r.roas >= 2 ? "text-foreground" : "text-destructive" },
     { key: "conv", label: "Conv.", format: (r: typeof channelBreakdown[0]) => r.conversions.toLocaleString() },
     { key: "cpa", label: "CPA", format: (r: typeof channelBreakdown[0]) => `$${r.cpa.toFixed(2)}` },
@@ -123,15 +121,17 @@ const CampaignHeader = ({ campaign }: CampaignHeaderProps) => {
                     {/* Dual bar: spend (muted) vs revenue (colored) */}
                     <td className="px-3 py-3">
                       <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-full h-[5px] bg-muted/20 rounded-full overflow-hidden">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-[5px] bg-muted/20 rounded-full overflow-hidden">
                             <div className="h-full rounded-full bg-muted-foreground/20 transition-all" style={{ width: `${spendW}%` }} />
                           </div>
+                          <span className="text-[10px] font-mono text-muted-foreground w-[60px] text-right">${row.spend.toLocaleString()}</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-full h-[5px] bg-muted/20 rounded-full overflow-hidden">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-[5px] bg-muted/20 rounded-full overflow-hidden">
                             <div className="h-full rounded-full transition-all" style={{ width: `${revW}%`, backgroundColor: color, opacity: 0.55 }} />
                           </div>
+                          <span className="text-[10px] font-mono text-foreground font-medium w-[60px] text-right">${row.revenue.toLocaleString()}</span>
                         </div>
                       </div>
                     </td>
