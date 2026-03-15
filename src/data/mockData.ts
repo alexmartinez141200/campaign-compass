@@ -25,6 +25,25 @@ export interface DailyMetric {
   initiateCheckout: number;
 }
 
+export type AspectRatio = "1:1" | "4:5" | "9:16" | "16:9";
+export type MotionIntensity = "None" | "Subtle" | "High";
+export type ContrastLevel = "Low" | "Medium" | "High";
+export type BrandProminence = "Subtle" | "Balanced" | "Dominant";
+export type BrandConsistency = "Low" | "Medium" | "High";
+export type FunnelStage = "Awareness" | "Consideration" | "Conversion";
+
+export interface CreativeProfile {
+  aspectRatio: AspectRatio;
+  videoDuration?: number; // seconds
+  motionIntensity: MotionIntensity;
+  colorContrast: ContrastLevel;
+  brandProminence: BrandProminence;
+  brandConsistency: BrandConsistency;
+  funnelStage: FunnelStage;
+  callToAction: string;
+  productInFirst3s: boolean;
+}
+
 export interface CreativeAsset {
   id: string;
   name: string;
@@ -32,6 +51,7 @@ export interface CreativeAsset {
   thumbnail: string;
   dimensions: string;
   channel: Channel;
+  creativeProfile: CreativeProfile;
   // Spend & Budget
   spend: number;
   // Delivery
@@ -49,7 +69,7 @@ export interface CreativeAsset {
   // Video (optional for non-video)
   videoPlays?: number;
   thruPlays?: number;
-  avgWatchTime?: number; // seconds
+  avgWatchTime?: number;
   videoWatched25?: number;
   videoWatched50?: number;
   videoWatched75?: number;
@@ -165,6 +185,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
     assets: [
       {
         id: "CRV-4821", name: "Video_Hero_01", type: "video", thumbnail: creative1, dimensions: "1080×1920", channel: "tiktok",
+        creativeProfile: { aspectRatio: "9:16", videoDuration: 15, motionIntensity: "High", colorContrast: "High", brandProminence: "Balanced", brandConsistency: "High", funnelStage: "Awareness", callToAction: "Shop Now", productInFirst3s: true },
         spend: 6800, impressions: 520000, reach: 385000, frequency: 1.35, clicks: 15600, linkClicks: 12480, outboundClicks: 11200,
         postReactions: 4200, postComments: 380, postShares: 920, postSaves: 1450,
         videoPlays: 480000, thruPlays: 312000, avgWatchTime: 8.4, videoWatched25: 420000, videoWatched50: 310000, videoWatched75: 198000, videoWatched95: 124000,
@@ -174,6 +195,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRI-7734", name: "Static_Product_03", type: "image", thumbnail: creative2, dimensions: "1200×628", channel: "meta",
+        creativeProfile: { aspectRatio: "16:9", motionIntensity: "None", colorContrast: "Medium", brandProminence: "Dominant", brandConsistency: "High", funnelStage: "Conversion", callToAction: "Buy Now", productInFirst3s: true },
         spend: 7200, impressions: 182000, reach: 145000, frequency: 1.26, clicks: 4550, linkClicks: 3640, outboundClicks: 3280,
         postReactions: 1890, postComments: 142, postShares: 310, postSaves: 680,
         conversions: 295, purchaseValue: 24480, addToCart: 890, initiateCheckout: 520, landingPageViews: 3100,
@@ -182,6 +204,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRC-9901", name: "Carousel_Gift_Guide", type: "carousel", thumbnail: creative3, dimensions: "1080×1080", channel: "meta",
+        creativeProfile: { aspectRatio: "1:1", motionIntensity: "Subtle", colorContrast: "High", brandProminence: "Balanced", brandConsistency: "High", funnelStage: "Consideration", callToAction: "Learn More", productInFirst3s: true },
         spend: 6200, impressions: 310000, reach: 248000, frequency: 1.25, clicks: 9300, linkClicks: 7440, outboundClicks: 6510,
         postReactions: 5100, postComments: 480, postShares: 1200, postSaves: 2800,
         conversions: 620, purchaseValue: 38440, addToCart: 2100, initiateCheckout: 1180, landingPageViews: 6200,
@@ -190,6 +213,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRV-5523", name: "Video_UGC_Review", type: "video", thumbnail: creative4, dimensions: "1080×1920", channel: "tiktok",
+        creativeProfile: { aspectRatio: "9:16", videoDuration: 22, motionIntensity: "High", colorContrast: "Medium", brandProminence: "Subtle", brandConsistency: "Medium", funnelStage: "Awareness", callToAction: "Shop Now", productInFirst3s: false },
         spend: 5200, impressions: 340000, reach: 260000, frequency: 1.31, clicks: 10200, linkClicks: 8160, outboundClicks: 7140,
         postReactions: 3100, postComments: 290, postShares: 680, postSaves: 1100,
         videoPlays: 310000, thruPlays: 186000, avgWatchTime: 6.2, videoWatched25: 280000, videoWatched50: 195000, videoWatched75: 120000, videoWatched95: 72000,
@@ -199,6 +223,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRI-4410", name: "Static_Hero_Banner", type: "image", thumbnail: creative1, dimensions: "1200×628", channel: "google",
+        creativeProfile: { aspectRatio: "16:9", motionIntensity: "None", colorContrast: "Low", brandProminence: "Dominant", brandConsistency: "Low", funnelStage: "Awareness", callToAction: "Learn More", productInFirst3s: false },
         spend: 3402, impressions: 89000, reach: 72000, frequency: 1.24, clicks: 2670, linkClicks: 2136, outboundClicks: 1870,
         postReactions: 420, postComments: 28, postShares: 65, postSaves: 110,
         conversions: 98, purchaseValue: 4082, addToCart: 310, initiateCheckout: 180, landingPageViews: 1800,
@@ -207,6 +232,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRV-6612", name: "Video_Gift_Unbox", type: "video", thumbnail: creative4, dimensions: "1080×1920", channel: "google",
+        creativeProfile: { aspectRatio: "9:16", videoDuration: 30, motionIntensity: "High", colorContrast: "Medium", brandProminence: "Balanced", brandConsistency: "Medium", funnelStage: "Consideration", callToAction: "Watch More", productInFirst3s: true },
         spend: 4200, impressions: 112000, reach: 89000, frequency: 1.26, clicks: 2240, linkClicks: 1792, outboundClicks: 1568,
         postReactions: 580, postComments: 42, postShares: 95, postSaves: 210,
         videoPlays: 98000, thruPlays: 58800, avgWatchTime: 5.1, videoWatched25: 86000, videoWatched50: 62000, videoWatched75: 38000, videoWatched95: 18000,
@@ -222,6 +248,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
     assets: [
       {
         id: "CRI-3310", name: "Static_Lookbook_01", type: "image", thumbnail: creative2, dimensions: "1200×628", channel: "meta",
+        creativeProfile: { aspectRatio: "16:9", motionIntensity: "None", colorContrast: "High", brandProminence: "Balanced", brandConsistency: "High", funnelStage: "Consideration", callToAction: "Shop Collection", productInFirst3s: true },
         spend: 8400, impressions: 195000, reach: 156000, frequency: 1.25, clicks: 5850, linkClicks: 4680, outboundClicks: 4100,
         postReactions: 2400, postComments: 195, postShares: 410, postSaves: 920,
         conversions: 340, purchaseValue: 31920, addToCart: 1100, initiateCheckout: 620, landingPageViews: 3900,
@@ -230,6 +257,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRV-4412", name: "Video_BTS_Shoot", type: "video", thumbnail: creative4, dimensions: "1080×1920", channel: "tiktok",
+        creativeProfile: { aspectRatio: "9:16", videoDuration: 18, motionIntensity: "High", colorContrast: "Medium", brandProminence: "Subtle", brandConsistency: "Medium", funnelStage: "Awareness", callToAction: "Follow Us", productInFirst3s: false },
         spend: 6800, impressions: 410000, reach: 320000, frequency: 1.28, clicks: 12300, linkClicks: 9840, outboundClicks: 8610,
         postReactions: 5800, postComments: 520, postShares: 1400, postSaves: 2100,
         videoPlays: 380000, thruPlays: 247000, avgWatchTime: 9.2, videoWatched25: 350000, videoWatched50: 260000, videoWatched75: 168000, videoWatched95: 98000,
@@ -239,6 +267,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRI-3311", name: "Static_Lookbook_02", type: "image", thumbnail: creative3, dimensions: "1200×628", channel: "google",
+        creativeProfile: { aspectRatio: "16:9", motionIntensity: "None", colorContrast: "Medium", brandProminence: "Balanced", brandConsistency: "Medium", funnelStage: "Consideration", callToAction: "Shop Now", productInFirst3s: true },
         spend: 2600, impressions: 98000, reach: 78000, frequency: 1.26, clicks: 2940, linkClicks: 2352, outboundClicks: 2060,
         postReactions: 680, postComments: 45, postShares: 120, postSaves: 280,
         conversions: 142, purchaseValue: 10140, addToCart: 460, initiateCheckout: 260, landingPageViews: 2000,
@@ -253,6 +282,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
     assets: [
       {
         id: "CRC-6601", name: "Carousel_Flash_Deals", type: "carousel", thumbnail: creative3, dimensions: "1080×1080", channel: "meta",
+        creativeProfile: { aspectRatio: "1:1", motionIntensity: "Subtle", colorContrast: "High", brandProminence: "Dominant", brandConsistency: "High", funnelStage: "Conversion", callToAction: "Shop Sale", productInFirst3s: true },
         spend: 12400, impressions: 520000, reach: 410000, frequency: 1.27, clicks: 15600, linkClicks: 12480, outboundClicks: 10920,
         postReactions: 7200, postComments: 680, postShares: 1800, postSaves: 4200,
         conversions: 1120, purchaseValue: 91760, addToCart: 3600, initiateCheckout: 2100, landingPageViews: 10500,
@@ -261,6 +291,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRV-7788", name: "Video_Pool_Party", type: "video", thumbnail: creative1, dimensions: "1080×1920", channel: "tiktok",
+        creativeProfile: { aspectRatio: "9:16", videoDuration: 12, motionIntensity: "High", colorContrast: "High", brandProminence: "Subtle", brandConsistency: "Medium", funnelStage: "Awareness", callToAction: "Shop Now", productInFirst3s: true },
         spend: 8100, impressions: 490000, reach: 380000, frequency: 1.29, clicks: 14700, linkClicks: 11760, outboundClicks: 10290,
         postReactions: 6100, postComments: 540, postShares: 1500, postSaves: 2400,
         videoPlays: 450000, thruPlays: 292500, avgWatchTime: 7.8, videoWatched25: 410000, videoWatched50: 300000, videoWatched75: 190000, videoWatched95: 112000,
@@ -270,6 +301,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRI-7789", name: "Static_Summer_Hero", type: "image", thumbnail: creative2, dimensions: "1200×628", channel: "google",
+        creativeProfile: { aspectRatio: "16:9", motionIntensity: "None", colorContrast: "Medium", brandProminence: "Balanced", brandConsistency: "High", funnelStage: "Conversion", callToAction: "Buy Now", productInFirst3s: true },
         spend: 4300, impressions: 165000, reach: 132000, frequency: 1.25, clicks: 4950, linkClicks: 3960, outboundClicks: 3465,
         postReactions: 1200, postComments: 85, postShares: 220, postSaves: 520,
         conversions: 312, purchaseValue: 24940, addToCart: 980, initiateCheckout: 560, landingPageViews: 3400,
@@ -284,6 +316,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
     assets: [
       {
         id: "CRI-9902", name: "Static_Backpack_Hero", type: "image", thumbnail: creative2, dimensions: "1200×628", channel: "meta",
+        creativeProfile: { aspectRatio: "16:9", motionIntensity: "None", colorContrast: "Medium", brandProminence: "Balanced", brandConsistency: "Medium", funnelStage: "Consideration", callToAction: "Shop Now", productInFirst3s: true },
         spend: 3200, impressions: 88000, reach: 70000, frequency: 1.26, clicks: 2640, linkClicks: 2112, outboundClicks: 1848,
         postReactions: 890, postComments: 62, postShares: 145, postSaves: 340,
         conversions: 132, purchaseValue: 9920, addToCart: 420, initiateCheckout: 240, landingPageViews: 1800,
@@ -292,6 +325,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
       },
       {
         id: "CRV-1134", name: "Video_Student_UGC", type: "video", thumbnail: creative4, dimensions: "1080×1920", channel: "tiktok",
+        creativeProfile: { aspectRatio: "9:16", videoDuration: 20, motionIntensity: "High", colorContrast: "Medium", brandProminence: "Subtle", brandConsistency: "Low", funnelStage: "Awareness", callToAction: "Shop Now", productInFirst3s: false },
         spend: 4000, impressions: 280000, reach: 215000, frequency: 1.30, clicks: 8400, linkClicks: 6720, outboundClicks: 5880,
         postReactions: 2800, postComments: 240, postShares: 620, postSaves: 980,
         videoPlays: 260000, thruPlays: 156000, avgWatchTime: 6.8, videoWatched25: 230000, videoWatched50: 165000, videoWatched75: 102000, videoWatched95: 58000,

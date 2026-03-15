@@ -214,7 +214,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <ArrowLeft className="w-4 h-4" /> Back to assets
       </button>
 
-      {/* ─── HERO + VERDICT (side by side for wide screens) ─── */}
+      {/* ─── HERO ─── */}
       <div className="flex gap-4 mb-5">
         <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0">
           <img src={asset.thumbnail} alt={asset.name} className="object-cover w-full h-full" />
@@ -231,6 +231,31 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               <p className="text-[10px] text-muted-foreground">of {campaignAssets.length}</p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ─── CREATIVE PROFILE ─── */}
+      <div className="rounded-lg border border-border/60 bg-card p-4 mb-5">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">Creative Profile</p>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          {[
+            { label: "Platform", value: asset.channel === "meta" ? "Meta" : asset.channel === "tiktok" ? "TikTok" : asset.channel === "google" ? "Google" : asset.channel },
+            { label: "Format", value: asset.type.charAt(0).toUpperCase() + asset.type.slice(1) },
+            ...(asset.creativeProfile.videoDuration ? [{ label: "Duration", value: `${asset.creativeProfile.videoDuration}s` }] : []),
+            { label: "Aspect Ratio", value: asset.creativeProfile.aspectRatio },
+            { label: "Motion", value: asset.creativeProfile.motionIntensity },
+            { label: "Contrast", value: asset.creativeProfile.colorContrast },
+            { label: "Brand", value: asset.creativeProfile.brandProminence },
+            { label: "Consistency", value: asset.creativeProfile.brandConsistency },
+            { label: "Funnel", value: asset.creativeProfile.funnelStage },
+            { label: "CTA", value: asset.creativeProfile.callToAction },
+            { label: "Product in 3s", value: asset.creativeProfile.productInFirst3s ? "Yes" : "No" },
+          ].map((attr) => (
+            <div key={attr.label} className="flex items-center gap-1.5">
+              <span className="text-[10px] text-muted-foreground">{attr.label}</span>
+              <span className="text-[11px] font-medium text-foreground bg-muted/60 px-2 py-0.5 rounded">{attr.value}</span>
+            </div>
+          ))}
         </div>
       </div>
 
