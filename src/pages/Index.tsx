@@ -67,9 +67,9 @@ const Index = () => {
 
   // All creatives flat list
   const allCreativeAssets = useMemo(() => {
-    const list: { campaignName: string; asset: (typeof campaigns)[0]["assets"][0] }[] = [];
+    const list: { campaignId: string; campaignName: string; asset: (typeof campaigns)[0]["assets"][0] }[] = [];
     for (const c of campaigns) {
-      for (const a of c.assets) list.push({ campaignName: c.name, asset: a });
+      for (const a of c.assets) list.push({ campaignId: c.id, campaignName: c.name, asset: a });
     }
     return list;
   }, []);
