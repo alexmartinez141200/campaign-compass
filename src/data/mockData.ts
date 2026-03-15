@@ -25,6 +25,25 @@ export interface DailyMetric {
   initiateCheckout: number;
 }
 
+export type AspectRatio = "1:1" | "4:5" | "9:16" | "16:9";
+export type MotionIntensity = "None" | "Subtle" | "High";
+export type ContrastLevel = "Low" | "Medium" | "High";
+export type BrandProminence = "Subtle" | "Balanced" | "Dominant";
+export type BrandConsistency = "Low" | "Medium" | "High";
+export type FunnelStage = "Awareness" | "Consideration" | "Conversion";
+
+export interface CreativeProfile {
+  aspectRatio: AspectRatio;
+  videoDuration?: number; // seconds
+  motionIntensity: MotionIntensity;
+  colorContrast: ContrastLevel;
+  brandProminence: BrandProminence;
+  brandConsistency: BrandConsistency;
+  funnelStage: FunnelStage;
+  callToAction: string;
+  productInFirst3s: boolean;
+}
+
 export interface CreativeAsset {
   id: string;
   name: string;
@@ -32,6 +51,7 @@ export interface CreativeAsset {
   thumbnail: string;
   dimensions: string;
   channel: Channel;
+  creativeProfile: CreativeProfile;
   // Spend & Budget
   spend: number;
   // Delivery
@@ -49,7 +69,7 @@ export interface CreativeAsset {
   // Video (optional for non-video)
   videoPlays?: number;
   thruPlays?: number;
-  avgWatchTime?: number; // seconds
+  avgWatchTime?: number;
   videoWatched25?: number;
   videoWatched50?: number;
   videoWatched75?: number;
