@@ -565,8 +565,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         );
       })()}
-        </div>
-      </div>
 
       {/* Video Metrics with Retention Chart */}
       {isVideo && (
