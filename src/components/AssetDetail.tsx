@@ -33,16 +33,19 @@ const kpiInfo: Record<string, string> = {
   "Revenue": "Total purchase value attributed to this ad within the conversion window.",
   "CPA": "Cost Per Acquisition — how much you pay for each purchase. Lower CPA means more efficient conversion spend.",
   "Plays": "Total number of times the video started playing, including auto-plays in feed.",
-  "ThruPlays": "Number of times the video was played to completion or for at least 15 seconds. Meta metric.",
+  "ThruPlays": "Number of times the video was played to completion or for at least 15 seconds. Meta-specific metric.",
+  "Completed Views": "Number of times the video was watched to completion. TikTok's equivalent of Meta's ThruPlays.",
   "Avg Watch": "Average duration a viewer watched the video before scrolling or closing.",
-  "ThruPlay Rate": "Percentage of total plays that counted as ThruPlays. Higher rate indicates more engaging content.",
+  "ThruPlay Rate": "Percentage of total plays that counted as ThruPlays (15s+ or completion). Meta-specific.",
+  "Completion Rate": "Percentage of viewers who watched the video to completion. TikTok's primary content retention metric.",
   "Video Views": "Total 2-second+ video views. TikTok's primary video metric.",
   "Video View Rate": "Percentage of impressions that resulted in a 2s+ video view. Higher = stronger hook.",
+  "6s Views": "Video views that reached 6 seconds. TikTok's key hook metric — did your content hold attention past the critical first moments?",
+  "6s View Rate": "Percentage of total video views that reached 6 seconds. The definitive measure of hook strength on TikTok.",
   "Profile Visits": "Number of times users visited your TikTok profile after seeing this ad.",
   "Follows": "New followers attributed to this ad. Measures brand-building effectiveness.",
   "Paid Likes": "Likes from paid impressions only, excluding organic engagement.",
   "Paid Shares": "Shares from paid impressions only. High shares indicate viral potential.",
-  "Completion Rate": "Percentage of viewers who watched the video to at least 95%. Indicates strong content retention.",
 };
 
 // ─── Insights Generator ───
@@ -236,13 +239,20 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const engagementTotal = engagementData.reduce((s, d) => s + d.value, 0);
 
   // Video retention
-  const videoRetentionData = isVideo ? [
+  const videoRetentionData = isVideo ? (isTikTok ? [
+    { point: "Start", pct: 100 },
+    { point: "6s", pct: Math.round((asset.videoViews6s || 0) / (asset.videoPlays || 1) * 100) },
+    { point: "25%", pct: Math.round((asset.videoWatched25 || 0) / (asset.videoPlays || 1) * 100) },
+    { point: "50%", pct: Math.round((asset.videoWatched50 || 0) / (asset.videoPlays || 1) * 100) },
+    { point: "75%", pct: Math.round((asset.videoWatched75 || 0) / (asset.videoPlays || 1) * 100) },
+    { point: "100%", pct: Math.round((asset.completedViews || 0) / (asset.videoPlays || 1) * 100) },
+  ] : [
     { point: "Start", pct: 100 },
     { point: "25%", pct: Math.round((asset.videoWatched25 || 0) / (asset.videoPlays || 1) * 100) },
     { point: "50%", pct: Math.round((asset.videoWatched50 || 0) / (asset.videoPlays || 1) * 100) },
     { point: "75%", pct: Math.round((asset.videoWatched75 || 0) / (asset.videoPlays || 1) * 100) },
     { point: "95%", pct: Math.round((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100) },
-  ] : [];
+  ]) : [];
 
   // Funnel steps
   const funnelSteps = [
@@ -339,8 +349,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         {isTikTok ? (
           <div className="grid grid-cols-5 gap-3 mb-2">
             <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
-            <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} />
-            <KpiCard label="Video View Rate" value={`${asset.videoViewRate || 0}%`} sub="2s+ views / impressions" />
+            <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} sub="2s+ views" />
+            <KpiCard label="6s View Rate" value={`${asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays * 100).toFixed(1) : 0}%`} sub="Hook strength" />
             <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
             <KpiCard label="ROAS" value={`${asset.roas}x`} trend={trends.roas} health={roasHealth} />
           </div>
@@ -362,13 +372,15 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         {isTikTok ? (
           <>
             {/* ═══ A. VIDEO PERFORMANCE (TikTok's core — first) ═══ */}
-            <SectionHeader title="Video Performance" description="TikTok video metrics — view rate and retention show content quality and hook strength." />
+            <SectionHeader title="Video Performance" description="TikTok video metrics — 6-second view rate measures hook strength, completion rate shows content quality." />
             <div className="grid grid-cols-2 gap-3">
-              <div className="grid grid-cols-2 gap-3">
-                <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} />
-                <KpiCard label="Video View Rate" value={`${asset.videoViewRate || 0}%`} sub="2s+ views / impressions" />
+              <div className="grid grid-cols-3 gap-3">
+                <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} sub="2s+ views" />
+                <KpiCard label="6s Views" value={(asset.videoViews6s || 0).toLocaleString()} sub="Passed the hook" />
+                <KpiCard label="6s View Rate" value={`${asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays * 100).toFixed(1) : 0}%`} sub="Hook strength" />
+                <KpiCard label="Completed Views" value={(asset.completedViews || 0).toLocaleString()} sub="Watched to end" />
                 <KpiCard label="Avg Watch" value={`${asset.avgWatchTime || 0}s`} />
-                <KpiCard label="Completion Rate" value={`${((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100).toFixed(1)}%`} sub="Watched to 95%" />
+                <KpiCard label="Completion Rate" value={`${asset.videoPlays ? ((asset.completedViews || 0) / asset.videoPlays * 100).toFixed(1) : 0}%`} sub="Views to completion" />
               </div>
               <ChartCard title="Retention Curve" height="h-[140px]">
                 <ResponsiveContainer width="100%" height="100%">
