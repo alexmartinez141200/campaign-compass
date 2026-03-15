@@ -200,7 +200,7 @@ const rawCampaigns: (Omit<Campaign, 'assets'> & { assets: Omit<CreativeAsset, 'd
         conversions: 580, purchaseValue: 32640, addToCart: 1820, initiateCheckout: 920, landingPageViews: 10800,
         roas: 4.8, ctr: 3.0, ctrAll: 4.2, cpc: 0.44, cpcAll: 0.35, cpm: 13.08, conversionRate: 3.7, costPerResult: 11.72,
         qualityRanking: "above_average", engagementRateRanking: "above_average", conversionRateRanking: "average",
-        profileVisits: 8400, follows: 620, paidLikes: 3100, paidShares: 680, videoViewRate: 92.3,
+        profileVisits: 8400, follows: 620, paidLikes: 3100, paidShares: 680, videoViewRate: 92.3, completedViews: 124000, videoViews6s: 396000,
       },
       {
         id: "CRI-7734", name: "Static_Product_03", type: "image", thumbnail: creative2, dimensions: "1200×628", channel: "meta",
