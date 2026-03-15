@@ -1,9 +1,9 @@
 /* refreshed */
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, BarChart3, Layers, TrendingUp, MousePointerClick, ShoppingCart, Eye, Zap, Video } from "lucide-react";
+import { ArrowLeft, BarChart3, Layers, TrendingUp, MousePointerClick, ShoppingCart, Eye, Zap, Video, ChevronRight } from "lucide-react";
 import type { CreativeAsset, Channel } from "@/data/mockData";
 import { channelConfig } from "@/components/ChannelIcon";
-import { useMemo } from "react";
+import { useMemo, useRef, useCallback } from "react";
 
 /* ─── Helpers ─── */
 
