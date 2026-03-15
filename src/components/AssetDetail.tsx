@@ -170,23 +170,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <Stat icon={Target} label="Cost / Result" value={`$${asset.costPerResult.toFixed(2)}`} sub="Per conversion" />
       </div>
 
-      {/* Charts: Spend vs Revenue + ROAS Trend */}
+      {/* Charts: ROAS Trend */}
       <SectionTitle>Performance Trends (14 Days)</SectionTitle>
       <div className="grid grid-cols-2 gap-3">
-        <ChartCard title="Daily Spend vs Revenue">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={daily} barGap={0} barSize={8}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(228 14% 93%)" />
-              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" />
-              <YAxis tick={{ fontSize: 9 }} stroke="hsl(228 10% 52%)" tickFormatter={(v) => `$${v}`} />
-              <Tooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toLocaleString()}`} />
-              <Legend iconSize={8} wrapperStyle={{ fontSize: '10px' }} />
-              <Bar dataKey="spend" name="Spend" fill="hsl(227, 71%, 55%)" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="purchaseValue" name="Revenue" fill="hsl(174, 100%, 33%)" radius={[2, 2, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
         <ChartCard title="ROAS Over Time">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={daily}>
@@ -204,7 +190,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
-      </div>
 
       {/* CTR & CPM trends */}
       <div className="grid grid-cols-2 gap-3 mt-3">
