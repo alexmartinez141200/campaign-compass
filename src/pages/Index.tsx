@@ -272,7 +272,7 @@ const Index = () => {
                   {/* Creatives list — same style as campaign detail */}
                   <div className="space-y-0.5">
                     <DiagnosticHeader sort={sort} onSortChange={setSort} showCheckbox={false} />
-                    {filteredCreatives.map(({ asset, campaignName }, i) => (
+                    {filteredCreatives.map(({ asset, campaignName, campaignId }, i) => (
                       <DiagnosticCard
                         key={asset.id}
                         asset={asset}
@@ -283,7 +283,7 @@ const Index = () => {
                         showCheckbox={false}
                         campaignName={campaignName}
                         onSelectToggle={() => {}}
-                        onClick={() => {}}
+                        onClick={() => { setSelectedCampaignId(campaignId); setViewingAssetId(asset.id); }}
                       />
                     ))}
                   </div>
