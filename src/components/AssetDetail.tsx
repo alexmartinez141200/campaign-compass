@@ -287,58 +287,24 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           ═══════════════════════════════════════════════════ */}
       <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
 
-      <div className="grid grid-cols-5 gap-3 mb-3">
-        {/* Delivery stats */}
-        <div className="col-span-2 rounded-lg border border-border/60 bg-card p-4">
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium mb-1">Reach</p>
-                <p className="text-lg font-mono font-bold text-foreground">{asset.reach.toLocaleString()}</p>
-                <p className="text-[9px] text-muted-foreground">Unique users</p>
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Frequency</p>
-                  {freqHealth !== "good" && <div className={`w-1.5 h-1.5 rounded-full ${healthDot(freqHealth)}`} />}
-                </div>
-                <p className={`text-lg font-mono font-bold ${healthColor(freqHealth)}`}>{asset.frequency.toFixed(2)}</p>
-                <p className="text-[9px] text-muted-foreground">{freqHealth === "critical" ? "⚠ Ad fatigue risk" : freqHealth === "warning" ? "Monitor closely" : "Healthy range"}</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">CPM</p>
-                  <div className={`w-1.5 h-1.5 rounded-full ${healthDot(cpmHealth)}`} />
-                </div>
-                <p className="text-lg font-mono font-bold text-foreground">${asset.cpm.toFixed(2)}</p>
-                <TrendArrow value={trends.cpm} suffix="%" inverse />
-              </div>
-              <div>
-                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium mb-1">Spend</p>
-                <p className="text-lg font-mono font-bold text-foreground">${asset.spend.toLocaleString()}</p>
-                <p className="text-[9px] text-muted-foreground">Total budget used</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* CPM trend chart */}
-        <div className="col-span-3">
-        <ChartCard title="CPM Over Time" height="h-36">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={filteredDaily}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-              <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `$${v}`} />
-              <Tooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
-              <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
-        </div>
+      <div className="grid grid-cols-4 gap-2.5 mb-3">
+        <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
+        <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub={freqHealth === "critical" ? "⚠ Ad fatigue risk" : freqHealth === "warning" ? "Monitor closely" : "Healthy range"} />
+        <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
+        <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total budget used" />
       </div>
+
+      <ChartCard title="CPM Over Time" height="h-40">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={filteredDaily}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+            <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `$${v}`} />
+            <Tooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
+            <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </ChartCard>
 
       {/* ═══════════════════════════════════════════════════
           B. ENGAGEMENT — On-platform response
