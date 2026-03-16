@@ -7,7 +7,7 @@ import type { CreativeAsset, Channel } from "@/data/mockData";
 import { channelConfig } from "@/components/ChannelIcon";
 import { useMemo, useRef, useCallback, useState } from "react";
 import { ChartContainer } from "@/components/ui/chart";
-import { axisStoryDimensionMap, buildCreativeStorySummary } from "@/lib/creative-story";
+import { axisStoryDimensionMap, buildCreativeStorySummary, formatStoryMetricValue, getCreativeAttributeDrivers } from "@/lib/creative-story";
 
 /* ─── Helpers ─── */
 
@@ -581,13 +581,10 @@ const Insights = () => {
 
   const profileMetricRows = useMemo(() => {
     if (!selectedAsset || !selectedProfileAxis) return [];
-    const mappedDimension = axisStoryDimensionMap[selectedProfileAxis.key];
-    const summary = mappedDimension ? selectedStorySummary.find((row) => row.key === mappedDimension) : null;
-    if (!summary) return [];
 
-    return summary.drivers.map((driver) => {
+    return getCreativeAttributeDrivers(selectedAsset, assets, selectedProfileAxis.key).map((driver) => {
       const pctDiff = driver.average > 0 ? ((driver.value - driver.average) / driver.average) * 100 : 0;
-      const inverseMetric = driver.metricKey.includes("cpm") || driver.metricKey.includes("cpc") || driver.metricKey.includes("cpa");
+      const inverseMetric = ["cpm", "cpc", "cpa"].some((token) => driver.metricKey.includes(token));
       const positive = inverseMetric ? pctDiff <= 0 : pctDiff >= 0;
       const rounded = Math.round(Math.abs(pctDiff));
       const note = rounded < 5
@@ -607,7 +604,7 @@ const Insights = () => {
         note,
       };
     });
-  }, [selectedAsset, selectedProfileAxis, selectedStorySummary]);
+  }, [selectedAsset, selectedProfileAxis, assets]);
 
   const handleProfileModalOpen = useCallback((profileKey: string) => {
     setSelectedProfileKey(profileKey);
@@ -994,7 +991,7 @@ const Insights = () => {
                         <div className="text-right">
                           <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Current Value</p>
                           <p className="text-[12px] font-medium text-foreground mt-1">{selectedProfileAxis.getValue(selectedAsset)}</p>
-                          <p className={`text-[22px] font-mono font-bold mt-2 ${scoreColor(selectedProfileAxis.score(selectedAsset))}`}>{selectedProfileAxis.score(selectedAsset)}</p>
+                          <p className={`text-[22px] font-mono font-bold mt-2 ${scoreColor(selectedProfileDerivedScore)}`}>{selectedProfileDerivedScore}</p>
                         </div>
                       </div>
                     </div>
@@ -1043,8 +1040,8 @@ const Insights = () => {
                           {profileMetricRows.map((row) => (
                             <tr key={row.key} className="border-b border-border/20 last:border-0 align-top">
                               <td className="px-4 py-3 text-[11px] font-semibold text-foreground">{row.label}</td>
-                              <td className="px-4 py-3 text-right text-[11px] font-mono text-foreground">{fmt(row.value, row.format)}</td>
-                              <td className="px-4 py-3 text-right text-[11px] font-mono text-muted-foreground">{fmt(row.average, row.format)}</td>
+                              <td className="px-4 py-3 text-right text-[11px] font-mono text-foreground">{formatStoryMetricValue(row.value, row.format)}</td>
+                              <td className="px-4 py-3 text-right text-[11px] font-mono text-muted-foreground">{formatStoryMetricValue(row.average, row.format)}</td>
                               <td className={`px-4 py-3 text-right text-[11px] font-mono font-semibold ${row.positive ? "text-accent" : "text-destructive"}`}>
                                 {row.pctDiff > 0 ? "+" : ""}{Math.round(row.pctDiff)}%
                               </td>
