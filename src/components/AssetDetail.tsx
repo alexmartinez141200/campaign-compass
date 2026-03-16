@@ -438,6 +438,38 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
+        <SectionHeader title="Creative diagnostics" description="Each creative attribute is scored against assets with the same attribute value. Deltas are averaged from pillar volume and efficiency metrics, so weak spots are numerical under-indexes, not theory." />
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <div className="rounded-lg border border-border/60 bg-card p-4">
+            <div className="grid grid-cols-[minmax(0,1.4fr)_repeat(5,minmax(0,0.72fr))] gap-x-3 gap-y-2 text-[10px]">
+              <div className="text-muted-foreground uppercase tracking-[0.18em] font-semibold">Attribute</div>
+              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Del</div>
+              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Eng</div>
+              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Tra</div>
+              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Rev</div>
+              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Net</div>
+              {creativeDiagnostics.map((item) => (
+                <>
+                  <div key={`${item.label}-label`} className="border-t border-border/50 pt-2 min-w-0">
+                    <p className="truncate text-[11px] font-semibold text-foreground">{item.label}</p>
+                    <p className="truncate text-[10px] text-muted-foreground">{item.value} · n={item.sampleSize}</p>
+                  </div>
+                  <div key={`${item.label}-delivery`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-semibold text-foreground">{item.deliveryDelta > 0 ? "+" : ""}{item.deliveryDelta}%</div>
+                  <div key={`${item.label}-engagement`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-semibold text-foreground">{item.engagementDelta > 0 ? "+" : ""}{item.engagementDelta}%</div>
+                  <div key={`${item.label}-traffic`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-semibold text-foreground">{item.trafficDelta > 0 ? "+" : ""}{item.trafficDelta}%</div>
+                  <div key={`${item.label}-revenue`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-semibold text-foreground">{item.revenueDelta > 0 ? "+" : ""}{item.revenueDelta}%</div>
+                  <div key={`${item.label}-net`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-bold text-foreground">{item.net > 0 ? "+" : ""}{item.net}%</div>
+                </>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <KpiCard label="Best creative aspect" value={strongestCreativeAspect ? strongestCreativeAspect.label : "—"} sub={strongestCreativeAspect ? `${strongestCreativeAspect.value} · ${strongestCreativeAspect.net > 0 ? "+" : ""}${strongestCreativeAspect.net}% net` : undefined} />
+            <KpiCard label="Priority to improve" value={weakestCreativeAspect ? weakestCreativeAspect.label : "—"} sub={weakestCreativeAspect ? `${weakestCreativeAspect.value} · weakest in ${weakestCreativeAspect.weakestPillar}` : undefined} />
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
           {storySummaryRows.map((row) => (
             <KpiCard
