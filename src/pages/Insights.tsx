@@ -779,27 +779,13 @@ const Insights = () => {
                   </div>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {radarData.map((item) => {
-                    const active = item.key === selectedProfileKey;
-                    return (
-                      <button
-                        key={item.key}
-                        onClick={() => setSelectedProfileKey(item.key)}
-                        className={`rounded-full border px-2.5 py-1 text-[10px] font-medium transition-colors ${active ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted/40"}`}
-                      >
-                        {item.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
                 {selectedProfileAxis && selectedProfileAnalysis && selectedAsset && (
                   <div className="mt-4 rounded-xl border border-border bg-background p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Category Analysis</p>
                         <h3 className="text-[14px] font-semibold text-foreground mt-1">{selectedProfileAxis.label}</h3>
+                        <p className="text-[10px] text-muted-foreground mt-1">Click any label directly on the radar chart to open the full metric popup.</p>
                       </div>
                       <div className="text-right">
                         <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Current Value</p>
