@@ -689,7 +689,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </ChartCard>
 
             {/* ═══ C. CONVERSIONS & REVENUE ═══ */}
-            <SectionHeader title="Conversions & Revenue" description="Direct and view-through conversions. View-through measures users who saw your ad but converted later without clicking." />
+            <SectionHeader sectionId="section-revenue" title="Conversions & Revenue" description="Direct and view-through conversions. View-through measures users who saw your ad but converted later without clicking." contribution="Funnel stage and brand consistency contribute most to revenue by aligning message depth with intent and reinforcing trust through conversion." />
             <div className="grid grid-cols-4 gap-3 mb-3">
               <KpiCard label="Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} sub="Selected period" />
               <KpiCard label="ROAS" value={`${rangeSummary.roas}x`} health={roasHealth} sub="Revenue ÷ Spend" />
