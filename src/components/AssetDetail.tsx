@@ -282,50 +282,42 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       : `${hookMetricValue.toFixed(1)}%`;
   const hookMetricAverage = isTikTok ? campaignAverages.hookRate : isVideo ? campaignAverages.avgWatch : campaignAverages.ctr;
 
-  const diagnosticProfiles = [
+  const profileMetricSummary = [
     {
-      output: "Attention & Hook",
-      diagnostic: asset.creativeProfile.motionIntensity === "High" || asset.creativeProfile.productInFirst3s ? "Strong stopping power" : "Moderate stopping power",
-      supports: `${asset.creativeProfile.motionIntensity} motion · ${asset.creativeProfile.productInFirst3s ? "product visible early" : "product introduced later"}`,
-      proof: formatDelta(hookMetricValue, hookMetricAverage),
+      output: "Hook",
+      profile: `${asset.creativeProfile.motionIntensity} motion · ${asset.creativeProfile.productInFirst3s ? "Product in 3s" : "Product after 3s"}`,
       metrics: [
         { label: hookMetricLabel, value: hookMetricDisplay },
         { label: "CTR", value: `${asset.ctr.toFixed(1)}%` },
-        { label: "Impressions", value: asset.impressions.toLocaleString() },
       ],
+      correlation: formatDelta(hookMetricValue, hookMetricAverage),
     },
     {
-      output: "Traffic Quality",
-      diagnostic: primaryTrafficMetricValue >= campaignAverages.linkClicks ? "Strong click intent" : "Traffic needs stronger intent",
-      supports: `${asset.creativeProfile.callToAction} CTA · ${asset.creativeProfile.aspectRatio} format framing`,
-      proof: formatDelta(primaryTrafficMetricValue, campaignAverages.linkClicks),
+      output: "Traffic",
+      profile: `${asset.creativeProfile.callToAction} CTA · ${asset.creativeProfile.aspectRatio}`,
       metrics: [
         { label: primaryTrafficMetricLabel, value: primaryTrafficMetricValue.toLocaleString() },
-        { label: isGoogle ? "Website Visits" : "LPV", value: asset.landingPageViews.toLocaleString() },
-        { label: "Click→LPV", value: `${(asset.linkClicks > 0 ? (asset.landingPageViews / asset.linkClicks) * 100 : 0).toFixed(0)}%` },
+        { label: "LPV", value: asset.landingPageViews.toLocaleString() },
       ],
+      correlation: formatDelta(primaryTrafficMetricValue, campaignAverages.linkClicks),
     },
     {
-      output: "Funnel Progression",
-      diagnostic: asset.conversions >= campaignAverages.conversions ? "Healthy progression to purchase" : "Drop-off in lower funnel",
-      supports: `${asset.creativeProfile.funnelStage} message fit · ${asset.creativeProfile.brandProminence} brand presence`,
-      proof: formatDelta(asset.conversions, campaignAverages.conversions),
+      output: "Conversion",
+      profile: `${asset.creativeProfile.funnelStage} · ${asset.creativeProfile.brandProminence} brand`,
       metrics: [
         { label: "ATC", value: asset.addToCart.toLocaleString() },
-        { label: "Checkout", value: asset.initiateCheckout.toLocaleString() },
         { label: "Purchases", value: asset.conversions.toLocaleString() },
       ],
+      correlation: formatDelta(asset.conversions, campaignAverages.conversions),
     },
     {
-      output: "Efficiency Outcome",
-      diagnostic: rangeSummary.roas >= campaignAverages.roas ? "Above-average commercial return" : "Below-average commercial return",
-      supports: `${asset.creativeProfile.colorContrast} contrast · ${asset.creativeProfile.brandConsistency} brand consistency`,
-      proof: `${formatDelta(rangeSummary.roas, campaignAverages.roas)} over selected range`,
+      output: "Efficiency",
+      profile: `${asset.creativeProfile.colorContrast} contrast · ${asset.creativeProfile.brandConsistency} consistency`,
       metrics: [
         { label: "ROAS", value: `${rangeSummary.roas.toFixed(1)}x` },
-        { label: "Revenue", value: `$${Math.round(rangeSummary.revenue).toLocaleString()}` },
-        { label: "Spend", value: `$${Math.round(rangeSummary.spend).toLocaleString()}` },
+        { label: "CPM", value: `$${asset.cpm.toFixed(2)}` },
       ],
+      correlation: formatDelta(rangeSummary.roas, campaignAverages.roas),
     },
   ];
 
