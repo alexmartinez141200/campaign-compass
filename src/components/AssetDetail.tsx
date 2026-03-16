@@ -251,16 +251,16 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     ),
     engagement: (
       <>
-        <SectionHeader title="Engagement" description="How strongly the creative earns attention and interaction from the audience. Engagement rate is built from reactions, comments, shares, and saves divided by impressions." />
+        <SectionHeader title="Engagement" description="A full view of how this creative earns attention, interaction depth, and response quality across the audience." />
         <div className="grid gap-3 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-stretch">
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <KpiCard label="Engagement" value={engagementTotal.toLocaleString()} sub="Total interactions" />
-            <KpiCard label="CTR" value={`${asset.ctr}%`} trend={trends.ctr} health={ctrHealth} />
-            <KpiCard label="Shares" value={asset.postShares.toLocaleString()} sub="Share depth" />
-            <KpiCard label="Saves" value={asset.postSaves.toLocaleString()} sub="Save intent" />
+            <KpiCard label="Eng. Rate" value={formatStoryMetricValue(storySummaryRows.find((row) => row.key === "engagement")?.drivers[0].value || 0, "pct")} sub="Interactions ÷ impressions" />
+            <KpiCard label="Shares" value={asset.postShares.toLocaleString()} sub={`${engagementTotal ? ((asset.postShares / engagementTotal) * 100).toFixed(1) : "0.0"}% of engagement`} />
+            <KpiCard label="Saves" value={asset.postSaves.toLocaleString()} sub={`${engagementTotal ? ((asset.postSaves / engagementTotal) * 100).toFixed(1) : "0.0"}% of engagement`} />
           </div>
           <div className="rounded-lg border border-border/60 bg-card p-3.5">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">CTR over time</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Click response over time</p>
             <ChartContainer config={chartConfig} className="h-[200px] w-full">
               <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={true} strokeDasharray="4 4" />
@@ -273,13 +273,40 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
+        <SectionHeader title="What builds engagement rate" description="These are the raw inputs behind the headline engagement rate, with impressions as the denominator." />
         <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-6">
-          <KpiCard label="Eng. Rate" value={formatStoryMetricValue(storySummaryRows.find((row) => row.key === "engagement")?.drivers[0].value || 0, "pct")} sub="Total engagement ÷ impressions" />
-          <KpiCard label="Reactions" value={asset.postReactions.toLocaleString()} sub="Likes and reactions" />
-          <KpiCard label="Comments" value={asset.postComments.toLocaleString()} sub="Conversation volume" />
-          <KpiCard label="Shares" value={asset.postShares.toLocaleString()} sub="Amplification" />
-          <KpiCard label="Saves" value={asset.postSaves.toLocaleString()} sub="Retention signal" />
+          <KpiCard label="Reactions" value={asset.postReactions.toLocaleString()} sub={`${engagementTotal ? ((asset.postReactions / engagementTotal) * 100).toFixed(1) : "0.0"}% of engagement`} />
+          <KpiCard label="Comments" value={asset.postComments.toLocaleString()} sub={`${engagementTotal ? ((asset.postComments / engagementTotal) * 100).toFixed(1) : "0.0"}% of engagement`} />
+          <KpiCard label="Shares" value={asset.postShares.toLocaleString()} sub={`${engagementTotal ? ((asset.postShares / engagementTotal) * 100).toFixed(1) : "0.0"}% of engagement`} />
+          <KpiCard label="Saves" value={asset.postSaves.toLocaleString()} sub={`${engagementTotal ? ((asset.postSaves / engagementTotal) * 100).toFixed(1) : "0.0"}% of engagement`} />
           <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} sub="Rate denominator" />
+          <KpiCard label="Eng. Rate" value={formatStoryMetricValue(storySummaryRows.find((row) => row.key === "engagement")?.drivers[0].value || 0, "pct")} sub="Final blended rate" />
+        </div>
+
+        <SectionHeader title="Engagement story" description="A quick read on what kind of interaction this creative is actually generating." />
+        <div className="grid gap-2.5 lg:grid-cols-3">
+          <div className="rounded-lg border border-border/60 bg-card px-4 py-3">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Primary signal</p>
+            <p className="mt-1 text-sm text-foreground leading-relaxed">
+              {asset.postSaves >= asset.postShares && asset.postSaves >= asset.postComments
+                ? "Saves lead the engagement mix, which suggests the creative has strong keep-for-later value."
+                : asset.postShares >= asset.postComments
+                  ? "Shares are a major part of engagement, which suggests the creative is resonating enough to be passed along."
+                  : "Comments are a meaningful part of engagement, which suggests the creative is creating conversation."}
+            </p>
+          </div>
+          <div className="rounded-lg border border-border/60 bg-card px-4 py-3">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Scale context</p>
+            <p className="mt-1 text-sm text-foreground leading-relaxed">
+              {formatStoryMetricValue(storySummaryRows.find((row) => row.key === "engagement")?.drivers[0].value || 0, "pct")} engagement rate is generated from {engagementTotal.toLocaleString()} total interactions across {asset.impressions.toLocaleString()} impressions.
+            </p>
+          </div>
+          <div className="rounded-lg border border-border/60 bg-card px-4 py-3">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Campaign benchmark</p>
+            <p className="mt-1 text-sm text-foreground leading-relaxed">
+              {storySummaryRows.find((row) => row.key === "engagement")?.drivers[0].benchmark || "0% vs campaign avg"} on engagement rate and {storySummaryRows.find((row) => row.key === "engagement")?.drivers[1].benchmark || "0% vs campaign avg"} on shares.
+            </p>
+          </div>
         </div>
       </>
     ),
