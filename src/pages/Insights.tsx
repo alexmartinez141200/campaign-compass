@@ -599,6 +599,30 @@ const Insights = () => {
       });
   }, [selectedAsset, selectedProfileAxis, metrics, assets]);
 
+  const renderRadarDot = (props: any) => {
+    const { cx, cy, payload } = props;
+    if (typeof cx !== "number" || typeof cy !== "number" || !payload?.key) return null;
+
+    const active = payload.key === selectedProfileKey;
+
+    return (
+      <circle
+        cx={cx}
+        cy={cy}
+        r={active ? 6.5 : 5.5}
+        fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"}
+        stroke="hsl(var(--primary))"
+        strokeWidth={2}
+        className="cursor-pointer"
+        onClick={(event) => {
+          event.stopPropagation();
+          setSelectedProfileKey(payload.key);
+          setOpenModal(`profile:${payload.key}`);
+        }}
+      />
+    );
+  };
+
   if (assets.length === 0) {
     return (
       <div className="min-h-screen bg-background">
