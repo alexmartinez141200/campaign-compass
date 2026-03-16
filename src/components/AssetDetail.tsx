@@ -428,9 +428,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
 
         <Tabs value={activeTopTab} onValueChange={(value) => setActiveTopTab(value as "creative" | "campaign")} className="space-y-4">
-          <TabsList className="h-auto w-full justify-start rounded-xl border border-border/60 bg-card p-1">
-            <TabsTrigger value="creative" className="px-4 py-2 text-[11px] uppercase tracking-[0.16em]">Creative Asset Performance</TabsTrigger>
-            <TabsTrigger value="campaign" className="px-4 py-2 text-[11px] uppercase tracking-[0.16em]">Campaign Performance</TabsTrigger>
+          <TabsList className="grid h-auto w-full grid-cols-2 rounded-xl border border-border/60 bg-muted/30 p-1 shadow-card">
+            <TabsTrigger value="campaign" className="rounded-lg px-4 py-3 text-[11px] uppercase tracking-[0.16em] data-[state=active]:bg-background data-[state=active]:shadow-sm">Campaign Performance</TabsTrigger>
+            <TabsTrigger value="creative" className="rounded-lg px-4 py-3 text-[11px] uppercase tracking-[0.16em] data-[state=active]:bg-background data-[state=active]:shadow-sm">Creative Asset Performance</TabsTrigger>
           </TabsList>
 
           <TabsContent value="creative" className="mt-0 space-y-4">
