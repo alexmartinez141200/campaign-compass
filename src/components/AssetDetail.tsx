@@ -279,12 +279,61 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     { point: "95%", pct: Math.round((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100) },
   ]) : [];
 
-  // Funnel steps — platform-aware labels
-  const funnelSteps = [
-    { label: isGoogle ? "Website Visits" : "Landing Page Views", value: asset.landingPageViews, color: "hsl(227, 71%, 55%)" },
-    { label: "Add to Cart", value: asset.addToCart, color: "hsl(174, 100%, 33%)" },
-    { label: "Checkout", value: asset.initiateCheckout, color: "hsl(45, 93%, 47%)" },
-    { label: "Purchase", value: asset.conversions, color: "hsl(142, 71%, 45%)" },
+  const aspectMetricSummary = [
+    {
+      label: "Format",
+      value: asset.type.charAt(0).toUpperCase() + asset.type.slice(1),
+      metrics: [
+        { name: "CTR", value: `${asset.ctr}%` },
+        { name: "ROAS", value: `${asset.roas}x` },
+        { name: "Conversions", value: asset.conversions.toLocaleString() },
+      ],
+    },
+    {
+      label: "Motion",
+      value: asset.creativeProfile.motionIntensity,
+      metrics: [
+        { name: isTikTok ? "6s View Rate" : isVideo ? "Avg Watch" : "CTR", value: isTikTok ? `${asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays * 100).toFixed(1) : 0}%` : isVideo ? `${asset.avgWatchTime || 0}s` : `${asset.ctr}%` },
+        { name: "Engagement", value: engagementTotal.toLocaleString() },
+        { name: "Clicks", value: asset.clicks.toLocaleString() },
+      ],
+    },
+    {
+      label: "CTA",
+      value: asset.creativeProfile.callToAction,
+      metrics: [
+        { name: isGoogle ? "Clicks" : "Link Clicks", value: (isGoogle ? asset.clicks : asset.linkClicks).toLocaleString() },
+        { name: "CTR", value: `${asset.ctr}%` },
+        { name: "LPV", value: asset.landingPageViews.toLocaleString() },
+      ],
+    },
+    {
+      label: "Funnel",
+      value: asset.creativeProfile.funnelStage,
+      metrics: [
+        { name: "ATC", value: asset.addToCart.toLocaleString() },
+        { name: "Checkout", value: asset.initiateCheckout.toLocaleString() },
+        { name: "ROAS", value: `${asset.roas}x` },
+      ],
+    },
+    {
+      label: "Brand",
+      value: asset.creativeProfile.brandProminence,
+      metrics: [
+        { name: "Quality", value: rankingLabel(asset.qualityRanking) },
+        { name: "Conv. Rank", value: rankingLabel(asset.conversionRateRanking) },
+        { name: "Revenue", value: `$${asset.purchaseValue.toLocaleString()}` },
+      ],
+    },
+    {
+      label: "Contrast",
+      value: asset.creativeProfile.colorContrast,
+      metrics: [
+        { name: "CTR", value: `${asset.ctr}%` },
+        { name: "CPM", value: `$${asset.cpm.toFixed(2)}` },
+        { name: "ROAS", value: `${asset.roas}x` },
+      ],
+    },
   ];
 
   return (
@@ -338,25 +387,36 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <div className="rounded-xl border border-border/60 bg-muted/20 mb-6 px-4 py-3 shadow-card">
-          <div className="flex items-start justify-between gap-6">
-            <div className="max-w-[760px]">
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">How this profile feeds the bigger picture</p>
-              <p className="text-[12px] text-foreground mt-1">
-                This screen shows the <span className="font-semibold">source signals</span> behind the higher-level comparison views: creative attributes on the right describe the asset setup, while the KPI sections below show how that setup performs in delivery, engagement, traffic, and conversion.
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-2">
-                In comparison screens, those detailed metrics are rolled up into broader attribute insights like <span className="text-foreground font-medium">Format</span>, <span className="text-foreground font-medium">Motion</span>, <span className="text-foreground font-medium">CTA</span>, and <span className="text-foreground font-medium">Brand</span> — so users can see both the high-level pattern and the KPI evidence behind it.
-              </p>
+        <div className="rounded-xl border border-border/60 bg-muted/20 mb-6 px-4 py-4 shadow-card">
+          <div className="flex items-start justify-between gap-4 mb-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Creative aspects → supporting KPIs</p>
+              <p className="text-[11px] text-muted-foreground mt-1">This summary shows how each creative aspect is supported by the individual performance metrics shown below.</p>
             </div>
-            <div className="min-w-[180px] rounded-lg border border-border/60 bg-background px-3 py-2.5">
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Read this page as</p>
-              <div className="mt-2 space-y-1.5 text-[11px]">
-                <div className="flex items-center justify-between gap-3"><span className="text-muted-foreground">Creative setup</span><span className="font-semibold text-foreground">Attributes</span></div>
-                <div className="flex items-center justify-between gap-3"><span className="text-muted-foreground">Performance proof</span><span className="font-semibold text-foreground">KPIs</span></div>
-                <div className="flex items-center justify-between gap-3"><span className="text-muted-foreground">Cross-screen output</span><span className="font-semibold text-foreground">Insights</span></div>
+            <div className="text-right">
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Use this to connect</p>
+              <p className="text-[11px] font-semibold text-foreground mt-1">Attributes → KPIs → Insights</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {aspectMetricSummary.map((item) => (
+              <div key={item.label} className="rounded-lg border border-border/60 bg-background p-3">
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">{item.label}</p>
+                    <p className="text-[12px] font-semibold text-foreground mt-0.5">{item.value}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {item.metrics.map((metric) => (
+                    <div key={metric.name} className="rounded-md bg-muted/40 px-2.5 py-2">
+                      <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{metric.name}</p>
+                      <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{metric.value}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
 
