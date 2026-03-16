@@ -251,7 +251,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     ),
     engagement: (
       <>
-        <SectionHeader title="Engagement" description="How strongly the creative earns attention and interaction from the audience." />
+        <SectionHeader title="Engagement" description="How strongly the creative earns attention and interaction from the audience. Engagement rate is built from reactions, comments, shares, and saves divided by impressions." />
         <div className="grid gap-3 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-stretch">
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <KpiCard label="Engagement" value={engagementTotal.toLocaleString()} sub="Total interactions" />
@@ -271,6 +271,14 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               </LineChart>
             </ChartContainer>
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-5">
+          <KpiCard label="Eng. Rate" value={formatStoryMetricValue(storySummaryRows.find((row) => row.key === "engagement")?.drivers[0].value || 0, "pct")} sub="(Reactions + Comments + Shares + Saves) / Impressions" />
+          <KpiCard label="Reactions" value={asset.postReactions.toLocaleString()} sub="Likes and reactions" />
+          <KpiCard label="Comments" value={asset.postComments.toLocaleString()} sub="Conversation volume" />
+          <KpiCard label="Shares" value={asset.postShares.toLocaleString()} sub="Amplification" />
+          <KpiCard label="Saves" value={asset.postSaves.toLocaleString()} sub="Retention signal" />
         </div>
       </>
     ),
