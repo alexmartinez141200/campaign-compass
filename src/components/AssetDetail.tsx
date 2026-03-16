@@ -452,13 +452,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           <TabsContent value="creative" className="mt-0 space-y-3">
             <SectionHeader title="Creative asset performance" description="Each row shows whether a creative profile category is doing good, mixed, or weak based on the campaign-average metrics used to evaluate it." />
 
-            <div className="flex justify-start">
+            <div className="flex justify-end">
               <button
                 type="button"
                 onClick={() => setShowUpdateRecommendations((prev) => !prev)}
-                className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-primary/15"
+                className="rounded-lg border border-primary/30 bg-primary/10 px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground transition-colors hover:bg-primary/15"
               >
-                Update Based on Low Performing Metrics Identified
+                Update Creative
               </button>
             </div>
 
