@@ -508,46 +508,56 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-border bg-card overflow-hidden shadow-card">
-                <div className="grid grid-cols-[minmax(0,0.9fr)_96px_minmax(0,1.5fr)] gap-3 border-b border-border bg-muted/20 px-4 py-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80">
-                  <div>Category</div>
-                  <div>Status</div>
-                  <div>Metric comparison</div>
+              <div className="rounded-xl border border-border bg-card p-3 shadow-card">
+                <div className="mb-3 flex items-center justify-between border-b border-border/60 px-2 pb-3">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80">Category comparison</p>
+                    <p className="mt-1 text-[10px] text-muted-foreground">Compact view of each category with actual vs average metric signals.</p>
+                  </div>
                 </div>
-                {creativeDiagnostics.map((item) => (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => setSelectedCategoryKey(item.key)}
-                    className={`grid w-full grid-cols-[minmax(0,0.9fr)_96px_minmax(0,1.5fr)] gap-3 border-b border-border/60 px-4 py-3 text-left transition-colors last:border-b-0 ${selectedCategoryKey === item.key ? "bg-primary/5" : "hover:bg-muted/20"}`}
-                  >
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-semibold text-foreground">{item.label}</p>
-                      <p className="text-[10px] text-muted-foreground">{item.value}</p>
-                    </div>
-                    <div className="pt-0.5">
-                      <p className="text-[11px] font-semibold text-foreground">{item.status}</p>
-                    </div>
-                    <div className="space-y-1.5">
-                      {item.metrics.map((metric) => (
-                        <div key={`${item.key}-${metric.label}`} className="grid grid-cols-[minmax(88px,0.95fr)_minmax(76px,0.8fr)_minmax(76px,0.8fr)_56px] items-center gap-3 rounded-md border border-border/50 bg-background/70 px-3 py-2">
-                          <p className="text-[10px] font-semibold leading-snug text-foreground break-words">{metric.label}</p>
-                          <div className="min-w-0">
-                            <p className="text-[8px] uppercase tracking-[0.14em] text-muted-foreground">Actual</p>
-                            <p className="text-[10px] font-mono font-semibold leading-tight text-foreground break-words">{metric.value}</p>
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-[8px] uppercase tracking-[0.14em] text-muted-foreground">Average</p>
-                            <p className="text-[10px] font-mono leading-tight text-muted-foreground break-words">{metric.average}</p>
-                          </div>
-                          <p className={`text-right text-[10px] font-mono font-semibold ${metric.delta > 0 ? "text-accent" : metric.delta < 0 ? "text-destructive" : "text-muted-foreground"}`}>
-                            {metric.delta > 0 ? "+" : ""}{metric.delta}%
-                          </p>
+                <div className="grid gap-3 xl:grid-cols-2">
+                  {creativeDiagnostics.map((item) => (
+                    <button
+                      key={item.key}
+                      type="button"
+                      onClick={() => setSelectedCategoryKey(item.key)}
+                      className={`rounded-xl border px-3 py-3 text-left transition-colors ${selectedCategoryKey === item.key ? "border-primary bg-primary/5" : "border-border/60 bg-background hover:bg-muted/20"}`}
+                    >
+                      <div className="mb-3 flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-semibold text-foreground">{item.label}</p>
+                          <p className="text-[10px] text-muted-foreground">{item.value}</p>
                         </div>
-                      ))}
-                    </div>
-                  </button>
-                ))}
+                        <span className="rounded-full border border-border/60 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-foreground">
+                          {item.status}
+                        </span>
+                      </div>
+
+                      <div className="space-y-2">
+                        {item.metrics.map((metric) => (
+                          <div key={`${item.key}-${metric.label}`} className="rounded-lg border border-border/50 bg-muted/20 px-3 py-2">
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="text-[10px] font-semibold text-foreground">{metric.label}</p>
+                              <p className={`text-[10px] font-mono font-semibold ${metric.delta > 0 ? "text-accent" : metric.delta < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                                {metric.delta > 0 ? "+" : ""}{metric.delta}%
+                              </p>
+                            </div>
+                            <div className="mt-2 grid grid-cols-2 gap-2">
+                              <div className="rounded-md bg-background px-2 py-1.5">
+                                <p className="text-[8px] uppercase tracking-[0.14em] text-muted-foreground">Actual</p>
+                                <p className="mt-0.5 text-[10px] font-mono font-semibold text-foreground">{metric.value}</p>
+                              </div>
+                              <div className="rounded-md bg-background px-2 py-1.5">
+                                <p className="text-[8px] uppercase tracking-[0.14em] text-muted-foreground">Average</p>
+                                <p className="mt-0.5 text-[10px] font-mono text-muted-foreground">{metric.average}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </TabsContent>
