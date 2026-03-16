@@ -625,8 +625,9 @@ const Insights = () => {
           r={active ? 7 : 6}
           fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"}
           stroke="hsl(var(--primary))"
-          strokeWidth={2}
+          strokeWidth={2.5}
         />
+        {active && <circle cx={cx} cy={cy} r={11} fill="none" stroke="hsl(var(--primary) / 0.18)" strokeWidth={1.5} />}
       </g>
     );
   };
@@ -764,22 +765,25 @@ const Insights = () => {
             </div>
 
             <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-5 rounded-xl border border-border bg-card shadow-card p-4">
-              <div className="rounded-xl border border-border bg-muted/10 p-4">
+              <div className="rounded-xl border border-border bg-[linear-gradient(180deg,hsl(var(--background)),hsl(var(--muted)/0.45))] p-4">
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
                     <p className="text-[12px] font-semibold text-foreground">{selectedAsset?.name}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">Interactive profile shape for the selected creative asset.</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Overall Score</p>
+                  <div className="rounded-lg border border-border bg-background/80 px-3 py-2 text-right shadow-card">
+                    <p className="text-[9px] uppercase tracking-[0.18em] font-semibold text-muted-foreground">Overall Score</p>
                     <p className={`text-[26px] leading-none font-mono font-bold mt-1 ${scoreColor(selectedPerformanceScore)}`}>{selectedPerformanceScore}</p>
                   </div>
                 </div>
 
-                <div className="relative">
+                <div className="relative overflow-hidden rounded-xl border border-border bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.08),transparent_44%),linear-gradient(180deg,hsl(var(--background)),hsl(var(--muted)/0.35))] px-4 py-5">
+                  <div className="pointer-events-none absolute inset-x-6 top-1/2 h-px -translate-y-1/2 bg-border/70" />
+                  <div className="pointer-events-none absolute left-1/2 top-6 bottom-6 w-px -translate-x-1/2 bg-border/70" />
+                  <div className="pointer-events-none absolute inset-6 rounded-[28px] border border-primary/10" />
                   <ChartContainer config={chartConfig} className="mx-auto h-[360px] w-full max-w-[520px]">
                     <RadarChart data={radarData} outerRadius="72%">
-                      <PolarGrid radialLines={true} />
+                      <PolarGrid radialLines={true} gridType="polygon" stroke="hsl(var(--border))" strokeOpacity={0.9} />
                       <PolarAngleAxis
                         dataKey="label"
                         tick={({ payload, x, y, textAnchor }) => {
@@ -805,16 +809,16 @@ const Insights = () => {
                         dataKey="value"
                         stroke="var(--color-score)"
                         fill="var(--color-score)"
-                        fillOpacity={0.14}
-                        strokeWidth={2.5}
+                        fillOpacity={0.12}
+                        strokeWidth={3}
                         dot={renderRadarDot}
                       />
                     </RadarChart>
                   </ChartContainer>
                   <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                    <div className="rounded-full border border-border bg-background/92 px-5 py-4 text-center shadow-card">
+                    <div className="rounded-full border border-primary/20 bg-background/88 px-6 py-4 text-center shadow-card backdrop-blur-[2px]">
                       <p className={`text-[34px] leading-none font-mono font-bold ${scoreColor(selectedPerformanceScore)}`}>{selectedPerformanceScore}</p>
-                      <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">Profile Score</p>
+                      <p className="text-[9px] uppercase tracking-[0.22em] font-semibold text-muted-foreground mt-1">Profile Score</p>
                     </div>
                   </div>
                 </div>
