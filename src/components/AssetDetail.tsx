@@ -285,39 +285,35 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const profileMetricSummary = [
     {
       output: "Hook",
-      profile: `${asset.creativeProfile.motionIntensity} motion · ${asset.creativeProfile.productInFirst3s ? "Product in 3s" : "Product after 3s"}`,
-      metrics: [
-        { label: hookMetricLabel, value: hookMetricDisplay },
-        { label: "CTR", value: `${asset.ctr.toFixed(1)}%` },
-      ],
-      correlation: formatDelta(hookMetricValue, hookMetricAverage),
+      profile: `${asset.creativeProfile.motionIntensity} motion · ${asset.creativeProfile.productInFirst3s ? "Product in first 3s" : "Product after 3s"}`,
+      source: isTikTok || isVideo ? "Video Performance" : "Top-line KPIs",
+      metricA: { label: hookMetricLabel, value: hookMetricDisplay },
+      metricB: { label: "CTR", value: `${asset.ctr.toFixed(1)}%` },
+      story: "This profile signal is proven by the attention metrics below.",
     },
     {
       output: "Traffic",
       profile: `${asset.creativeProfile.callToAction} CTA · ${asset.creativeProfile.aspectRatio}`,
-      metrics: [
-        { label: primaryTrafficMetricLabel, value: primaryTrafficMetricValue.toLocaleString() },
-        { label: "LPV", value: asset.landingPageViews.toLocaleString() },
-      ],
-      correlation: formatDelta(primaryTrafficMetricValue, campaignAverages.linkClicks),
+      source: "Traffic",
+      metricA: { label: primaryTrafficMetricLabel, value: primaryTrafficMetricValue.toLocaleString() },
+      metricB: { label: isGoogle ? "Website Visits" : "Landing Page Views", value: asset.landingPageViews.toLocaleString() },
+      story: "This profile signal is proven by click-through and visit quality below.",
     },
     {
       output: "Conversion",
-      profile: `${asset.creativeProfile.funnelStage} · ${asset.creativeProfile.brandProminence} brand`,
-      metrics: [
-        { label: "ATC", value: asset.addToCart.toLocaleString() },
-        { label: "Purchases", value: asset.conversions.toLocaleString() },
-      ],
-      correlation: formatDelta(asset.conversions, campaignAverages.conversions),
+      profile: `${asset.creativeProfile.funnelStage} funnel · ${asset.creativeProfile.brandProminence} brand`,
+      source: "Conversion",
+      metricA: { label: "Add to Cart", value: asset.addToCart.toLocaleString() },
+      metricB: { label: "Purchases", value: asset.conversions.toLocaleString() },
+      story: "This profile signal is proven by lower-funnel movement below.",
     },
     {
       output: "Efficiency",
       profile: `${asset.creativeProfile.colorContrast} contrast · ${asset.creativeProfile.brandConsistency} consistency`,
-      metrics: [
-        { label: "ROAS", value: `${rangeSummary.roas.toFixed(1)}x` },
-        { label: "CPM", value: `$${asset.cpm.toFixed(2)}` },
-      ],
-      correlation: formatDelta(rangeSummary.roas, campaignAverages.roas),
+      source: "Delivery",
+      metricA: { label: "ROAS", value: `${rangeSummary.roas.toFixed(1)}x` },
+      metricB: { label: "CPM", value: `$${asset.cpm.toFixed(2)}` },
+      story: "This profile signal is proven by cost efficiency and return below.",
     },
   ];
 
