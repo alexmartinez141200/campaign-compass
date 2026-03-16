@@ -1,6 +1,6 @@
 import type { CreativeAsset } from "@/data/mockData";
 
-export type StoryDimensionKey = "hook" | "engagement" | "traffic" | "conversion" | "efficiency";
+export type StoryDimensionKey = "delivery" | "engagement" | "traffic" | "revenue";
 export type StoryMetricFormat = "pct" | "num" | "x" | "dollar2" | "sec";
 
 export interface StoryDriverMetric {
@@ -23,72 +23,73 @@ export interface StorySummaryRow {
 }
 
 export const axisStoryDimensionMap: Record<string, StoryDimensionKey> = {
-  format: "hook",
-  duration: "hook",
+  format: "engagement",
+  duration: "delivery",
   aspect: "traffic",
-  motion: "hook",
-  contrast: "efficiency",
+  motion: "delivery",
+  contrast: "delivery",
   brandProminence: "engagement",
-  brandConsistency: "efficiency",
-  funnelStage: "conversion",
+  brandConsistency: "revenue",
+  funnelStage: "revenue",
   cta: "traffic",
-  productInFirst3s: "hook",
+  productInFirst3s: "delivery",
 };
 
 const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
+
+const safeAverage = (campaignAssets: CreativeAsset[], getter: (item: CreativeAsset) => number) => {
+  if (!campaignAssets.length) return 0;
+  return campaignAssets.reduce((sum, item) => sum + getter(item), 0) / campaignAssets.length;
+};
 
 const pctDelta = (value: number, average: number) => {
   if (!average) return 0;
   return ((value - average) / average) * 100;
 };
 
-const benchmarkText = (value: number, average: number) => {
+const benchmarkText = (value: number, average: number, inverse = false) => {
   if (!average) return "0% vs campaign avg";
-  const delta = pctDelta(value, average);
+  const delta = inverse ? ((average - value) / average) * 100 : pctDelta(value, average);
   const rounded = Math.round(Math.abs(delta));
   if (rounded < 1) return "0% vs campaign avg";
   return `${delta >= 0 ? "+" : "-"}${rounded}% vs campaign avg`;
 };
 
-const toScore = (deltaA: number, deltaB: number) => clampScore(50 + ((deltaA + deltaB) / 2) * 1.6);
+const toScore = (...deltas: number[]) => {
+  const avgDelta = deltas.length ? deltas.reduce((sum, value) => sum + value, 0) / deltas.length : 0;
+  return clampScore(50 + avgDelta * 1.2);
+};
 
-const engagementTotal = (asset: CreativeAsset) => asset.postReactions + asset.postComments + asset.postShares + asset.postSaves;
-const engagementRate = (asset: CreativeAsset) => (asset.impressions > 0 ? (engagementTotal(asset) / asset.impressions) * 100 : 0);
-const shareRate = (asset: CreativeAsset) => (asset.impressions > 0 ? (asset.postShares / asset.impressions) * 100 : 0);
+const totalEngagement = (asset: CreativeAsset) => asset.postReactions + asset.postComments + asset.postShares + asset.postSaves;
+const engagementRate = (asset: CreativeAsset) => (asset.impressions > 0 ? (totalEngagement(asset) / asset.impressions) * 100 : 0);
+const clickVolume = (asset: CreativeAsset) => asset.channel === "google" ? asset.clicks : asset.linkClicks;
 const clickToLpv = (asset: CreativeAsset) => {
-  const clicks = asset.channel === "google" ? asset.clicks : asset.linkClicks;
+  const clicks = clickVolume(asset);
   return clicks > 0 ? (asset.landingPageViews / clicks) * 100 : 0;
 };
-const checkoutToPurchase = (asset: CreativeAsset) => asset.initiateCheckout > 0 ? (asset.conversions / asset.initiateCheckout) * 100 : 0;
-
-const hookStrength = (asset: CreativeAsset) => {
+const conversionRateFromClicks = (asset: CreativeAsset) => {
+  const clicks = clickVolume(asset);
+  return clicks > 0 ? (asset.conversions / clicks) * 100 : 0;
+};
+const hookMetric = (asset: CreativeAsset) => {
   if (asset.channel === "tiktok") return asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays) * 100 : 0;
   if (asset.type === "video") return asset.avgWatchTime || 0;
-  return asset.ctr;
+  return asset.frequency;
 };
-
-const hookStrengthLabel = (asset: CreativeAsset) => {
+const hookMetricLabel = (asset: CreativeAsset) => {
   if (asset.channel === "tiktok") return "6s View Rate";
   if (asset.type === "video") return "Avg Watch";
-  return "CTR";
+  return "Frequency";
 };
-
-const hookFormat = (asset: CreativeAsset): StoryMetricFormat => {
+const hookMetricFormat = (asset: CreativeAsset): StoryMetricFormat => {
   if (asset.channel === "tiktok") return "pct";
   if (asset.type === "video") return "sec";
-  return "pct";
+  return "num";
 };
-
-const engagementSection = (asset: CreativeAsset) => {
-  if (asset.channel === "tiktok") return "Engagement & Growth";
-  if (asset.channel === "google") return "Click Performance";
-  return "Engagement";
-};
-
-const safeAverage = (campaignAssets: CreativeAsset[], getter: (item: CreativeAsset) => number) => {
-  if (!campaignAssets.length) return 0;
-  return campaignAssets.reduce((sum, item) => sum + getter(item), 0) / campaignAssets.length;
-};
+const deliveryProfileSignal = (asset: CreativeAsset) => `${asset.creativeProfile.motionIntensity} motion · ${asset.creativeProfile.productInFirst3s ? "product visible early" : "product introduced late"} · ${asset.creativeProfile.colorContrast} contrast`;
+const engagementProfileSignal = (asset: CreativeAsset) => `${asset.creativeProfile.brandProminence} branding · ${asset.type} format`;
+const trafficProfileSignal = (asset: CreativeAsset) => `${asset.creativeProfile.callToAction} CTA · ${asset.creativeProfile.aspectRatio}`;
+const revenueProfileSignal = (asset: CreativeAsset) => `${asset.creativeProfile.funnelStage} funnel · ${asset.creativeProfile.brandConsistency} consistency`;
 
 export function buildCreativeStorySummary(
   asset: CreativeAsset,
@@ -97,98 +98,108 @@ export function buildCreativeStorySummary(
 ): StorySummaryRow[] {
   const currentRoas = options?.selectedRoas ?? asset.roas;
 
-  const currentHook = hookStrength(asset);
-  const avgHook = safeAverage(campaignAssets, (item) => hookStrength(item));
-
-  const currentClicks = asset.channel === "google" ? asset.clicks : asset.linkClicks;
-  const avgClicks = safeAverage(campaignAssets, (item) => item.channel === "google" ? item.clicks : item.linkClicks);
-
+  const currentImpressions = asset.impressions;
+  const avgImpressions = safeAverage(campaignAssets, (item) => item.impressions);
   const currentCpm = asset.cpm;
   const avgCpm = safeAverage(campaignAssets, (item) => item.cpm);
+  const currentHook = hookMetric(asset);
+  const avgHook = safeAverage(campaignAssets, (item) => hookMetric(item));
 
-  const currentEngRate = engagementRate(asset);
-  const avgEngRate = safeAverage(campaignAssets, (item) => engagementRate(item));
+  const currentEngagementRate = engagementRate(asset);
+  const avgEngagementRate = safeAverage(campaignAssets, (item) => engagementRate(item));
+  const currentShares = asset.postShares;
+  const avgShares = safeAverage(campaignAssets, (item) => item.postShares);
 
-  const currentShareRate = shareRate(asset);
-  const avgShareRate = safeAverage(campaignAssets, (item) => shareRate(item));
-
+  const currentClicks = clickVolume(asset);
+  const avgClicks = safeAverage(campaignAssets, (item) => clickVolume(item));
   const currentClickToLpv = clickToLpv(asset);
   const avgClickToLpv = safeAverage(campaignAssets, (item) => clickToLpv(item));
 
-  const currentCheckoutToPurchase = checkoutToPurchase(asset);
-  const avgCheckoutToPurchase = safeAverage(campaignAssets, (item) => checkoutToPurchase(item));
+  const currentRevenue = asset.purchaseValue;
+  const avgRevenue = safeAverage(campaignAssets, (item) => item.purchaseValue);
+  const currentConvRate = conversionRateFromClicks(asset);
+  const avgConvRate = safeAverage(campaignAssets, (item) => conversionRateFromClicks(item));
 
-  const avgCtr = safeAverage(campaignAssets, (item) => item.ctr);
-  const avgConversions = safeAverage(campaignAssets, (item) => item.conversions);
-  const avgRoas = safeAverage(campaignAssets, (item) => item.roas);
-
-  const hookScore = toScore(pctDelta(currentHook, avgHook), pctDelta(asset.ctr, avgCtr));
-  const engagementScore = toScore(pctDelta(currentEngRate, avgEngRate), pctDelta(currentShareRate, avgShareRate));
-  const trafficScore = toScore(pctDelta(currentClicks, avgClicks), pctDelta(currentClickToLpv, avgClickToLpv));
-  const conversionScore = toScore(pctDelta(asset.conversions, avgConversions), pctDelta(currentCheckoutToPurchase, avgCheckoutToPurchase));
-  const efficiencyScore = toScore(pctDelta(currentRoas, avgRoas), pctDelta(avgCpm - currentCpm, avgCpm));
+  const deliveryScore = toScore(
+    pctDelta(currentImpressions, avgImpressions),
+    pctDelta(currentHook, avgHook),
+    pctDelta(avgCpm - currentCpm, avgCpm),
+  );
+  const engagementScore = toScore(
+    pctDelta(currentEngagementRate, avgEngagementRate),
+    pctDelta(currentShares, avgShares),
+  );
+  const trafficScore = toScore(
+    pctDelta(currentClicks, avgClicks),
+    pctDelta(currentClickToLpv, avgClickToLpv),
+  );
+  const revenueScore = toScore(
+    pctDelta(currentRevenue, avgRevenue),
+    pctDelta(currentRoas, safeAverage(campaignAssets, (item) => item.roas)),
+    pctDelta(currentConvRate, avgConvRate),
+  );
 
   return [
     {
-      key: "hook",
-      title: "Hook",
-      profileSignal: `${asset.creativeProfile.motionIntensity} motion · ${asset.creativeProfile.productInFirst3s ? "Product in first 3s" : "Product after 3s"}`,
-      score: hookScore,
-      story: `Derived from ${hookStrengthLabel(asset)} and CTR shown below.`,
+      key: "delivery",
+      title: "Delivery",
+      profileSignal: deliveryProfileSignal(asset),
+      score: deliveryScore,
+      story: `Delivery is built from scale and cost efficiency, then explained by ${asset.creativeProfile.motionIntensity.toLowerCase()} motion, ${asset.creativeProfile.colorContrast.toLowerCase()} contrast, and ${asset.creativeProfile.productInFirst3s ? "early product visibility" : "later product reveal"}.`,
       drivers: [
         {
-          metricKey: asset.channel === "tiktok" ? "hook_6s" : asset.type === "video" ? "hook_watch" : "hook_ctr",
-          label: hookStrengthLabel(asset),
-          section: asset.type === "video" || asset.channel === "tiktok" ? "Video Performance" : "Top-line KPIs",
-          value: currentHook,
-          average: avgHook,
-          format: hookFormat(asset),
-          benchmark: benchmarkText(currentHook, avgHook),
+          metricKey: "impressions",
+          label: "Impressions",
+          section: "Top-line KPIs",
+          value: currentImpressions,
+          average: avgImpressions,
+          format: "num",
+          benchmark: benchmarkText(currentImpressions, avgImpressions),
         },
         {
-          metricKey: "ctr",
-          label: "CTR",
-          section: "Top-line KPIs",
-          value: asset.ctr,
-          average: avgCtr,
-          format: "pct",
-          benchmark: benchmarkText(asset.ctr, avgCtr),
+          metricKey: "cpm",
+          label: "CPM",
+          section: "Delivery",
+          value: currentCpm,
+          average: avgCpm,
+          format: "dollar2",
+          benchmark: benchmarkText(currentCpm, avgCpm, true),
         },
       ],
     },
     {
       key: "engagement",
       title: "Engagement",
-      profileSignal: `${asset.creativeProfile.brandProminence} brand · ${asset.type} format`,
+      profileSignal: engagementProfileSignal(asset),
       score: engagementScore,
-      story: "Derived from engagement quality and share depth.",
+      story: `Engagement is anchored in how strongly this creative earns reactions and shares, which is why brand prominence and format are the main profile correlates for diagnostics.`,
       drivers: [
         {
-          metricKey: "eng_rate",
+          metricKey: "engagement_rate",
           label: "Eng. Rate",
-          section: engagementSection(asset),
-          value: currentEngRate,
-          average: avgEngRate,
+          section: asset.channel === "tiktok" ? "Engagement & Growth" : "Engagement",
+          value: currentEngagementRate,
+          average: avgEngagementRate,
           format: "pct",
-          benchmark: benchmarkText(currentEngRate, avgEngRate),
+          benchmark: benchmarkText(currentEngagementRate, avgEngagementRate),
         },
         {
-          metricKey: "share_rate",
-          label: "Share Rate",
-          section: engagementSection(asset),
-          value: currentShareRate,
-          average: avgShareRate,
-          format: "pct",
-          benchmark: benchmarkText(currentShareRate, avgShareRate),
+          metricKey: "shares",
+          label: "Shares",
+          section: asset.channel === "tiktok" ? "Engagement & Growth" : "Engagement",
+          value: currentShares,
+          average: avgShares,
+          format: "num",
+          benchmark: benchmarkText(currentShares, avgShares),
         },
       ],
     },
     {
       key: "traffic",
       title: "Traffic",
-      profileSignal: `${asset.creativeProfile.callToAction} CTA · ${asset.creativeProfile.aspectRatio}`,
+      profileSignal: trafficProfileSignal(asset),
       score: trafficScore,
-      story: "Derived from click volume and click-to-visit quality.",
+      story: `Traffic is defined by how much qualified visit volume the asset creates, so CTA and aspect ratio become the clearest creative profile explanations.`,
       drivers: [
         {
           metricKey: "clicks",
@@ -211,56 +222,29 @@ export function buildCreativeStorySummary(
       ],
     },
     {
-      key: "conversion",
-      title: "Conversion",
-      profileSignal: `${asset.creativeProfile.funnelStage} funnel · ${asset.creativeProfile.brandProminence} brand`,
-      score: conversionScore,
-      story: "Derived from purchase volume and checkout completion.",
+      key: "revenue",
+      title: "Revenue",
+      profileSignal: revenueProfileSignal(asset),
+      score: revenueScore,
+      story: `Revenue is the downstream outcome of the page: total revenue and return quality are linked back to funnel stage and brand consistency so diagnostics explain why this asset monetizes better or worse.`,
       drivers: [
         {
-          metricKey: "purchases",
-          label: "Purchases",
+          metricKey: "revenue",
+          label: "Revenue",
           section: "Conversions & Revenue",
-          value: asset.conversions,
-          average: avgConversions,
+          value: currentRevenue,
+          average: avgRevenue,
           format: "num",
-          benchmark: benchmarkText(asset.conversions, avgConversions),
+          benchmark: benchmarkText(currentRevenue, avgRevenue),
         },
-        {
-          metricKey: "checkout_purchase",
-          label: "Checkout→Purchase",
-          section: "Conversion Funnel",
-          value: currentCheckoutToPurchase,
-          average: avgCheckoutToPurchase,
-          format: "pct",
-          benchmark: benchmarkText(currentCheckoutToPurchase, avgCheckoutToPurchase),
-        },
-      ],
-    },
-    {
-      key: "efficiency",
-      title: "Efficiency",
-      profileSignal: `${asset.creativeProfile.colorContrast} contrast · ${asset.creativeProfile.brandConsistency} consistency`,
-      score: efficiencyScore,
-      story: "Derived from return strength and delivery cost control.",
-      drivers: [
         {
           metricKey: "roas",
           label: "ROAS",
           section: "Conversions & Revenue",
           value: currentRoas,
-          average: avgRoas,
+          average: safeAverage(campaignAssets, (item) => item.roas),
           format: "x",
-          benchmark: benchmarkText(currentRoas, avgRoas),
-        },
-        {
-          metricKey: "cpm",
-          label: "CPM",
-          section: "Delivery",
-          value: currentCpm,
-          average: avgCpm,
-          format: "dollar2",
-          benchmark: benchmarkText(avgCpm - currentCpm, avgCpm),
+          benchmark: benchmarkText(currentRoas, safeAverage(campaignAssets, (item) => item.roas)),
         },
       ],
     },
