@@ -241,9 +241,97 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     return { spend: s, revenue: r, roas: s > 0 ? Math.round(r / s * 100) / 100 : 0 };
   }, [filteredDaily]);
 
+  const campaignAverages = useMemo(() => {
+    const avg = (getValue: (item: CreativeAsset) => number) => campaignAssets.reduce((sum, item) => sum + getValue(item), 0) / campaignAssets.length;
+
+    return {
+      ctr: avg((item) => item.ctr),
+      roas: avg((item) => item.roas),
+      cpm: avg((item) => item.cpm),
+      linkClicks: avg((item) => isGoogle ? item.clicks : item.linkClicks),
+      engagement: avg((item) => item.postReactions + item.postComments + item.postShares + item.postSaves),
+      landingPageViews: avg((item) => item.landingPageViews),
+      addToCart: avg((item) => item.addToCart),
+      checkout: avg((item) => item.initiateCheckout),
+      conversions: avg((item) => item.conversions),
+      avgWatch: avg((item) => item.avgWatchTime || 0),
+      hookRate: avg((item) => item.videoPlays ? ((item.videoViews6s || 0) / item.videoPlays) * 100 : item.ctr),
+    };
+  }, [campaignAssets, isGoogle]);
+
+  const formatDelta = (value: number, baseline: number) => {
+    if (!baseline) return "vs campaign avg";
+    const delta = ((value - baseline) / baseline) * 100;
+    const rounded = Math.round(Math.abs(delta));
+    if (rounded < 1) return "in line with campaign avg";
+    return `${delta >= 0 ? "+" : "-"}${rounded}% vs campaign avg`;
+  };
+
+  const primaryTrafficMetricLabel = isGoogle ? "Clicks" : "Link Clicks";
+  const primaryTrafficMetricValue = isGoogle ? asset.clicks : asset.linkClicks;
+  const hookMetricLabel = isTikTok ? "6s View Rate" : isVideo ? "Avg Watch" : "CTR";
+  const hookMetricValue = isTikTok
+    ? asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays) * 100 : 0
+    : isVideo
+      ? asset.avgWatchTime || 0
+      : asset.ctr;
+  const hookMetricDisplay = isTikTok
+    ? `${hookMetricValue.toFixed(1)}%`
+    : isVideo
+      ? `${hookMetricValue.toFixed(1)}s`
+      : `${hookMetricValue.toFixed(1)}%`;
+  const hookMetricAverage = isTikTok ? campaignAverages.hookRate : isVideo ? campaignAverages.avgWatch : campaignAverages.ctr;
+
+  const diagnosticProfiles = [
+    {
+      output: "Attention & Hook",
+      diagnostic: asset.creativeProfile.motionIntensity === "High" || asset.creativeProfile.productInFirst3s ? "Strong stopping power" : "Moderate stopping power",
+      supports: `${asset.creativeProfile.motionIntensity} motion · ${asset.creativeProfile.productInFirst3s ? "product visible early" : "product introduced later"}`,
+      proof: formatDelta(hookMetricValue, hookMetricAverage),
+      metrics: [
+        { label: hookMetricLabel, value: hookMetricDisplay },
+        { label: "CTR", value: `${asset.ctr.toFixed(1)}%` },
+        { label: "Impressions", value: asset.impressions.toLocaleString() },
+      ],
+    },
+    {
+      output: "Traffic Quality",
+      diagnostic: primaryTrafficMetricValue >= campaignAverages.linkClicks ? "Strong click intent" : "Traffic needs stronger intent",
+      supports: `${asset.creativeProfile.callToAction} CTA · ${asset.creativeProfile.aspectRatio} format framing`,
+      proof: formatDelta(primaryTrafficMetricValue, campaignAverages.linkClicks),
+      metrics: [
+        { label: primaryTrafficMetricLabel, value: primaryTrafficMetricValue.toLocaleString() },
+        { label: isGoogle ? "Website Visits" : "LPV", value: asset.landingPageViews.toLocaleString() },
+        { label: "Click→LPV", value: `${(asset.linkClicks > 0 ? (asset.landingPageViews / asset.linkClicks) * 100 : 0).toFixed(0)}%` },
+      ],
+    },
+    {
+      output: "Funnel Progression",
+      diagnostic: asset.conversions >= campaignAverages.conversions ? "Healthy progression to purchase" : "Drop-off in lower funnel",
+      supports: `${asset.creativeProfile.funnelStage} message fit · ${asset.creativeProfile.brandProminence} brand presence`,
+      proof: formatDelta(asset.conversions, campaignAverages.conversions),
+      metrics: [
+        { label: "ATC", value: asset.addToCart.toLocaleString() },
+        { label: "Checkout", value: asset.initiateCheckout.toLocaleString() },
+        { label: "Purchases", value: asset.conversions.toLocaleString() },
+      ],
+    },
+    {
+      output: "Efficiency Outcome",
+      diagnostic: rangeSummary.roas >= campaignAverages.roas ? "Above-average commercial return" : "Below-average commercial return",
+      supports: `${asset.creativeProfile.colorContrast} contrast · ${asset.creativeProfile.brandConsistency} brand consistency`,
+      proof: `${formatDelta(rangeSummary.roas, campaignAverages.roas)} over selected range`,
+      metrics: [
+        { label: "ROAS", value: `${rangeSummary.roas.toFixed(1)}x` },
+        { label: "Revenue", value: `$${Math.round(rangeSummary.revenue).toLocaleString()}` },
+        { label: "Spend", value: `$${Math.round(rangeSummary.spend).toLocaleString()}` },
+      ],
+    },
+  ];
+
   // Health indicators
-  const cpmAvg = campaignAssets.reduce((s, a) => s + a.cpm, 0) / campaignAssets.length;
-  const ctrAvg = campaignAssets.reduce((s, a) => s + a.ctr, 0) / campaignAssets.length;
+  const cpmAvg = campaignAverages.cpm;
+  const ctrAvg = campaignAverages.ctr;
   const freqHealth: "good" | "warning" | "critical" = asset.frequency > 4 ? "critical" : asset.frequency > 2.5 ? "warning" : "good";
   const cpmHealth: "good" | "warning" | "critical" = asset.cpm < cpmAvg * 0.9 ? "good" : asset.cpm > cpmAvg * 1.2 ? "critical" : "warning";
   const ctrHealth: "good" | "warning" | "critical" = asset.ctr > ctrAvg * 1.1 ? "good" : asset.ctr < ctrAvg * 0.8 ? "critical" : "warning";
@@ -286,63 +374,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     { point: "75%", pct: Math.round((asset.videoWatched75 || 0) / (asset.videoPlays || 1) * 100) },
     { point: "95%", pct: Math.round((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100) },
   ]) : [];
-
-  const aspectMetricSummary = [
-    {
-      label: "Format",
-      value: asset.type.charAt(0).toUpperCase() + asset.type.slice(1),
-      metrics: [
-        { name: "CTR", value: `${asset.ctr}%` },
-        { name: "ROAS", value: `${asset.roas}x` },
-        { name: "Conversions", value: asset.conversions.toLocaleString() },
-      ],
-    },
-    {
-      label: "Motion",
-      value: asset.creativeProfile.motionIntensity,
-      metrics: [
-        { name: isTikTok ? "6s View Rate" : isVideo ? "Avg Watch" : "CTR", value: isTikTok ? `${asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays * 100).toFixed(1) : 0}%` : isVideo ? `${asset.avgWatchTime || 0}s` : `${asset.ctr}%` },
-        { name: "Engagement", value: engagementTotal.toLocaleString() },
-        { name: "Clicks", value: asset.clicks.toLocaleString() },
-      ],
-    },
-    {
-      label: "CTA",
-      value: asset.creativeProfile.callToAction,
-      metrics: [
-        { name: isGoogle ? "Clicks" : "Link Clicks", value: (isGoogle ? asset.clicks : asset.linkClicks).toLocaleString() },
-        { name: "CTR", value: `${asset.ctr}%` },
-        { name: "LPV", value: asset.landingPageViews.toLocaleString() },
-      ],
-    },
-    {
-      label: "Funnel",
-      value: asset.creativeProfile.funnelStage,
-      metrics: [
-        { name: "ATC", value: asset.addToCart.toLocaleString() },
-        { name: "Checkout", value: asset.initiateCheckout.toLocaleString() },
-        { name: "ROAS", value: `${asset.roas}x` },
-      ],
-    },
-    {
-      label: "Brand",
-      value: asset.creativeProfile.brandProminence,
-      metrics: [
-        { name: "Quality", value: rankingLabel(asset.qualityRanking) },
-        { name: "Conv. Rank", value: rankingLabel(asset.conversionRateRanking) },
-        { name: "Revenue", value: `$${asset.purchaseValue.toLocaleString()}` },
-      ],
-    },
-    {
-      label: "Contrast",
-      value: asset.creativeProfile.colorContrast,
-      metrics: [
-        { name: "CTR", value: `${asset.ctr}%` },
-        { name: "CPM", value: `$${asset.cpm.toFixed(2)}` },
-        { name: "ROAS", value: `${asset.roas}x` },
-      ],
-    },
-  ];
 
   return (
     <TooltipProvider delayDuration={200}>
