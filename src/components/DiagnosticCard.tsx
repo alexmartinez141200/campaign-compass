@@ -2,10 +2,7 @@ import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import type { CreativeAsset } from "@/data/mockData";
 import { Checkbox } from "@/components/ui/checkbox";
-import { formatStoryMetricValue, getCreativeAttributeDrivers } from "@/lib/creative-story";
 import ChannelIcon from "./ChannelIcon";
-
-const rankStyle = "text-muted-foreground/60";
 
 interface DiagnosticCardProps {
   asset: CreativeAsset;
@@ -21,18 +18,22 @@ interface DiagnosticCardProps {
 
 type SortOption = "roas" | "spend";
 
-const sorts: { value: SortOption; label: string }[] = [
-  { value: "roas", label: "ROAS" },
-  { value: "spend", label: "Spend" },
-];
+const getCreativePerformanceScore = (asset: CreativeAsset) => {
+  const engagementRate = asset.impressions > 0 ? ((asset.postReactions + asset.postComments + asset.postShares + asset.postSaves) / asset.impressions) * 100 : 0;
+  const linkCtr = asset.impressions > 0 ? (asset.linkClicks / asset.impressions) * 100 : 0;
+  const clickToLpv = asset.linkClicks > 0 ? (asset.landingPageViews / asset.linkClicks) * 100 : 0;
+  const purchaseRate = asset.landingPageViews > 0 ? (asset.conversions / asset.landingPageViews) * 100 : 0;
 
-const getProfileMetricKeys = (asset: CreativeAsset) => {
-  if (asset.type === "video") return ["duration", "motion", "cta"];
-  if (asset.type === "carousel") return ["format", "cta", "funnelStage"];
-  return ["format", "brandProminence", "funnelStage"];
+  const score =
+    35 +
+    Math.min(20, engagementRate * 6) +
+    Math.min(15, linkCtr * 4) +
+    Math.min(15, clickToLpv / 6) +
+    Math.min(15, purchaseRate * 2.5);
+
+  return Math.max(0, Math.min(100, Math.round(score)));
 };
 
-/** Column header row — render once above the list */
 export const DiagnosticHeader = ({ sort, onSortChange, showCheckbox = true }: { sort?: SortOption; onSortChange?: (s: SortOption) => void; showCheckbox?: boolean }) => (
   <div className="flex items-center h-8 px-0 text-[9px] uppercase tracking-wider font-semibold text-muted-foreground/60 select-none">
     <div className="w-8 flex-shrink-0" />
@@ -41,20 +42,30 @@ export const DiagnosticHeader = ({ sort, onSortChange, showCheckbox = true }: { 
     <div className="flex-1" />
     <div className="mr-6 min-w-[70px] text-right flex-shrink-0">Spend</div>
     <div className="mr-6 min-w-[80px] text-right flex-shrink-0">Revenue</div>
-    <div className="min-w-[360px] flex-shrink-0">Key profile metrics</div>
+    <div className="mr-6 min-w-[70px] text-right flex-shrink-0">ROAS</div>
+    <div className="min-w-[120px] text-right flex-shrink-0">Creative Score</div>
     <div className="w-3.5 ml-4 flex-shrink-0" />
   </div>
 );
 
 const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showCheckbox = true, campaignName, onSelectToggle, onClick }: DiagnosticCardProps) => {
-  const metricGroups = getProfileMetricKeys(asset)
-    .flatMap((key) => getCreativeAttributeDrivers(asset, [asset], key))
-    .filter((metric, metricIndex, arr) => arr.findIndex((item) => item.metricKey === metric.metricKey) === metricIndex)
-    .slice(0, 4)
-    .map((metric) => ({
-      label: metric.label,
-      value: formatStoryMetricValue(metric.value, metric.format),
-    }));
+  const roasPercent = Math.min((asset.roas / maxRoas) * 100, 100);
+  const performanceScore = getCreativePerformanceScore(asset);
+
+  const roasColor =
+    roasPercent >= 75 ? "text-emerald-600" :
+    roasPercent >= 40 ? "text-foreground" :
+    "text-destructive";
+
+  const barColor =
+    roasPercent >= 75 ? "bg-emerald-500" :
+    roasPercent >= 40 ? "bg-primary" :
+    "bg-destructive";
+
+  const scoreColor =
+    performanceScore >= 75 ? "text-accent" :
+    performanceScore >= 50 ? "text-foreground" :
+    "text-destructive";
 
   return (
     <motion.div
@@ -110,13 +121,21 @@ const DiagnosticCard = ({ asset, index, rank, maxRoas, selected = false, showChe
         <p className="text-[13px] font-mono text-foreground font-semibold">${asset.purchaseValue.toLocaleString()}</p>
       </div>
 
-      <div className="grid min-w-[360px] grid-cols-4 gap-2 flex-shrink-0">
-        {metricGroups.map((metric) => (
-          <div key={`${asset.id}-${metric.label}`} className="rounded-md border border-border/50 bg-background px-2 py-1.5">
-            <p className="text-[8px] uppercase tracking-[0.14em] text-muted-foreground truncate">{metric.label}</p>
-            <p className="mt-0.5 text-[11px] font-mono font-semibold text-foreground truncate">{metric.value}</p>
-          </div>
-        ))}
+      <div className="mr-6 min-w-[70px] flex-shrink-0 text-right">
+        <p className={`text-[15px] font-mono font-bold leading-tight ${roasColor}`}>{asset.roas.toFixed(1)}x</p>
+        <div className="ml-auto h-[2px] w-[56px] bg-border/50 rounded-full overflow-hidden mt-1">
+          <motion.div
+            className={`h-full rounded-full ${barColor}`}
+            initial={{ width: 0 }}
+            animate={{ width: `${roasPercent}%` }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          />
+        </div>
+      </div>
+
+      <div className="min-w-[120px] flex-shrink-0 text-right">
+        <p className={`text-[16px] font-mono font-bold leading-tight ${scoreColor}`}>{performanceScore}</p>
+        <p className="mt-0.5 text-[8px] uppercase tracking-[0.16em] text-muted-foreground">Creative score</p>
       </div>
 
       <button
