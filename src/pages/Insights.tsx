@@ -991,7 +991,7 @@ const Insights = () => {
                         <div className="text-right">
                           <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Current Value</p>
                           <p className="text-[12px] font-medium text-foreground mt-1">{selectedProfileAxis.getValue(selectedAsset)}</p>
-                          <p className={`text-[22px] font-mono font-bold mt-2 ${scoreColor(selectedProfileAxis.score(selectedAsset))}`}>{selectedProfileAxis.score(selectedAsset)}</p>
+                          <p className={`text-[22px] font-mono font-bold mt-2 ${scoreColor(selectedProfileDerivedScore)}`}>{selectedProfileDerivedScore}</p>
                         </div>
                       </div>
                     </div>
