@@ -1040,8 +1040,8 @@ const Insights = () => {
                           {profileMetricRows.map((row) => (
                             <tr key={row.key} className="border-b border-border/20 last:border-0 align-top">
                               <td className="px-4 py-3 text-[11px] font-semibold text-foreground">{row.label}</td>
-                              <td className="px-4 py-3 text-right text-[11px] font-mono text-foreground">{fmt(row.value, row.format)}</td>
-                              <td className="px-4 py-3 text-right text-[11px] font-mono text-muted-foreground">{fmt(row.average, row.format)}</td>
+                              <td className="px-4 py-3 text-right text-[11px] font-mono text-foreground">{formatStoryMetricValue(row.value, row.format)}</td>
+                              <td className="px-4 py-3 text-right text-[11px] font-mono text-muted-foreground">{formatStoryMetricValue(row.average, row.format)}</td>
                               <td className={`px-4 py-3 text-right text-[11px] font-mono font-semibold ${row.positive ? "text-accent" : "text-destructive"}`}>
                                 {row.pctDiff > 0 ? "+" : ""}{Math.round(row.pctDiff)}%
                               </td>
