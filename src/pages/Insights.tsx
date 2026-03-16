@@ -618,11 +618,11 @@ const Insights = () => {
           handleProfileModalOpen(payload.key);
         }}
       >
-        <circle cx={cx} cy={cy} r={11} fill="hsl(var(--background))" fillOpacity={0.01} />
+        <circle cx={cx} cy={cy} r={18} fill="hsl(var(--background))" fillOpacity={0.01} />
         <circle
           cx={cx}
           cy={cy}
-          r={active ? 7 : 6}
+          r={active ? 8 : 6.5}
           fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"}
           stroke="hsl(var(--primary))"
           strokeWidth={2}
@@ -787,19 +787,31 @@ const Insights = () => {
                         tick={({ payload, x, y, textAnchor }) => {
                           const active = payload.value === selectedProfileAxis.shortLabel;
                           const axis = profileAxes.find((item) => item.shortLabel === payload.value);
+                          const labelWidth = Math.max(String(payload.value).length * 7.2, 44);
                           return (
-                            <text
-                              x={x}
-                              y={y}
-                              textAnchor={textAnchor}
-                              fill={active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))"}
-                              fontSize={10}
-                              fontWeight={active ? 700 : 600}
+                            <g
+                              transform={`translate(${x}, ${y})`}
                               style={{ cursor: axis ? "pointer" : "default" }}
                               onClick={() => axis && handleProfileModalOpen(axis.key)}
                             >
-                              {payload.value}
-                            </text>
+                              <rect
+                                x={textAnchor === "start" ? -4 : textAnchor === "end" ? -labelWidth + 4 : -labelWidth / 2}
+                                y={-12}
+                                width={labelWidth}
+                                height={24}
+                                rx={6}
+                                fill="hsl(var(--background))"
+                                fillOpacity={0.01}
+                              />
+                              <text
+                                textAnchor={textAnchor}
+                                fill={active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))"}
+                                fontSize={10}
+                                fontWeight={active ? 700 : 600}
+                              >
+                                {payload.value}
+                              </text>
+                            </g>
                           );
                         }}
                       />
