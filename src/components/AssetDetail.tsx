@@ -127,13 +127,13 @@ const InfoButton = ({ label }: { label: string }) => {
   );
 };
 
-const KpiCard = ({ label, value, trend, trendInverse = false, health, sub, onClick }: {
-  label: string; value: string; trend?: number; trendInverse?: boolean; health?: "good" | "warning" | "critical"; sub?: string; onClick?: () => void;
+const KpiCard = ({ label, value, trend, trendInverse = false, health, sub, onClick, active = false }: {
+  label: string; value: string; trend?: number; trendInverse?: boolean; health?: "good" | "warning" | "critical"; sub?: string; onClick?: () => void; active?: boolean;
 }) => (
   <button
     type="button"
     onClick={onClick}
-    className={`p-3.5 rounded-lg border border-border/60 bg-card flex-1 min-w-0 text-left ${onClick ? "transition-colors hover:bg-muted/40 cursor-pointer" : "cursor-default"}`}
+    className={`p-3.5 rounded-lg border flex-1 min-w-0 text-left ${active ? "border-primary bg-primary/5" : "border-border/60 bg-card"} ${onClick ? "transition-colors hover:bg-muted/40 cursor-pointer" : "cursor-default"}`}
   >
     <div className="flex items-center justify-between mb-1.5">
       <div className="flex items-center gap-1.5">
