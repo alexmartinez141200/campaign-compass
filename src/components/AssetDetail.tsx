@@ -238,6 +238,10 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     value: item.score,
   }));
 
+  const lowPerformingCategories = creativeDiagnostics.filter((item) => item.status === "Weak" || item.score < 50);
+  const selectedCategory = creativeDiagnostics.find((item) => item.key === selectedCategoryKey) ?? creativeDiagnostics[0];
+  const updateTargets = lowPerformingCategories.length ? lowPerformingCategories.slice(0, 3) : creativeDiagnostics.slice().sort((a, b) => a.score - b.score).slice(0, 2);
+
   const pillarContent = {
     delivery: (
       <>
