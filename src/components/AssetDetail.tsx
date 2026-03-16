@@ -391,7 +391,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
   return (
     <TooltipProvider>
-      <div className="p-6 space-y-6">
+      <div className="pt-5 space-y-5">
 
         <div className="rounded-xl border border-border/60 bg-card/60 p-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Creative asset being analyzed</p>
@@ -416,13 +416,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <Tabs value={activeTopTab} onValueChange={(value) => setActiveTopTab(value as "creative" | "campaign")} className="space-y-4">
+        <Tabs value={activeTopTab} onValueChange={(value) => setActiveTopTab(value as "creative" | "campaign")} className="space-y-3">
           <TabsList className="grid h-auto w-full grid-cols-2 rounded-lg border border-border/60 bg-muted/20 p-0.5 shadow-card">
             <TabsTrigger value="campaign" className="rounded-md px-4 py-2 text-[10px] uppercase tracking-[0.18em] data-[state=active]:bg-background data-[state=active]:shadow-sm">Campaign Performance</TabsTrigger>
             <TabsTrigger value="creative" className="rounded-md px-4 py-2 text-[10px] uppercase tracking-[0.18em] data-[state=active]:bg-background data-[state=active]:shadow-sm">Creative Asset Performance</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="creative" className="mt-0 space-y-4">
+          <TabsContent value="creative" className="mt-0 space-y-3">
             <SectionHeader title="Creative asset performance" description="Each row shows whether a creative profile category is doing good, mixed, or weak based on the campaign-average metrics used to evaluate it." />
             <div className="grid gap-4 lg:grid-cols-[minmax(320px,0.92fr)_minmax(0,1.08fr)]">
               <div className="rounded-xl border border-border bg-muted/30 p-4 shadow-card self-start">
