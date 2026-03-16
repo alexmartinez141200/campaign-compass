@@ -581,13 +581,10 @@ const Insights = () => {
 
   const profileMetricRows = useMemo(() => {
     if (!selectedAsset || !selectedProfileAxis) return [];
-    const mappedDimension = axisStoryDimensionMap[selectedProfileAxis.key];
-    const summary = mappedDimension ? selectedStorySummary.find((row) => row.key === mappedDimension) : null;
-    if (!summary) return [];
 
-    return summary.drivers.map((driver) => {
+    return getCreativeAttributeDrivers(selectedAsset, assets, selectedProfileAxis.key).map((driver) => {
       const pctDiff = driver.average > 0 ? ((driver.value - driver.average) / driver.average) * 100 : 0;
-      const inverseMetric = driver.metricKey.includes("cpm") || driver.metricKey.includes("cpc") || driver.metricKey.includes("cpa");
+      const inverseMetric = ["cpm", "cpc", "cpa"].some((token) => driver.metricKey.includes(token));
       const positive = inverseMetric ? pctDiff <= 0 : pctDiff >= 0;
       const rounded = Math.round(Math.abs(pctDiff));
       const note = rounded < 5
@@ -607,7 +604,7 @@ const Insights = () => {
         note,
       };
     });
-  }, [selectedAsset, selectedProfileAxis, selectedStorySummary]);
+  }, [selectedAsset, selectedProfileAxis, assets]);
 
   const handleProfileModalOpen = useCallback((profileKey: string) => {
     setSelectedProfileKey(profileKey);
