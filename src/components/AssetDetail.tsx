@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowDownRight, ArrowUpRight, Info, Minus } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import type { CreativeAsset } from "@/data/mockData";
-import { buildCreativeStorySummary, formatStoryMetricValue } from "@/lib/creative-story";
+import { axisStoryDimensionMap, buildCreativeStorySummary, formatStoryMetricValue } from "@/lib/creative-story";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
@@ -189,132 +189,45 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   };
 
   const creativeDiagnostics = useMemo(() => {
-    const safeDelta = (value: number, average: number, inverse = false) => {
-      if (!average) return 0;
-      return inverse ? ((average - value) / average) * 100 : ((value - average) / average) * 100;
-    };
-
-    const totalEngagementRate = (item: CreativeAsset) =>
-      item.impressions ? ((item.postReactions + item.postComments + item.postShares + item.postSaves) / item.impressions) * 100 : 0;
-    const clickToLpvRate = (item: CreativeAsset) => {
-      const clicks = item.channel === "google" ? item.clicks : item.linkClicks;
-      return clicks ? (item.landingPageViews / clicks) * 100 : 0;
-    };
-    const lpvToConvRate = (item: CreativeAsset) => (item.landingPageViews ? (item.conversions / item.landingPageViews) * 100 : 0);
-    const formatMetric = (value: number, label: string) => {
-      if (label === "ROAS") return `${value.toFixed(1)}x`;
-      if (label === "CPA" || label === "Revenue") return `$${value.toFixed(label === "CPA" ? 2 : 0)}`;
-      if (["CTR", "Eng. Rate", "Click → LPV", "LPV → Conv"].includes(label)) return `${value.toFixed(1)}%`;
-      return Math.round(value).toLocaleString();
-    };
-
-    const attributeDefs = [
-      {
-        label: "Format",
-        value: asset.type,
-        metrics: [
-          { label: "Eng. Rate", value: totalEngagementRate(asset), get: totalEngagementRate },
-          { label: "CTR", value: asset.ctr, get: (item: CreativeAsset) => item.ctr },
-          { label: "ROAS", value: asset.roas, get: (item: CreativeAsset) => item.roas },
-        ],
-      },
-      {
-        label: "Aspect Ratio",
-        value: asset.creativeProfile.aspectRatio,
-        metrics: [
-          { label: asset.channel === "google" ? "Clicks" : "Link Clicks", value: trafficClicks, get: (item: CreativeAsset) => (item.channel === "google" ? item.clicks : item.linkClicks) },
-          { label: asset.channel === "google" ? "Website Visits" : "Landing Page Views", value: asset.landingPageViews, get: (item: CreativeAsset) => item.landingPageViews },
-          { label: "Click → LPV", value: trafficRate, get: clickToLpvRate },
-        ],
-      },
-      {
-        label: "Motion",
-        value: asset.creativeProfile.motionIntensity,
-        metrics: [
-          { label: "Impressions", value: asset.impressions, get: (item: CreativeAsset) => item.impressions },
-          { label: "CPM", value: asset.cpm, get: (item: CreativeAsset) => item.cpm, inverse: true },
-          { label: "CTR", value: asset.ctr, get: (item: CreativeAsset) => item.ctr },
-        ],
-      },
-      {
-        label: "Contrast",
-        value: asset.creativeProfile.colorContrast,
-        metrics: [
-          { label: "CTR", value: asset.ctr, get: (item: CreativeAsset) => item.ctr },
-          { label: "Eng. Rate", value: totalEngagementRate(asset), get: totalEngagementRate },
-          { label: "ROAS", value: asset.roas, get: (item: CreativeAsset) => item.roas },
-        ],
-      },
-      {
-        label: "Brand",
-        value: asset.creativeProfile.brandProminence,
-        metrics: [
-          { label: "Eng. Rate", value: totalEngagementRate(asset), get: totalEngagementRate },
-          { label: "Shares", value: asset.postShares, get: (item: CreativeAsset) => item.postShares },
-          { label: "Revenue", value: asset.purchaseValue, get: (item: CreativeAsset) => item.purchaseValue },
-        ],
-      },
-      {
-        label: "Consistency",
-        value: asset.creativeProfile.brandConsistency,
-        metrics: [
-          { label: "ROAS", value: asset.roas, get: (item: CreativeAsset) => item.roas },
-          { label: "Revenue", value: asset.purchaseValue, get: (item: CreativeAsset) => item.purchaseValue },
-          { label: "CPA", value: asset.costPerResult, get: (item: CreativeAsset) => item.costPerResult, inverse: true },
-        ],
-      },
-      {
-        label: "Funnel",
-        value: asset.creativeProfile.funnelStage,
-        metrics: [
-          { label: "Conversions", value: asset.conversions, get: (item: CreativeAsset) => item.conversions },
-          { label: "LPV → Conv", value: lpvToConvRate(asset), get: lpvToConvRate },
-          { label: "ROAS", value: asset.roas, get: (item: CreativeAsset) => item.roas },
-        ],
-      },
-      {
-        label: "CTA",
-        value: asset.creativeProfile.callToAction,
-        metrics: [
-          { label: "CTR", value: asset.ctr, get: (item: CreativeAsset) => item.ctr },
-          { label: asset.channel === "google" ? "Clicks" : "Link Clicks", value: trafficClicks, get: (item: CreativeAsset) => (item.channel === "google" ? item.clicks : item.linkClicks) },
-          { label: "Click → LPV", value: trafficRate, get: clickToLpvRate },
-        ],
-      },
-      ...(asset.type === "video"
-        ? [{
-            label: "Product in first 3s",
-            value: asset.creativeProfile.productInFirst3s ? "Yes" : "No",
-            metrics: [
-              { label: "CTR", value: asset.ctr, get: (item: CreativeAsset) => item.ctr },
-              { label: "Landing Page Views", value: asset.landingPageViews, get: (item: CreativeAsset) => item.landingPageViews },
-              { label: "ROAS", value: asset.roas, get: (item: CreativeAsset) => item.roas },
-            ],
-          }]
-        : []),
+    const profileRows = [
+      { key: "format", label: "Format", value: asset.type },
+      { key: "duration", label: "Duration", value: asset.creativeProfile.videoDuration ? `${asset.creativeProfile.videoDuration}s` : "N/A" },
+      { key: "aspect", label: "Aspect Ratio", value: asset.creativeProfile.aspectRatio },
+      { key: "motion", label: "Motion", value: asset.creativeProfile.motionIntensity },
+      { key: "contrast", label: "Contrast", value: asset.creativeProfile.colorContrast },
+      { key: "brandProminence", label: "Brand", value: asset.creativeProfile.brandProminence },
+      { key: "brandConsistency", label: "Consistency", value: asset.creativeProfile.brandConsistency },
+      { key: "funnelStage", label: "Funnel", value: asset.creativeProfile.funnelStage },
+      { key: "cta", label: "CTA", value: asset.creativeProfile.callToAction },
+      { key: "productInFirst3s", label: "3s Product", value: asset.type === "video" ? (asset.creativeProfile.productInFirst3s ? "Yes" : "No") : "N/A" },
     ];
 
-    return attributeDefs.map((attribute) => {
-      const metrics = attribute.metrics.map((metric) => {
-        const average = campaignAssets.reduce((sum, item) => sum + metric.get(item), 0) / campaignAssets.length;
-        const delta = Math.round(safeDelta(metric.value, average, metric.inverse));
+    return profileRows.map((row) => {
+      const mappedDimension = axisStoryDimensionMap[row.key];
+      const summary = mappedDimension ? storySummaryRows.find((item) => item.key === mappedDimension) : undefined;
+      const metrics = (summary?.drivers ?? []).map((driver) => {
+        const pctDiff = driver.average > 0 ? ((driver.value - driver.average) / driver.average) * 100 : 0;
+        const inverseMetric = driver.metricKey.includes("cpm") || driver.metricKey.includes("cpc") || driver.metricKey.includes("cpa");
+        const adjustedDiff = inverseMetric ? -pctDiff : pctDiff;
+
         return {
-          label: metric.label,
-          value: formatMetric(metric.value, metric.label),
-          average: formatMetric(average, metric.label),
-          delta,
+          label: driver.label,
+          value: formatStoryMetricValue(driver.value, driver.format),
+          average: formatStoryMetricValue(driver.average, driver.format),
+          delta: Math.round(adjustedDiff),
         };
       });
-      const score = Math.round(metrics.reduce((sum, metric) => sum + metric.delta, 0) / metrics.length);
+
+      const score = metrics.length ? Math.round(metrics.reduce((sum, metric) => sum + metric.delta, 0) / metrics.length) : 0;
 
       return {
-        label: attribute.label,
-        value: attribute.value,
+        label: row.label,
+        value: row.value,
         status: score >= 12 ? "Good" : score <= -8 ? "Weak" : "Mixed",
         metrics,
       };
     });
-  }, [asset, campaignAssets, trafficClicks, trafficRate]);
+  }, [asset, storySummaryRows]);
 
   const pillarContent = {
     delivery: (
