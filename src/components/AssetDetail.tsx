@@ -483,6 +483,12 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                       </div>
                       <button
                         type="button"
+                        className="rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground transition-colors hover:bg-primary/15"
+                      >
+                        Take Me to Design
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setShowUpdateRecommendations(false)}
                         className="rounded-md border border-border/60 px-2.5 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground"
                       >
