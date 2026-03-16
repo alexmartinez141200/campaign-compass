@@ -379,51 +379,16 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <div className="rounded-xl border border-border/60 bg-muted/20 mb-6 px-4 py-4 shadow-card">
-          <div className="flex items-center justify-between gap-4 mb-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Creative profile analytics model</p>
-              <p className="text-[11px] text-muted-foreground mt-1">This summary starts with the page’s main analytics pillars—delivery, engagement, traffic, and revenue—then correlates each outcome back to the creative profile used in diagnostics.</p>
-            </div>
-          </div>
-          <div className="overflow-hidden rounded-lg border border-border/60 bg-background">
-            <div className="grid grid-cols-[0.8fr,1.4fr,0.6fr,1fr,1fr,1.35fr] border-b border-border/60 bg-muted/40 px-4 py-2 text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
-              <span>Pillar</span>
-              <span>Profile correlation</span>
-              <span>Score</span>
-              <span>Metric 1</span>
-              <span>Metric 2</span>
-              <span>Analytics story</span>
-            </div>
-            {storySummaryRows.map((row) => (
-              <div key={row.key} className="grid grid-cols-[0.8fr,1.4fr,0.6fr,1fr,1fr,1.35fr] items-start gap-3 border-b border-border/50 px-4 py-3 last:border-b-0">
-                <div>
-                  <p className="text-[11px] font-semibold text-foreground">{row.title}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] text-foreground">{row.profileSignal}</p>
-                </div>
-                <div>
-                  <p className="text-[14px] font-mono font-bold text-foreground">{row.score}</p>
-                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground mt-1">Correlated</p>
-                </div>
-                <div>
-                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.drivers[0].label}</p>
-                  <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{formatStoryMetricValue(row.drivers[0].value, row.drivers[0].format)}</p>
-                  <p className="text-[9px] text-muted-foreground mt-1">{row.drivers[0].benchmark}</p>
-                </div>
-                <div>
-                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.drivers[1].label}</p>
-                  <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{formatStoryMetricValue(row.drivers[1].value, row.drivers[1].format)}</p>
-                  <p className="text-[9px] text-muted-foreground mt-1">{row.drivers[1].benchmark}</p>
-                </div>
-                <div>
-                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.drivers[0].section} + {row.drivers[1].section}</p>
-                  <p className="text-[11px] text-foreground mt-1">{row.story}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="grid grid-cols-4 gap-3 mb-6">
+          {storySummaryRows.map((row) => (
+            <KpiCard
+              key={row.key}
+              label={row.title}
+              value={formatStoryMetricValue(row.drivers[0].value, row.drivers[0].format)}
+              sub={`${row.drivers[0].label} · ${row.profileSignal}`}
+              onClick={() => scrollToSection(pillarSectionMap[row.key])}
+            />
+          ))}
         </div>
 
         {/* ─── DATE FILTER ─── */}
