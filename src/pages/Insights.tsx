@@ -618,11 +618,11 @@ const Insights = () => {
           handleProfileModalOpen(payload.key);
         }}
       >
-        <circle cx={cx} cy={cy} r={11} fill="hsl(var(--background))" fillOpacity={0.01} />
+        <circle cx={cx} cy={cy} r={18} fill="hsl(var(--background))" fillOpacity={0.01} />
         <circle
           cx={cx}
           cy={cy}
-          r={active ? 7 : 6}
+          r={active ? 8 : 6.5}
           fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"}
           stroke="hsl(var(--primary))"
           strokeWidth={2}
