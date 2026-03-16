@@ -709,11 +709,18 @@ const Insights = () => {
   );
 
   const isCorrelationModal = openModal?.startsWith("correlation:");
+  const isProfileModal = openModal?.startsWith("profile:");
   const correlationAttrKey = isCorrelationModal ? openModal!.split(":")[1] : null;
   const correlationCard = correlationAttrKey ? correlationCards.find(c => c.attr.key === correlationAttrKey) : null;
-  const modalGroup = openModal && !isCorrelationModal ? metricGroups.find(g => g.name === openModal) : null;
-  const modalTitle = isCorrelationModal && correlationCard ? correlationCard.attr.label : openModal || "";
-  const ModalIcon = isCorrelationModal ? Layers : openModal ? (groupIcons[openModal] || BarChart3) : BarChart3;
+  const profileModalKey = isProfileModal ? openModal!.split(":")[1] : null;
+  const profileModalAxis = profileModalKey ? profileAxes.find((axis) => axis.key === profileModalKey) : null;
+  const modalGroup = openModal && !isCorrelationModal && !isProfileModal ? metricGroups.find(g => g.name === openModal) : null;
+  const modalTitle = isCorrelationModal && correlationCard
+    ? correlationCard.attr.label
+    : isProfileModal && profileModalAxis
+      ? profileModalAxis.label
+      : openModal || "";
+  const ModalIcon = isCorrelationModal ? Layers : isProfileModal ? Target : openModal ? (groupIcons[openModal] || BarChart3) : BarChart3;
 
   return (
     <div className="min-h-screen bg-background">
