@@ -556,6 +556,49 @@ const Insights = () => {
     return getProfileAnalysis(selectedProfileAxis, selectedAsset);
   }, [selectedAsset, selectedProfileAxis]);
 
+  const profileMetricMap: Record<string, string[]> = {
+    format: ["roas", "ctr", "conv", "revenue"],
+    duration: ["avgWatch", "thruRate", "ctr", "conv"],
+    aspect: ["impressions", "ctr", "engRate", "conv"],
+    motion: ["engRate", "ctr", "avgWatch", "thruRate"],
+    contrast: ["ctr", "engRate", "convRate", "revenue"],
+    brandProminence: ["qualRank", "engRank", "ctr", "convRate"],
+    brandConsistency: ["qualRank", "engRank", "convRank", "roas"],
+    funnelStage: ["ctr", "lpv", "convRate", "roas"],
+    cta: ["ctr", "linkClicks", "convRate", "roas"],
+    productInFirst3s: ["avgWatch", "thruRate", "ctr", "convRate"],
+  };
+
+  const profileMetricRows = useMemo(() => {
+    if (!selectedAsset || !selectedProfileAxis) return [];
+    const keys = profileMetricMap[selectedProfileAxis.key] || ["roas", "ctr", "convRate", "revenue"];
+    return keys
+      .map((key) => metrics.find((metric) => metric.key === key))
+      .filter((metric): metric is MetricDef => Boolean(metric))
+      .map((metric) => {
+        const value = metric.get(selectedAsset);
+        const average = assets.reduce((sum, asset) => sum + metric.get(asset), 0) / assets.length;
+        const pctDiff = average > 0 ? ((value - average) / average) * 100 : 0;
+        const positive = metric.higherIsBetter ? pctDiff >= 0 : pctDiff <= 0;
+        const note = Math.abs(pctDiff) < 5
+          ? "In line with the comparison average"
+          : positive
+            ? `Supports this category with ${Math.round(Math.abs(pctDiff))}% better-than-average performance`
+            : `Weakens this category with ${Math.round(Math.abs(pctDiff))}% worse-than-average performance`;
+
+        return {
+          key: metric.key,
+          label: metric.label,
+          format: metric.format,
+          value,
+          average,
+          pctDiff,
+          positive,
+          note,
+        };
+      });
+  }, [selectedAsset, selectedProfileAxis, metrics, assets]);
+
   if (assets.length === 0) {
     return (
       <div className="min-h-screen bg-background">
