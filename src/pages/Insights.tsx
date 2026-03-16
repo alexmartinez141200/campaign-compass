@@ -31,6 +31,12 @@ type ProfileAxis = {
   score: (asset: CreativeAsset) => number;
 };
 
+type ProfileAnalysis = {
+  headline: string;
+  summary: string;
+  why: string[];
+};
+
 const rankVal = (r: "above_average" | "average" | "below_average") => r === "above_average" ? 2 : r === "average" ? 1 : 0;
 
 const ALL_METRICS: MetricDef[] = [
@@ -263,6 +269,191 @@ function buildCorrelationCards(assets: CreativeAsset[], metrics: MetricDef[]): C
   return cards;
 }
 
+function getProfileAnalysis(axis: ProfileAxis, asset: CreativeAsset): ProfileAnalysis {
+  const score = axis.score(asset);
+  const value = axis.getValue(asset);
+  const level = score >= 85 ? "strong" : score >= 70 ? "mixed" : "weak";
+
+  const base = {
+    format: {
+      strong: {
+        headline: `${value} is working well`,
+        summary: `${value} aligns strongly with the best-performing creative pattern in this comparison set.`,
+        why: ["This format matches how users engage with this channel.", "The structure supports clearer storytelling and product framing.", "It likely helped this asset hold attention deeper into the funnel."],
+      },
+      mixed: {
+        headline: `${value} is performing adequately`,
+        summary: `${value} is helping, but it is not a clear advantage versus the strongest assets.`,
+        why: ["The format is serviceable for this message.", "Other attributes are likely carrying more of the performance.", "A stronger format choice could improve conversion efficiency."],
+      },
+      weak: {
+        headline: `${value} is a weaker fit`,
+        summary: `${value} appears less effective than the stronger creative formats in this set.`,
+        why: ["The presentation may feel less dynamic or less scannable.", "It may not showcase product or message hierarchy clearly enough.", "Switching format could improve response quality."],
+      },
+    },
+    duration: {
+      strong: {
+        headline: `${value} duration is strong`,
+        summary: `This duration looks well-matched to attention span and message density.`,
+        why: ["It delivers the message without dragging.", "It leaves enough time for product and CTA clarity.", "It supports higher completion and click intent."],
+      },
+      mixed: {
+        headline: `${value} duration is acceptable`,
+        summary: `The runtime works, but it is not a standout advantage for this asset.`,
+        why: ["The pacing is probably fine, but not optimized.", "Some scenes may be carrying extra time.", "A tighter cut could improve retention."],
+      },
+      weak: {
+        headline: `${value} duration is hurting efficiency`,
+        summary: `The runtime is likely too short to persuade properly or too long to sustain attention.`,
+        why: ["Users may not get to the key message quickly enough.", "Pacing may be less efficient than top assets.", "Re-editing the runtime could improve engagement."],
+      },
+    },
+    aspect: {
+      strong: {
+        headline: `${value} fits the placement well`,
+        summary: `This aspect ratio is supporting visibility and native placement behavior.`,
+        why: ["It likely uses screen space efficiently.", "It feels more natural in-feed for this channel.", "It helps the creative command more attention."],
+      },
+      mixed: {
+        headline: `${value} is usable but not optimal`,
+        summary: `This aspect ratio works, though stronger shapes exist in the current set.`,
+        why: ["It displays correctly but does not maximize impact.", "It may give up visual dominance to other assets.", "A more native ratio could lift results."],
+      },
+      weak: {
+        headline: `${value} is limiting performance`,
+        summary: `This aspect ratio is likely a weaker fit for how users are consuming the ad.`,
+        why: ["It may take up less effective screen area.", "It can reduce visual priority in the feed.", "A different ratio could improve thumb-stop power."],
+      },
+    },
+    motion: {
+      strong: {
+        headline: `${value} motion is helping`,
+        summary: `The motion treatment is supporting attention without overwhelming the message.`,
+        why: ["The creative likely feels active and intentional.", "Movement supports product understanding or pacing.", "It helps the asset stand out while staying clear."],
+      },
+      mixed: {
+        headline: `${value} motion is neutral`,
+        summary: `The motion style is acceptable, but it is not driving a strong advantage.`,
+        why: ["The pacing may be fine but not memorable.", "It does not hurt, but it may not amplify the hook enough.", "Refining movement could improve engagement."],
+      },
+      weak: {
+        headline: `${value} motion is a weakness`,
+        summary: `The current motion approach is likely reducing clarity or attention quality.`,
+        why: ["The creative may feel too static or too noisy.", "The message may not build momentum well.", "A cleaner motion strategy could improve response."],
+      },
+    },
+    contrast: {
+      strong: {
+        headline: `${value} contrast is strong`,
+        summary: `The contrast level is helping important elements read quickly.`,
+        why: ["Text, product, and CTA are easier to distinguish.", "The creative likely stops the scroll more effectively.", "Visual hierarchy is clearer than weaker assets."],
+      },
+      mixed: {
+        headline: `${value} contrast is moderate`,
+        summary: `The contrast works, but it is not giving this asset a major edge.`,
+        why: ["Readability is decent overall.", "Some details may blend more than ideal.", "A bolder hierarchy could improve clarity."],
+      },
+      weak: {
+        headline: `${value} contrast is hurting readability`,
+        summary: `The visual contrast is likely too soft or too harsh for efficient communication.`,
+        why: ["Important elements may not stand out enough.", "The ad may be harder to scan quickly.", "Adjusting contrast could improve comprehension."],
+      },
+    },
+    brandProminence: {
+      strong: {
+        headline: `${value} branding balance is effective`,
+        summary: `The brand presence feels well-calibrated for performance.`,
+        why: ["Branding is visible without overpowering the message.", "Users can recognize the advertiser quickly.", "It supports trust while keeping the creative conversion-focused."],
+      },
+      mixed: {
+        headline: `${value} branding is acceptable`,
+        summary: `Brand presence is working, but not as efficiently as the top-performing balance.`,
+        why: ["The brand is visible enough.", "It may not sharpen trust or recall as much as it could.", "A better balance may improve response."],
+      },
+      weak: {
+        headline: `${value} branding is reducing impact`,
+        summary: `The brand is either too dominant or too understated for the strongest performance.`,
+        why: ["The message may feel too promotional or not branded enough.", "Visual attention may be pulled from the key action.", "Rebalancing brand presence could improve outcomes."],
+      },
+    },
+    brandConsistency: {
+      strong: {
+        headline: `${value} consistency is a plus`,
+        summary: `The creative feels cohesive and on-brand, which supports trust and recognition.`,
+        why: ["Visual cues likely match the broader campaign system.", "Consistency helps reduce cognitive friction.", "It strengthens recognition across touchpoints."],
+      },
+      mixed: {
+        headline: `${value} consistency is average`,
+        summary: `The asset is coherent enough, but it is not gaining a major lift from brand consistency.`,
+        why: ["Brand signals are present but not especially sharp.", "Some visual elements may feel less unified.", "Tighter consistency could strengthen recall."],
+      },
+      weak: {
+        headline: `${value} consistency is a drag`,
+        summary: `The asset likely feels less coherent or less trustworthy than stronger creatives.`,
+        why: ["Brand cues may be too weak or inconsistent.", "The ad can feel disconnected from the campaign.", "Improving consistency could support better conversion behavior."],
+      },
+    },
+    funnelStage: {
+      strong: {
+        headline: `${value} stage matches intent`,
+        summary: `This creative appears well-aligned with the audience’s decision stage.`,
+        why: ["The message likely meets user intent more precisely.", "The CTA and offer fit the level of readiness.", "That alignment supports stronger downstream performance."],
+      },
+      mixed: {
+        headline: `${value} stage is partly aligned`,
+        summary: `The funnel stage works, but it is not the strongest match in this set.`,
+        why: ["The message is directionally correct.", "Some users may need a different depth of persuasion.", "Refining the stage alignment could boost efficiency."],
+      },
+      weak: {
+        headline: `${value} stage is mismatched`,
+        summary: `The creative likely asks too much or too little for where the audience is in the journey.`,
+        why: ["The message may be ahead of or behind user intent.", "That creates friction in the path to action.", "A better stage match could improve results."],
+      },
+    },
+    cta: {
+      strong: {
+        headline: `${value} is an effective CTA`,
+        summary: `The call-to-action is supporting clear next-step behavior.`,
+        why: ["Users know what action to take next.", "The CTA likely matches the asset’s promise.", "It creates lower-friction movement into the funnel."],
+      },
+      mixed: {
+        headline: `${value} is a decent CTA`,
+        summary: `The CTA works, but it is not the sharpest driver of action in this set.`,
+        why: ["It is understandable but not especially motivating.", "The action may feel generic for this message.", "Testing CTA language could improve response."],
+      },
+      weak: {
+        headline: `${value} is weakening intent`,
+        summary: `The CTA is likely not aligned well enough with user motivation or stage.`,
+        why: ["The next step may feel unclear or less compelling.", "It may not match the asset’s promise closely enough.", "A better CTA could improve click-through and conversion quality."],
+      },
+    },
+    productInFirst3s: {
+      strong: {
+        headline: `${value} in the first 3s is helping`,
+        summary: `Early product visibility is reinforcing relevance and recognition quickly.`,
+        why: ["Users understand the offer almost immediately.", "The asset gets to the point fast.", "That usually helps stronger qualification and action."],
+      },
+      mixed: {
+        headline: `${value} in the first 3s is neutral`,
+        summary: `Early product visibility is not hurting much, but it is not a standout advantage.`,
+        why: ["The hook may still work for some users.", "The product reveal timing could be tighter.", "A clearer opening may improve performance."],
+      },
+      weak: {
+        headline: `${value} in the first 3s is a weakness`,
+        summary: `The product is likely introduced too late to maximize hook clarity.`,
+        why: ["Users may not understand the offer early enough.", "That can reduce qualified attention.", "Moving product visibility earlier could improve results."],
+      },
+    },
+  } as Record<string, Record<string, ProfileAnalysis>>;
+
+  return base[axis.key]?.[level] ?? {
+    headline: `${axis.label} is ${level}`,
+    summary: `${axis.label} currently contributes a ${level} signal for this creative asset.`,
+    why: ["This category influences how clearly the asset communicates.", "Its current value shapes attention and response quality.", "Refining it could improve performance."],
+  };
+}
+
 const cellStyles: Record<string, string> = {
   best: "bg-accent/10 text-accent",
   worst: "bg-destructive/10 text-destructive",
@@ -335,6 +526,7 @@ const Insights = () => {
 
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [selectedAssetId, setSelectedAssetId] = useState<string>(assets[0]?.id || "");
+  const [selectedProfileKey, setSelectedProfileKey] = useState<string>(profileAxes[0]?.key || "format");
 
   const rankedWithOverall = useMemo(() => {
     return ranked.map((asset) => {
@@ -346,10 +538,12 @@ const Insights = () => {
 
   const selectedAsset = rankedWithOverall.find(({ asset }) => asset.id === selectedAssetId)?.asset ?? rankedWithOverall[0]?.asset;
   const selectedPerformanceScore = rankedWithOverall.find(({ asset }) => asset.id === selectedAsset?.id)?.performanceScore ?? 0;
+  const selectedProfileAxis = profileAxes.find((axis) => axis.key === selectedProfileKey) ?? profileAxes[0];
 
   const radarData = useMemo(() => {
     if (!selectedAsset) return [];
     return profileAxes.map((axis) => ({
+      key: axis.key,
       label: axis.shortLabel,
       fullLabel: axis.label,
       value: axis.score(selectedAsset),
@@ -357,14 +551,10 @@ const Insights = () => {
     }));
   }, [selectedAsset]);
 
-  const profileFacts = useMemo(() => {
-    if (!selectedAsset) return [];
-    return profileAxes.map((axis) => ({
-      key: axis.key,
-      label: axis.label,
-      value: axis.getValue(selectedAsset),
-    }));
-  }, [selectedAsset]);
+  const selectedProfileAnalysis = useMemo(() => {
+    if (!selectedAsset || !selectedProfileAxis) return null;
+    return getProfileAnalysis(selectedProfileAxis, selectedAsset);
+  }, [selectedAsset, selectedProfileAxis]);
 
   if (assets.length === 0) {
     return (
@@ -488,7 +678,7 @@ const Insights = () => {
                 <Target className="w-4 h-4 text-primary" />
                 <h2 className="text-xs uppercase tracking-wider font-bold text-foreground">Creative Profiles Diagnostics</h2>
               </div>
-              <p className="text-[10px] text-muted-foreground">Compare selected creative assets, ranked by performance, and inspect how their profile attributes shape the overall score.</p>
+              <p className="text-[10px] text-muted-foreground">Compare selected creative assets, ranked by performance, and click any profile category to see why it is helping or hurting that asset.</p>
             </div>
 
             <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-5 rounded-xl border border-border bg-card shadow-card p-4">
@@ -510,7 +700,24 @@ const Insights = () => {
                       <PolarGrid radialLines={true} />
                       <PolarAngleAxis
                         dataKey="label"
-                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10, fontWeight: 600 }}
+                        tick={({ payload, x, y, textAnchor }) => {
+                          const active = payload.value === selectedProfileAxis.shortLabel;
+                          const axis = profileAxes.find((item) => item.shortLabel === payload.value);
+                          return (
+                            <text
+                              x={x}
+                              y={y}
+                              textAnchor={textAnchor}
+                              fill={active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))"}
+                              fontSize={10}
+                              fontWeight={active ? 700 : 600}
+                              style={{ cursor: axis ? "pointer" : "default" }}
+                              onClick={() => axis && setSelectedProfileKey(axis.key)}
+                            >
+                              {payload.value}
+                            </text>
+                          );
+                        }}
                       />
                       <Radar
                         dataKey="value"
@@ -528,6 +735,51 @@ const Insights = () => {
                     </div>
                   </div>
                 </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {radarData.map((item) => {
+                    const active = item.key === selectedProfileKey;
+                    return (
+                      <button
+                        key={item.key}
+                        onClick={() => setSelectedProfileKey(item.key)}
+                        className={`rounded-full border px-2.5 py-1 text-[10px] font-medium transition-colors ${active ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted/40"}`}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {selectedProfileAxis && selectedProfileAnalysis && selectedAsset && (
+                  <div className="mt-4 rounded-xl border border-border bg-background p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Category Analysis</p>
+                        <h3 className="text-[14px] font-semibold text-foreground mt-1">{selectedProfileAxis.label}</h3>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Current Value</p>
+                        <p className="text-[11px] font-medium text-foreground mt-1">{selectedProfileAxis.getValue(selectedAsset)}</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 rounded-lg border border-border/70 bg-muted/20 p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-[12px] font-semibold text-foreground">{selectedProfileAnalysis.headline}</p>
+                        <span className={`text-[16px] font-mono font-bold ${scoreColor(selectedProfileAxis.score(selectedAsset))}`}>{selectedProfileAxis.score(selectedAsset)}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-2">{selectedProfileAnalysis.summary}</p>
+                      <ul className="mt-3 space-y-1.5">
+                        {selectedProfileAnalysis.why.map((reason) => (
+                          <li key={reason} className="flex gap-2 text-[11px] text-foreground">
+                            <span className="text-primary">•</span>
+                            <span>{reason}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
