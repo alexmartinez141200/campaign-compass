@@ -819,7 +819,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
 
             {/* ═══ B. ENGAGEMENT ═══ */}
-            <SectionHeader title="Engagement" description="On-platform signals showing how users respond to the creative before clicking through." />
+            <SectionHeader sectionId="section-engagement" title="Engagement" description="On-platform signals showing how users respond to the creative before clicking through." contribution="Brand prominence and format contribute most to engagement because they influence recognizability, interaction depth, and save/share behavior." />
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-lg border border-border/60 bg-card p-4">
                 <div className="flex items-center gap-5">
