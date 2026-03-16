@@ -125,7 +125,7 @@ const KpiCard = ({
 );
 
 const SectionHeader = ({ title, description }: { title: string; description: string }) => (
-  <div className="mt-10 mb-5">
+  <div className="mt-6 mb-4">
     <div className="flex items-center gap-3 mb-1.5">
       <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground/80 font-bold whitespace-nowrap">{title}</h3>
       <div className="flex-1 h-px bg-border/50" />
