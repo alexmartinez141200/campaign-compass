@@ -512,37 +512,24 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <SectionHeader title="Creative diagnostics" description="Each creative category is evaluated from the metrics observed on assets with the same profile value, so the output tells you whether that category is currently strong, mixed, or weak based on performance." />
-        <div className="grid grid-cols-1 gap-3">
-          {creativeDiagnostics.map((item) => (
-            <div key={item.label} className="rounded-lg border border-border/60 bg-card p-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{item.label}</p>
-                    <span className="text-[10px] font-mono text-muted-foreground">{item.value} · n={item.sampleSize}</span>
-                  </div>
-                  <p className="mt-1 text-sm font-semibold text-foreground">{item.status === "good" ? "This category evaluates as strong" : item.status === "mixed" ? "This category evaluates as mixed" : "This category evaluates as weak"}</p>
-                  <p className="text-[11px] text-muted-foreground">Decision: {item.action} · lowest relative metric: {item.weakestMetric.label} ({item.weakestMetric.delta > 0 ? "+" : ""}{item.weakestMetric.delta}% vs matched avg)</p>
-                </div>
-                <div className="text-left lg:text-right">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Evaluation</p>
-                  <p className="text-sm font-semibold text-foreground">{item.action}</p>
-                </div>
-              </div>
-              <div className="mt-4 grid grid-cols-1 gap-2.5 md:grid-cols-3">
-                {item.metrics.map((metric) => (
-                  <KpiCard
-                    key={`${item.label}-${metric.label}`}
-                    label={metric.label}
-                    value={typeof metric.value === "number" && metric.label !== "Revenue" && metric.label !== "Impressions" && metric.label !== "Conversions" && metric.label !== "Landing Page Views" && metric.label !== "Shares" && metric.label !== "Clicks" && metric.label !== "Link Clicks" && metric.label !== "Website Visits" ? `${metric.value.toFixed(1)}${metric.label.includes("CTR") || metric.label.includes("Rate") || metric.label.includes("LPV") ? "%" : metric.label === "ROAS" ? "x" : metric.label === "CPA" ? "" : ""}` : metric.label === "Revenue" || metric.label === "CPA" ? `$${metric.value.toFixed(metric.label === "CPA" ? 2 : 0)}` : Math.round(metric.value).toLocaleString()}
-                    sub={`Observed vs avg ${metric.label === "Revenue" || metric.label === "CPA" ? `$${metric.average.toFixed(metric.label === "CPA" ? 2 : 0)}` : metric.label === "ROAS" ? `${metric.average.toFixed(1)}x` : metric.label.includes("CTR") || metric.label.includes("Rate") || metric.label.includes("LPV") ? `${metric.average.toFixed(1)}%` : Math.round(metric.average).toLocaleString()}`}
-                    trend={metric.delta}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+        <SectionHeader title="Asset performance" description="A simple read on whether this asset is performing across the core pillars, based only on observed metrics versus campaign averages." />
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
+          {storySummaryRows.map((row) => {
+            const benchmarkText = row.drivers[0].benchmark;
+            const benchmarkValue = Number.parseInt(benchmarkText.replace(/[^-\d]/g, ""), 10) || 0;
+            const status = benchmarkValue >= 10 ? "Performing" : benchmarkValue <= -10 ? "Underperforming" : "Mixed";
+
+            return (
+              <KpiCard
+                key={row.key}
+                label={row.title}
+                value={status}
+                sub={`${row.drivers[0].label} · ${benchmarkText}`}
+                active={activePillar === row.key}
+                onClick={() => setActivePillar(row.key)}
+              />
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
