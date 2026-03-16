@@ -399,27 +399,16 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       <div className="pt-5 space-y-5">
 
         <div className="rounded-xl border border-border/60 bg-card/60 p-4">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="flex items-start gap-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex min-w-0 items-start gap-5">
               <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted shadow-card">
                 <img src={asset.thumbnail} alt={asset.name} className="h-full w-full object-cover" />
               </div>
               <div className="space-y-2">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Creative asset being analyzed</p>
-                    <div className="mt-2">
-                      <p className="text-xl font-semibold text-foreground">{asset.name}</p>
-                      <p className="text-[11px] text-muted-foreground">{asset.id} · {asset.type}</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowUpdateRecommendations((prev) => !prev)}
-                    className="shrink-0 rounded-lg border border-primary/30 bg-primary/10 px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground transition-colors hover:bg-primary/15"
-                  >
-                    Update Creative
-                  </button>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Creative asset being analyzed</p>
+                <div>
+                  <p className="text-xl font-semibold text-foreground">{asset.name}</p>
+                  <p className="text-[11px] text-muted-foreground">{asset.id} · {asset.type}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground">
@@ -435,7 +424,16 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               </div>
             </div>
 
-            <div className="grid min-w-[280px] grid-cols-3 gap-2 self-end">
+            <div className="flex flex-col items-end gap-4">
+              <button
+                type="button"
+                onClick={() => setShowUpdateRecommendations((prev) => !prev)}
+                className="shrink-0 rounded-lg border border-primary/30 bg-primary/10 px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground transition-colors hover:bg-primary/15"
+              >
+                Update Creative
+              </button>
+
+              <div className="grid min-w-[280px] grid-cols-3 gap-2">
               <div className="rounded-lg border border-border/60 bg-background/80 px-3 py-2">
                 <p className="text-[8px] uppercase tracking-[0.16em] text-muted-foreground">Spend</p>
                 <p className="mt-1 text-[13px] font-mono font-semibold text-foreground">${asset.spend.toLocaleString()}</p>
