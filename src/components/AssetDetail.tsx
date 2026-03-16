@@ -301,13 +301,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     ),
     traffic: (
       <>
-        <SectionHeader title="Traffic" description="How effectively the creative turns attention into site visits and qualified landing sessions." />
+        <SectionHeader title="Traffic" description="A full view of how efficiently this creative converts attention into outbound clicks, site visits, and successful landing sessions." />
         <div className="grid gap-3 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-stretch">
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <KpiCard label={asset.channel === "google" ? "Clicks" : "Link Clicks"} value={trafficClicks.toLocaleString()} sub="Qualified traffic" />
             <KpiCard label="Website Clicks" value={asset.outboundClicks.toLocaleString()} sub="Outbound visits" />
             <KpiCard label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} sub="Successful loads" />
-            <KpiCard label="CTR" value={`${trafficRate.toFixed(1)}%`} sub="Click → LPV" />
+            <KpiCard label="Click → LPV" value={`${trafficRate.toFixed(1)}%`} sub="Landing efficiency" />
           </div>
           <div className="rounded-lg border border-border/60 bg-card p-3.5">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Traffic over time</p>
@@ -322,6 +322,23 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               </LineChart>
             </ChartContainer>
           </div>
+        </div>
+
+        <SectionHeader title="What builds traffic" description="These are the raw traffic steps from click generation to successful landing page arrival." />
+        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-5">
+          <KpiCard label={asset.channel === "google" ? "Clicks" : "Link Clicks"} value={trafficClicks.toLocaleString()} sub="Primary traffic signal" />
+          <KpiCard label="Website Clicks" value={asset.outboundClicks.toLocaleString()} sub={`${trafficClicks ? ((asset.outboundClicks / trafficClicks) * 100).toFixed(1) : "0.0"}% of link clicks`} />
+          <KpiCard label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} sub={`${trafficClicks ? ((asset.landingPageViews / trafficClicks) * 100).toFixed(1) : "0.0"}% of link clicks`} />
+          <KpiCard label="Click → LPV" value={`${trafficRate.toFixed(1)}%`} sub="Final landing efficiency" />
+          <KpiCard label="CTR" value={`${asset.ctr.toFixed(1)}%`} sub="Impression to click rate" health={ctrHealth} trend={trends.ctr} />
+        </div>
+
+        <SectionHeader title="Traffic benchmark" description="Current traffic metrics against the campaign baseline." />
+        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+          <KpiCard label="Clicks Δ" value={storySummaryRows.find((row) => row.key === "traffic")?.drivers[0].benchmark || "0% vs avg"} sub="Vs campaign average" />
+          <KpiCard label="Click → LPV Δ" value={storySummaryRows.find((row) => row.key === "traffic")?.drivers[1].benchmark || "0% vs avg"} sub="Vs campaign average" />
+          <KpiCard label="Website Clicks" value={asset.outboundClicks.toLocaleString()} sub="Outbound traffic volume" />
+          <KpiCard label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} sub="Resolved sessions" />
         </div>
       </>
     ),
