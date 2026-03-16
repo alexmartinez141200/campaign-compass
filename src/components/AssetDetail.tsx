@@ -378,8 +378,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               key={row.key}
               label={row.title}
               value={formatStoryMetricValue(row.drivers[0].value, row.drivers[0].format)}
-              sub={`${row.drivers[0].label} · ${row.profileSignal}`}
-              onClick={() => scrollToSection(pillarSectionMap[row.key])}
+              sub={row.drivers[0].label}
+              active={activePillar === row.key}
+              onClick={() => setActivePillar(row.key)}
             />
           ))}
         </div>
