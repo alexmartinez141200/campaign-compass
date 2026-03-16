@@ -396,7 +396,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
   return (
     <TooltipProvider>
-      <div className="pt-5 space-y-5">
+      <div className="space-y-4 pt-2">
 
         <div className="rounded-xl border border-border/60 bg-card/60 p-4">
           <div className="flex items-start justify-between gap-4">
