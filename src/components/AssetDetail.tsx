@@ -134,6 +134,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const [activePillar, setActivePillar] = useState<PillarKey>("delivery");
   const [selectedCategoryKey, setSelectedCategoryKey] = useState("format");
   const [activeTopTab, setActiveTopTab] = useState<"creative" | "campaign">("campaign");
+  const [showUpdateRecommendations, setShowUpdateRecommendations] = useState(false);
 
   const storySummaryRows = useMemo(
     () => buildCreativeStorySummary(asset, campaignAssets, { selectedRoas: asset.roas }),
