@@ -760,7 +760,7 @@ const Insights = () => {
                 <Target className="w-4 h-4 text-primary" />
                 <h2 className="text-xs uppercase tracking-wider font-bold text-foreground">Creative Profiles Diagnostics</h2>
               </div>
-              <p className="text-[10px] text-muted-foreground">Compare selected creative assets, ranked by performance, and click any profile category to see why it is helping or hurting that asset.</p>
+              <p className="text-[10px] text-muted-foreground">Compare selected creative assets, ranked by performance, and click any profile category to inspect its analytical impact.</p>
             </div>
 
             <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-5 rounded-xl border border-border bg-card shadow-card p-4">
