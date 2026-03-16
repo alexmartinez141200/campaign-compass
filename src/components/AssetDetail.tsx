@@ -400,8 +400,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
         <div className="rounded-xl border border-border/60 bg-card/60 p-4">
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted shadow-card">
+            <div className="flex items-start gap-5">
+              <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted shadow-card">
                 <img src={asset.thumbnail} alt={asset.name} className="h-full w-full object-cover" />
               </div>
               <div className="space-y-2">
