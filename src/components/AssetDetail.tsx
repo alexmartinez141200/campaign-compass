@@ -406,14 +406,23 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
         <div className="rounded-xl border border-border/60 bg-card/60 p-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Creative asset being analyzed</p>
-          <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xl font-semibold text-foreground">{asset.name}</p>
-              <p className="text-[11px] text-muted-foreground">{asset.id} · {asset.channel} · {asset.type}</p>
-            </div>
-            <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              <span className="rounded-full border border-border/60 px-3 py-1">Format: {asset.type}</span>
-              <span className="rounded-full border border-border/60 px-3 py-1">Campaign asset profile</span>
+          <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
+            <div className="space-y-2">
+              <div>
+                <p className="text-xl font-semibold text-foreground">{asset.name}</p>
+                <p className="text-[11px] text-muted-foreground">{asset.id} · {asset.type}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground">
+                  Launched on {asset.channel}
+                </span>
+                <span className="rounded-full border border-border/60 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                  Format: {asset.type}
+                </span>
+                <span className="rounded-full border border-border/60 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                  Campaign asset profile
+                </span>
+              </div>
             </div>
           </div>
         </div>
