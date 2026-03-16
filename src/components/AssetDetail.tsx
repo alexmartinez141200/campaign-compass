@@ -413,6 +413,21 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                 </span>
               </div>
             </div>
+
+            <div className="grid min-w-[280px] grid-cols-3 gap-2 self-end">
+              <div className="rounded-lg border border-border/60 bg-background/80 px-3 py-2">
+                <p className="text-[8px] uppercase tracking-[0.16em] text-muted-foreground">Spend</p>
+                <p className="mt-1 text-[13px] font-mono font-semibold text-foreground">${asset.spend.toLocaleString()}</p>
+              </div>
+              <div className="rounded-lg border border-border/60 bg-background/80 px-3 py-2">
+                <p className="text-[8px] uppercase tracking-[0.16em] text-muted-foreground">Revenue</p>
+                <p className="mt-1 text-[13px] font-mono font-semibold text-foreground">${asset.purchaseValue.toLocaleString()}</p>
+              </div>
+              <div className="rounded-lg border border-border/60 bg-background/80 px-3 py-2">
+                <p className="text-[8px] uppercase tracking-[0.16em] text-muted-foreground">ROAS</p>
+                <p className="mt-1 text-[13px] font-mono font-semibold text-accent">{asset.roas.toFixed(1)}x</p>
+              </div>
+            </div>
           </div>
         </div>
 
