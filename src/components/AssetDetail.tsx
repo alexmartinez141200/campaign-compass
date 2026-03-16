@@ -219,16 +219,24 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         };
       });
 
-      const score = metrics.length ? Math.round(metrics.reduce((sum, metric) => sum + metric.delta, 0) / metrics.length) : 0;
+      const score = metrics.length ? Math.max(0, Math.min(100, Math.round(50 + metrics.reduce((sum, metric) => sum + metric.delta, 0) / metrics.length))) : 50;
 
       return {
+        key: row.key,
         label: row.label,
         value: row.value,
-        status: score >= 12 ? "Good" : score <= -8 ? "Weak" : "Mixed",
+        score,
+        status: score >= 70 ? "Good" : score <= 40 ? "Weak" : "Mixed",
         metrics,
       };
     });
   }, [asset, storySummaryRows]);
+
+  const radarData = creativeDiagnostics.map((item) => ({
+    key: item.key,
+    label: item.label === "Aspect Ratio" ? "Aspect" : item.label,
+    value: item.score,
+  }));
 
   const pillarContent = {
     delivery: (
