@@ -991,6 +991,31 @@ const Insights = () => {
 
                     <div className="rounded-xl border border-border overflow-hidden">
                       <div className="bg-muted/20 px-4 py-3 border-b border-border/40">
+                        <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Profile Categories</p>
+                        <p className="text-[11px] text-muted-foreground mt-1">Full creative attribute view for this asset, with the selected category highlighted.</p>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-0">
+                        {radarData.map((item) => {
+                          const active = item.key === selectedProfileAxis.key;
+                          return (
+                            <button
+                              key={item.key}
+                              onClick={() => handleProfileModalOpen(item.key)}
+                              className={`border-r border-b border-border/40 px-4 py-3 text-left transition-colors last:border-r-0 md:[&:nth-child(5n)]:border-r-0 ${active ? "bg-primary/5" : "bg-background hover:bg-muted/20"}`}
+                            >
+                              <p className={`text-[10px] font-semibold ${active ? "text-foreground" : "text-muted-foreground"}`}>{item.label}</p>
+                              <div className="mt-1 flex items-end justify-between gap-2">
+                                <span className={`text-[16px] font-mono font-bold ${scoreColor(item.value)}`}>{item.value}</span>
+                                <span className={`text-[10px] ${active ? "text-primary font-semibold" : "text-muted-foreground"}`}>{item.detail}</span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-border overflow-hidden">
+                      <div className="bg-muted/20 px-4 py-3 border-b border-border/40">
                         <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Metric Analysis</p>
                         <p className="text-[11px] text-muted-foreground mt-1">These metrics explain why <span className="text-foreground font-medium">{selectedProfileAxis.label}</span> looks good or bad for <span className="text-foreground font-medium">{selectedAsset.name}</span>.</p>
                       </div>
