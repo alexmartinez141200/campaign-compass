@@ -292,7 +292,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
 
         {/* ─── ASSET HEADER ─── */}
-        <div className="rounded-xl border border-border/60 bg-card mb-6 overflow-hidden flex shadow-card">
+        <div className="rounded-xl border border-border/60 bg-card mb-4 overflow-hidden flex shadow-card">
           {/* Left: Identity */}
           <div className="w-1/3 p-5 flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
@@ -334,6 +334,28 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                   <span className="text-[11px] font-semibold text-foreground">{value}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border/60 bg-muted/20 mb-6 px-4 py-3 shadow-card">
+          <div className="flex items-start justify-between gap-6">
+            <div className="max-w-[760px]">
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">How this profile feeds the bigger picture</p>
+              <p className="text-[12px] text-foreground mt-1">
+                This screen shows the <span className="font-semibold">source signals</span> behind the higher-level comparison views: creative attributes on the right describe the asset setup, while the KPI sections below show how that setup performs in delivery, engagement, traffic, and conversion.
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-2">
+                In comparison screens, those detailed metrics are rolled up into broader attribute insights like <span className="text-foreground font-medium">Format</span>, <span className="text-foreground font-medium">Motion</span>, <span className="text-foreground font-medium">CTA</span>, and <span className="text-foreground font-medium">Brand</span> — so users can see both the high-level pattern and the KPI evidence behind it.
+              </p>
+            </div>
+            <div className="min-w-[180px] rounded-lg border border-border/60 bg-background px-3 py-2.5">
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Read this page as</p>
+              <div className="mt-2 space-y-1.5 text-[11px]">
+                <div className="flex items-center justify-between gap-3"><span className="text-muted-foreground">Creative setup</span><span className="font-semibold text-foreground">Attributes</span></div>
+                <div className="flex items-center justify-between gap-3"><span className="text-muted-foreground">Performance proof</span><span className="font-semibold text-foreground">KPIs</span></div>
+                <div className="flex items-center justify-between gap-3"><span className="text-muted-foreground">Cross-screen output</span><span className="font-semibold text-foreground">Insights</span></div>
+              </div>
             </div>
           </div>
         </div>
