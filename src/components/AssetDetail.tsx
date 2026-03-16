@@ -125,7 +125,7 @@ const KpiCard = ({
 );
 
 const SectionHeader = ({ title, description }: { title: string; description: string }) => (
-  <div className="mt-10 mb-5">
+  <div className="mt-6 mb-4">
     <div className="flex items-center gap-3 mb-1.5">
       <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground/80 font-bold whitespace-nowrap">{title}</h3>
       <div className="flex-1 h-px bg-border/50" />
@@ -224,20 +224,20 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     delivery: (
       <>
         <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-stretch">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
             <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub="Healthy range" />
             <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
             <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total budget used" />
           </div>
-          <div className="rounded-lg border border-border/60 bg-card p-4">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">CPM over time</p>
-            <ChartContainer config={chartConfig} className="h-[260px] w-full">
-              <LineChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
+          <div className="rounded-lg border border-border/60 bg-card p-3.5">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">CPM over time</p>
+            <ChartContainer config={chartConfig} className="h-[200px] w-full">
+              <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={true} strokeDasharray="4 4" />
                 <XAxis dataKey="date" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} width={42} tickFormatter={(value) => `$${value}`} />
+                <YAxis tickLine={false} axisLine={false} width={36} tickFormatter={(value) => `$${value}`} />
                 <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
                 <Line type="monotone" dataKey="cpm" stroke="var(--color-cpm)" strokeWidth={3} dot={false} />
               </LineChart>
@@ -252,20 +252,20 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     engagement: (
       <>
         <SectionHeader title="Engagement" description="How strongly the creative earns attention and interaction from the audience." />
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-stretch">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <KpiCard label="Engagement" value={engagementTotal.toLocaleString()} sub="Total interactions" />
             <KpiCard label="CTR" value={`${asset.ctr}%`} trend={trends.ctr} health={ctrHealth} />
             <KpiCard label="Shares" value={asset.postShares.toLocaleString()} sub="Share depth" />
             <KpiCard label="Saves" value={asset.postSaves.toLocaleString()} sub="Save intent" />
           </div>
-          <div className="rounded-lg border border-border/60 bg-card p-4">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">CTR over time</p>
-            <ChartContainer config={chartConfig} className="h-[260px] w-full">
-              <LineChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
+          <div className="rounded-lg border border-border/60 bg-card p-3.5">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">CTR over time</p>
+            <ChartContainer config={chartConfig} className="h-[200px] w-full">
+              <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={true} strokeDasharray="4 4" />
                 <XAxis dataKey="date" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} width={42} tickFormatter={(value) => `${value}%`} />
+                <YAxis tickLine={false} axisLine={false} width={36} tickFormatter={(value) => `${value}%`} />
                 <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
                 <Line type="monotone" dataKey="ctr" stroke="var(--color-ctr)" strokeWidth={3} dot={false} />
               </LineChart>
@@ -277,20 +277,20 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     traffic: (
       <>
         <SectionHeader title="Traffic" description="How effectively the creative turns attention into site visits and qualified landing sessions." />
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-stretch">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <KpiCard label={asset.channel === "google" ? "Clicks" : "Link Clicks"} value={trafficClicks.toLocaleString()} sub="Qualified traffic" />
             <KpiCard label="Website Clicks" value={asset.outboundClicks.toLocaleString()} sub="Outbound visits" />
             <KpiCard label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} sub="Successful loads" />
             <KpiCard label="CTR" value={`${trafficRate.toFixed(1)}%`} sub="Click → LPV" />
           </div>
-          <div className="rounded-lg border border-border/60 bg-card p-4">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Traffic over time</p>
-            <ChartContainer config={chartConfig} className="h-[260px] w-full">
-              <LineChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
+          <div className="rounded-lg border border-border/60 bg-card p-3.5">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Traffic over time</p>
+            <ChartContainer config={chartConfig} className="h-[200px] w-full">
+              <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={true} strokeDasharray="4 4" />
                 <XAxis dataKey="date" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} width={42} />
+                <YAxis tickLine={false} axisLine={false} width={36} />
                 <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
                 <Line type="monotone" dataKey="clicks" stroke="var(--color-clicks)" strokeWidth={3} dot={false} />
                 <Line type="monotone" dataKey="lpv" stroke="var(--color-lpv)" strokeWidth={2.5} dot={false} />
@@ -303,20 +303,20 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     revenue: (
       <>
         <SectionHeader title="Revenue" description="This tab isolates revenue and conversion metrics." />
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-stretch">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <KpiCard label="Revenue" value={`$${asset.purchaseValue.toLocaleString()}`} sub="Attributed value" />
             <KpiCard label="ROAS" value={`${asset.roas.toFixed(1)}x`} health={roasHealth} trend={trends.roas} />
             <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
             <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
           </div>
-          <div className="rounded-lg border border-border/60 bg-card p-4">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">ROAS over time</p>
-            <ChartContainer config={chartConfig} className="h-[260px] w-full">
-              <LineChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
+          <div className="rounded-lg border border-border/60 bg-card p-3.5">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">ROAS over time</p>
+            <ChartContainer config={chartConfig} className="h-[200px] w-full">
+              <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={true} strokeDasharray="4 4" />
                 <XAxis dataKey="date" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} width={42} />
+                <YAxis tickLine={false} axisLine={false} width={36} />
                 <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
                 <Line type="monotone" dataKey="roas" stroke="var(--color-roas)" strokeWidth={3} dot={false} />
                 <Line type="monotone" dataKey="conversions" stroke="var(--color-conversions)" strokeWidth={2.5} dot={false} />
