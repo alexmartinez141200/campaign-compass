@@ -874,7 +874,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
 
             {/* ═══ C. TRAFFIC ═══ */}
-            <SectionHeader title="Traffic" description="Users clicking through to your site. CTR trends reveal creative effectiveness over time." />
+            <SectionHeader sectionId="section-traffic" title="Traffic" description="Users clicking through to your site. CTR trends reveal creative effectiveness over time." contribution="CTA and aspect ratio contribute most to traffic because they drive the click decision and improve feed-native layout performance." />
             <div className="grid grid-cols-3 gap-3 mb-3">
               <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
               <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
