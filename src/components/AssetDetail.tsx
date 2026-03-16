@@ -428,8 +428,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               <button
                 type="button"
                 onClick={() => setShowUpdateRecommendations((prev) => !prev)}
-                className="shrink-0 rounded-lg border border-primary/30 bg-primary/10 px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground transition-colors hover:bg-primary/15"
+                className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-primary/40 bg-primary px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary-foreground shadow-card transition-all hover:scale-[1.01] hover:bg-primary/90"
               >
+                <Wand2 className="h-4 w-4" />
                 Update Creative
               </button>
 
