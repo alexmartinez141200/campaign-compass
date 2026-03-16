@@ -755,7 +755,7 @@ const Insights = () => {
                               fontSize={10}
                               fontWeight={active ? 700 : 600}
                               style={{ cursor: axis ? "pointer" : "default" }}
-                              onClick={() => axis && setSelectedProfileKey(axis.key)}
+                              onClick={() => axis && setOpenModal(`profile:${axis.key}`)}
                             >
                               {payload.value}
                             </text>
