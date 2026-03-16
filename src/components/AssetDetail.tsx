@@ -449,17 +449,17 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           <>
             {activePillar === "delivery" && (
               <>
-                <SectionHeader sectionId="section-delivery" title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
+                <SectionHeader sectionId="section-delivery" title="Delivery" description="How efficiently the ad reaches your audience through retention, reach, frequency, and CPM." />
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div className="grid grid-cols-3 gap-3">
                     <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} sub="2s+ views" />
                     <KpiCard label="6s Views" value={(asset.videoViews6s || 0).toLocaleString()} sub="Passed the hook" />
                     <KpiCard label="6s View Rate" value={`${asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays * 100).toFixed(1) : 0}%`} sub="Hook strength" />
-                    <KpiCard label="Completed Views" value={(asset.completedViews || 0).toLocaleString()} sub="Watched to end" />
-                    <KpiCard label="Avg Watch" value={`${asset.avgWatchTime || 0}s`} />
-                    <KpiCard label="Completion Rate" value={`${asset.videoPlays ? ((asset.completedViews || 0) / asset.videoPlays * 100).toFixed(1) : 0}%`} sub="Views to completion" />
+                    <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
+                    <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub={freqHealth === "critical" ? "Ad fatigue risk" : freqHealth === "warning" ? "Monitor closely" : "Healthy range"} />
+                    <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
                   </div>
-                  <ChartCard title="Retention Curve" height="h-[140px]">
+                  <ChartCard title="Retention Curve" height="h-[180px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={videoRetentionData}>
                         <defs>
@@ -477,10 +477,129 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                     </ResponsiveContainer>
                   </ChartCard>
                 </div>
+              </>
+            )}
+
+            {activePillar === "engagement" && (
+              <>
+                <SectionHeader sectionId="section-engagement" title="Engagement" description="On-platform signals — likes, shares, saves, and profile actions that build resonance." />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg border border-border/60 bg-card p-4">
+                    <div className="flex items-center gap-5">
+                      <div className="w-28 h-28 flex-shrink-0">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie data={engagementData} cx="50%" cy="50%" innerRadius={26} outerRadius={50} paddingAngle={3} dataKey="value" strokeWidth={0}>
+                              {engagementData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                            </Pie>
+                            <RechartsTooltip {...chartTooltipStyle} formatter={(value: number, name: string) => [`${value.toLocaleString()} (${(value / engagementTotal * 100).toFixed(1)}%)`, name]} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        {engagementData.map((item) => (
+                          <div key={item.name} className="flex items-center justify-between">
+                            <span className="text-[11px] text-muted-foreground">{item.name}</span>
+                            <span className="text-[12px] font-mono font-bold text-foreground">{item.value.toLocaleString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-border/60 bg-card p-4">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">TikTok Growth Signals</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <KpiCard label="Profile Visits" value={(asset.profileVisits || 0).toLocaleString()} sub="From this ad" />
+                      <KpiCard label="Follows" value={(asset.follows || 0).toLocaleString()} sub="New followers" />
+                      <KpiCard label="Paid Likes" value={(asset.paidLikes || 0).toLocaleString()} sub="From paid reach" />
+                      <KpiCard label="Paid Shares" value={(asset.paidShares || 0).toLocaleString()} sub="Viral potential" />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {activePillar === "traffic" && (
+              <>
+                <SectionHeader sectionId="section-traffic" title="Traffic" description="Traffic quality from clicks through to site visits." />
+                <div className="grid grid-cols-3 gap-3 mb-3">
+                  <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
+                  <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
+                  <KpiCard label="Website Clicks" value={asset.outboundClicks.toLocaleString()} sub="To your site" />
+                </div>
+                <ChartCard title="Video View Rate % Over Time" height="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={filteredDaily}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                      <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} domain={['dataMin - 5', 'dataMax + 2']} />
+                      <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                      <Line type="monotone" dataKey="videoViewRate" name="Video View Rate" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              </>
+            )}
+
+            {activePillar === "revenue" && (
+              <>
+                <SectionHeader sectionId="section-revenue" title="Revenue" description="Revenue, ROAS, and funnel completion from visit to purchase." />
+                <div className="grid grid-cols-3 gap-3 mb-3">
+                  <KpiCard label="Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} sub="Selected period" />
+                  <KpiCard label="ROAS" value={`${rangeSummary.roas}x`} health={roasHealth} sub="Revenue ÷ Spend" />
+                  <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
+                </div>
+                <div className="grid grid-cols-5 gap-3">
+                  <div className="col-span-3">
+                    <ChartCard title="ROAS Over Time" height="h-52">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={filteredDaily} barSize={filteredDaily.length > 14 ? 6 : 12}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                          <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}x`} />
+                          <RechartsTooltip {...chartTooltipStyle} />
+                          <ReferenceLine y={rangeSummary.roas} stroke="hsl(346, 84%, 61%)" strokeDasharray="4 4" strokeWidth={1.5} />
+                          <Bar dataKey="roas" name="ROAS" fill="hsl(174, 100%, 33%)" radius={[2, 2, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartCard>
+                  </div>
+                  <div className="col-span-2 rounded-lg border border-border/60 bg-card p-4">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">Conversion Funnel</p>
+                    <div className="space-y-2">
+                      {funnelSteps.map((step, i, arr) => {
+                        const pctOfTop = (step.value / arr[0].value * 100).toFixed(1);
+                        const dropOff = i > 0 ? (100 - (step.value / arr[i - 1].value * 100)).toFixed(1) : null;
+                        return (
+                          <div key={step.label}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[11px] text-foreground font-medium">{step.label}</span>
+                              <div className="flex items-center gap-3">
+                                <span className="text-[12px] font-mono font-bold text-foreground">{step.value.toLocaleString()}</span>
+                                {dropOff && <span className="text-[9px] font-mono text-destructive/70">↓{dropOff}%</span>}
+                              </div>
+                            </div>
+                            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                              <div className="h-full rounded-full transition-all" style={{ width: `${pctOfTop}%`, background: step.color, opacity: 0.7 }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </>
+        ) : isGoogle ? (
+          <>
+            {activePillar === "delivery" && (
+              <>
+                <SectionHeader sectionId="section-delivery" title="Delivery" description="Reach, frequency, CPM, and video retention efficiency." />
                 <div className="grid grid-cols-5 gap-3">
                   <div className="col-span-2 grid grid-cols-2 gap-3">
                     <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
-                    <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub={freqHealth === "critical" ? "⚠ Ad fatigue risk" : freqHealth === "warning" ? "Monitor closely" : "Healthy range"} />
+                    <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub={freqHealth === "critical" ? "Ad fatigue risk" : freqHealth === "warning" ? "Monitor closely" : "Healthy range"} />
                     <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
                     <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total budget used" />
                   </div>
@@ -503,7 +622,82 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
             {activePillar === "engagement" && (
               <>
-                <SectionHeader sectionId="section-engagement" title="Engagement" description="On-platform signals — likes, shares, and profile actions that drive organic reach and brand building." />
+                <SectionHeader sectionId="section-click-performance" title="Engagement" description="Primary ad interaction signals on Google." />
+                <div className="grid grid-cols-4 gap-3 mb-3">
+                  <KpiCard label="Clicks" value={asset.clicks.toLocaleString()} trend={trends.clicks} />
+                  <KpiCard label="CTR" value={`${asset.ctr}%`} trend={trends.ctr} health={ctrHealth} />
+                  <KpiCard label="CPC" value={`$${asset.cpc.toFixed(2)}`} sub="Avg cost per click" />
+                  <KpiCard label="Interaction Rate" value={`${asset.interactionRate || 0}%`} sub="Interactions / Impressions" />
+                </div>
+                <ChartCard title="CTR % Over Time" height="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={filteredDaily}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                      <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} />
+                      <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
+                      <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              </>
+            )}
+
+            {activePillar === "traffic" && (
+              <>
+                <SectionHeader sectionId="section-traffic" title="Traffic" description="Traffic quality from click to landing-page visit." />
+                <div className="grid grid-cols-3 gap-3">
+                  <KpiCard label="Clicks" value={asset.clicks.toLocaleString()} sub="Total click volume" />
+                  <KpiCard label="Link Clicks" value={asset.linkClicks.toLocaleString()} sub="Qualified clicks" />
+                  <KpiCard label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} sub="Site visits" />
+                </div>
+              </>
+            )}
+
+            {activePillar === "revenue" && (
+              <>
+                <SectionHeader sectionId="section-revenue" title="Revenue" description="Return, conversions, and funnel quality." />
+                <div className="grid grid-cols-4 gap-3 mb-3">
+                  <KpiCard label="Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} sub="Selected period" />
+                  <KpiCard label="ROAS" value={`${rangeSummary.roas}x`} health={roasHealth} sub="Revenue ÷ Spend" />
+                  <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
+                  <KpiCard label="View-Through Conv." value={(asset.viewThroughConversions || 0).toLocaleString()} sub="Saw ad, converted later" />
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            {activePillar === "delivery" && (
+              <>
+                <SectionHeader sectionId="section-delivery" title="Delivery" description="Reach, frequency, spend, and CPM efficiency." />
+                <div className="grid grid-cols-5 gap-3">
+                  <div className="col-span-2 grid grid-cols-2 gap-3">
+                    <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
+                    <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub={freqHealth === "critical" ? "Ad fatigue risk" : freqHealth === "warning" ? "Monitor closely" : "Healthy range"} />
+                    <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
+                    <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total budget used" />
+                  </div>
+                  <div className="col-span-3">
+                    <ChartCard title="CPM Over Time" height="h-[168px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={filteredDaily}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
+                          <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `$${v}`} />
+                          <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `$${value.toFixed(2)}`} />
+                          <Line type="monotone" dataKey="cpm" name="CPM" stroke="hsl(346, 84%, 61%)" strokeWidth={2} dot={false} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </ChartCard>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {activePillar === "engagement" && (
+              <>
+                <SectionHeader sectionId="section-engagement" title="Engagement" description="On-platform interaction quality and relevance signals." />
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-lg border border-border/60 bg-card p-4">
                     <div className="flex items-center gap-5">
@@ -520,10 +714,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                       <div className="flex-1 space-y-2">
                         {engagementData.map((item) => (
                           <div key={item.name} className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.color }} />
-                              <span className="text-[11px] text-muted-foreground">{item.name}</span>
-                            </div>
+                            <span className="text-[11px] text-muted-foreground">{item.name}</span>
                             <span className="text-[12px] font-mono font-bold text-foreground">{item.value.toLocaleString()}</span>
                           </div>
                         ))}
@@ -531,12 +722,23 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                     </div>
                   </div>
                   <div className="rounded-lg border border-border/60 bg-card p-4">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">TikTok Growth Signals</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <KpiCard label="Profile Visits" value={(asset.profileVisits || 0).toLocaleString()} sub="From this ad" />
-                      <KpiCard label="Follows" value={(asset.follows || 0).toLocaleString()} sub="New followers" />
-                      <KpiCard label="Paid Likes" value={(asset.paidLikes || 0).toLocaleString()} sub="From paid reach" />
-                      <KpiCard label="Paid Shares" value={(asset.paidShares || 0).toLocaleString()} sub="Viral potential" />
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-4">Ad Relevance Diagnostics</p>
+                    <div className="space-y-3">
+                      {([
+                        ["Quality Ranking", asset.qualityRanking, "Ad creative quality vs competitors"],
+                        ["Engagement Ranking", asset.engagementRateRanking, "Expected engagement vs competitors"],
+                        ["Conversion Ranking", asset.conversionRateRanking, "Expected conversion vs competitors"],
+                      ] as const).map(([label, val, desc]) => (
+                        <div key={label} className="flex items-center justify-between">
+                          <div>
+                            <p className="text-[11px] font-medium text-foreground">{label}</p>
+                            <p className="text-[9px] text-muted-foreground">{desc}</p>
+                          </div>
+                          <span className={`px-2.5 py-1 rounded-md text-[11px] font-semibold ${rankingColor(val)}`}>
+                            {rankingLabel(val)}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -545,20 +747,20 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
             {activePillar === "traffic" && (
               <>
-                <SectionHeader sectionId="section-traffic" title="Traffic" description="Video view rate trend shows hook effectiveness over time. CPC and website clicks measure off-platform traffic quality." />
+                <SectionHeader sectionId="section-traffic" title="Traffic" description="Traffic quality from ad click through to site visit." />
                 <div className="grid grid-cols-3 gap-3 mb-3">
                   <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
                   <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
-                  <KpiCard label="Website Clicks" value={asset.outboundClicks.toLocaleString()} sub="To your site" />
+                  <KpiCard label="Outbound Clicks" value={asset.outboundClicks.toLocaleString()} sub="Off-platform" />
                 </div>
-                <ChartCard title="Video View Rate % Over Time" height="h-[200px]">
+                <ChartCard title="CTR % Over Time" height="h-[200px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={filteredDaily}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" />
-                      <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} domain={['dataMin - 5', 'dataMax + 2']} />
+                      <YAxis tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}%`} />
                       <RechartsTooltip {...chartTooltipStyle} formatter={(value: number) => `${value}%`} />
-                      <Line type="monotone" dataKey="videoViewRate" name="Video View Rate" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="ctr" name="CTR" stroke="hsl(227, 71%, 55%)" strokeWidth={2} dot={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 </ChartCard>
@@ -567,13 +769,16 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
             {activePillar === "revenue" && (
               <>
-                <SectionHeader sectionId="section-revenue" title="Revenue" description="The bottom line — from click-through to purchase, and your return on ad spend." />
+                <SectionHeader sectionId="section-revenue" title="Revenue" description="Revenue, ROAS, and conversion funnel performance." />
                 <div className="grid grid-cols-3 gap-3 mb-3">
                   <KpiCard label="Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} sub="Selected period" />
                   <KpiCard label="ROAS" value={`${rangeSummary.roas}x`} health={roasHealth} sub="Revenue ÷ Spend" />
                   <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
                 </div>
-            <div className="grid grid-cols-5 gap-3">
+              </>
+            )}
+          </>
+        )}
               <div className="col-span-3">
                 <ChartCard title="ROAS Over Time" height="h-52">
                   <ResponsiveContainer width="100%" height="100%">
