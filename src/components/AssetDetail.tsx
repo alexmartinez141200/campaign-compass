@@ -260,6 +260,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     { name: "Comments", value: asset.postComments, color: "hsl(174, 100%, 33%)" },
     { name: "Shares", value: asset.postShares, color: "hsl(45, 93%, 47%)" },
     { name: "Saves", value: asset.postSaves, color: "hsl(346, 84%, 61%)" },
+
+  // Funnel steps — platform-aware labels
+  const funnelSteps = [
+    { label: isGoogle ? "Website Visits" : "Landing Page Views", value: asset.landingPageViews, color: "hsl(227, 71%, 55%)" },
+    { label: "Add to Cart", value: asset.addToCart, color: "hsl(174, 100%, 33%)" },
+    { label: "Checkout", value: asset.initiateCheckout, color: "hsl(45, 93%, 47%)" },
+    { label: "Purchase", value: asset.conversions, color: "hsl(142, 71%, 45%)" },
   ];
   const engagementTotal = engagementData.reduce((s, d) => s + d.value, 0);
 
