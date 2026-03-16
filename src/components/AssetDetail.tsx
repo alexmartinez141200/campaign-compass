@@ -282,50 +282,42 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       : `${hookMetricValue.toFixed(1)}%`;
   const hookMetricAverage = isTikTok ? campaignAverages.hookRate : isVideo ? campaignAverages.avgWatch : campaignAverages.ctr;
 
-  const diagnosticProfiles = [
+  const profileMetricSummary = [
     {
-      output: "Attention & Hook",
-      diagnostic: asset.creativeProfile.motionIntensity === "High" || asset.creativeProfile.productInFirst3s ? "Strong stopping power" : "Moderate stopping power",
-      supports: `${asset.creativeProfile.motionIntensity} motion · ${asset.creativeProfile.productInFirst3s ? "product visible early" : "product introduced later"}`,
-      proof: formatDelta(hookMetricValue, hookMetricAverage),
+      output: "Hook",
+      profile: `${asset.creativeProfile.motionIntensity} motion · ${asset.creativeProfile.productInFirst3s ? "Product in 3s" : "Product after 3s"}`,
       metrics: [
         { label: hookMetricLabel, value: hookMetricDisplay },
         { label: "CTR", value: `${asset.ctr.toFixed(1)}%` },
-        { label: "Impressions", value: asset.impressions.toLocaleString() },
       ],
+      correlation: formatDelta(hookMetricValue, hookMetricAverage),
     },
     {
-      output: "Traffic Quality",
-      diagnostic: primaryTrafficMetricValue >= campaignAverages.linkClicks ? "Strong click intent" : "Traffic needs stronger intent",
-      supports: `${asset.creativeProfile.callToAction} CTA · ${asset.creativeProfile.aspectRatio} format framing`,
-      proof: formatDelta(primaryTrafficMetricValue, campaignAverages.linkClicks),
+      output: "Traffic",
+      profile: `${asset.creativeProfile.callToAction} CTA · ${asset.creativeProfile.aspectRatio}`,
       metrics: [
         { label: primaryTrafficMetricLabel, value: primaryTrafficMetricValue.toLocaleString() },
-        { label: isGoogle ? "Website Visits" : "LPV", value: asset.landingPageViews.toLocaleString() },
-        { label: "Click→LPV", value: `${(asset.linkClicks > 0 ? (asset.landingPageViews / asset.linkClicks) * 100 : 0).toFixed(0)}%` },
+        { label: "LPV", value: asset.landingPageViews.toLocaleString() },
       ],
+      correlation: formatDelta(primaryTrafficMetricValue, campaignAverages.linkClicks),
     },
     {
-      output: "Funnel Progression",
-      diagnostic: asset.conversions >= campaignAverages.conversions ? "Healthy progression to purchase" : "Drop-off in lower funnel",
-      supports: `${asset.creativeProfile.funnelStage} message fit · ${asset.creativeProfile.brandProminence} brand presence`,
-      proof: formatDelta(asset.conversions, campaignAverages.conversions),
+      output: "Conversion",
+      profile: `${asset.creativeProfile.funnelStage} · ${asset.creativeProfile.brandProminence} brand`,
       metrics: [
         { label: "ATC", value: asset.addToCart.toLocaleString() },
-        { label: "Checkout", value: asset.initiateCheckout.toLocaleString() },
         { label: "Purchases", value: asset.conversions.toLocaleString() },
       ],
+      correlation: formatDelta(asset.conversions, campaignAverages.conversions),
     },
     {
-      output: "Efficiency Outcome",
-      diagnostic: rangeSummary.roas >= campaignAverages.roas ? "Above-average commercial return" : "Below-average commercial return",
-      supports: `${asset.creativeProfile.colorContrast} contrast · ${asset.creativeProfile.brandConsistency} brand consistency`,
-      proof: `${formatDelta(rangeSummary.roas, campaignAverages.roas)} over selected range`,
+      output: "Efficiency",
+      profile: `${asset.creativeProfile.colorContrast} contrast · ${asset.creativeProfile.brandConsistency} consistency`,
       metrics: [
         { label: "ROAS", value: `${rangeSummary.roas.toFixed(1)}x` },
-        { label: "Revenue", value: `$${Math.round(rangeSummary.revenue).toLocaleString()}` },
-        { label: "Spend", value: `$${Math.round(rangeSummary.spend).toLocaleString()}` },
+        { label: "CPM", value: `$${asset.cpm.toFixed(2)}` },
       ],
+      correlation: formatDelta(rangeSummary.roas, campaignAverages.roas),
     },
   ];
 
@@ -427,41 +419,38 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
 
         <div className="rounded-xl border border-border/60 bg-muted/20 mb-6 px-4 py-4 shadow-card">
-          <div className="flex items-start justify-between gap-4 mb-3">
+          <div className="flex items-center justify-between gap-4 mb-3">
             <div>
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Diagnostic outputs → campaign support → KPI proof</p>
-              <p className="text-[11px] text-muted-foreground mt-1">Each profile output is formed from higher-level campaign analytics, then supported by the smaller metrics driving it.</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Profile logic</p>
-              <p className="text-[11px] font-semibold text-foreground mt-1">Output → signal → metric proof</p>
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Creative profile metric summary</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Compact mapping of performance metrics to profile attributes for diagnostics.</p>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            {diagnosticProfiles.map((item) => (
-              <div key={item.output} className="rounded-lg border border-border/60 bg-background p-3">
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Final diagnostic output</p>
-                    <p className="text-[13px] font-semibold text-foreground mt-0.5">{item.output}</p>
-                    <p className="text-[12px] text-foreground/80 mt-1">{item.diagnostic}</p>
-                  </div>
-                  <div className="text-right max-w-[140px]">
-                    <p className="text-[8px] uppercase tracking-wider font-semibold text-muted-foreground">Campaign read</p>
-                    <p className="text-[10px] font-mono text-foreground mt-1">{item.proof}</p>
-                  </div>
+          <div className="overflow-hidden rounded-lg border border-border/60 bg-background">
+            <div className="grid grid-cols-[0.9fr,1.4fr,1fr,1fr,1fr] border-b border-border/60 bg-muted/40 px-4 py-2 text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
+              <span>Output</span>
+              <span>Creative profile</span>
+              <span>Metric 1</span>
+              <span>Metric 2</span>
+              <span>Campaign corr.</span>
+            </div>
+            {profileMetricSummary.map((row) => (
+              <div key={row.output} className="grid grid-cols-[0.9fr,1.4fr,1fr,1fr,1fr] items-center gap-3 border-b border-border/50 px-4 py-3 last:border-b-0">
+                <div>
+                  <p className="text-[11px] font-semibold text-foreground">{row.output}</p>
                 </div>
-                <div className="rounded-md bg-muted/40 px-3 py-2.5 mb-2.5">
-                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">High-level support signal</p>
-                  <p className="text-[11px] text-foreground font-medium mt-1">{item.supports}</p>
+                <div>
+                  <p className="text-[11px] text-foreground">{row.profile}</p>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {item.metrics.map((metric) => (
-                    <div key={metric.label} className="rounded-md bg-card px-2.5 py-2 border border-border/50">
-                      <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{metric.label}</p>
-                      <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{metric.value}</p>
-                    </div>
-                  ))}
+                <div>
+                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.metrics[0].label}</p>
+                  <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{row.metrics[0].value}</p>
+                </div>
+                <div>
+                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.metrics[1].label}</p>
+                  <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{row.metrics[1].value}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-mono text-foreground">{row.correlation}</p>
                 </div>
               </div>
             ))}
