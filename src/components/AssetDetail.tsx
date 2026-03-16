@@ -184,6 +184,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const [datePreset, setDatePreset] = useState<DatePreset>("7d");
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [activePillar, setActivePillar] = useState<"delivery" | "engagement" | "traffic" | "revenue">("delivery");
 
   const insights = generateInsights(asset, campaignAssets);
   const rank = [...campaignAssets].sort((a, b) => b.roas - a.roas).findIndex(a => a.id === asset.id) + 1;
@@ -192,9 +193,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const isMeta = asset.channel === "meta";
   const isGoogle = asset.channel === "google";
   const daily = asset.dailyMetrics;
-  const scrollToSection = (sectionId: string) => {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
   // Filter daily metrics
   const filteredDaily = useMemo(() => {
