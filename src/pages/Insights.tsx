@@ -618,7 +618,7 @@ const Insights = () => {
           handleProfileModalOpen(payload.key);
         }}
       >
-        <circle cx={cx} cy={cy} r={11} fill="transparent" />
+        <circle cx={cx} cy={cy} r={11} fill="hsl(var(--background))" fillOpacity={0.01} />
         <circle
           cx={cx}
           cy={cy}
