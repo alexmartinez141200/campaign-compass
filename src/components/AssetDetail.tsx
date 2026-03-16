@@ -127,10 +127,14 @@ const InfoButton = ({ label }: { label: string }) => {
   );
 };
 
-const KpiCard = ({ label, value, trend, trendInverse = false, health, sub }: {
-  label: string; value: string; trend?: number; trendInverse?: boolean; health?: "good" | "warning" | "critical"; sub?: string;
+const KpiCard = ({ label, value, trend, trendInverse = false, health, sub, onClick }: {
+  label: string; value: string; trend?: number; trendInverse?: boolean; health?: "good" | "warning" | "critical"; sub?: string; onClick?: () => void;
 }) => (
-  <div className="p-3.5 rounded-lg border border-border/60 bg-card flex-1 min-w-0">
+  <button
+    type="button"
+    onClick={onClick}
+    className={`p-3.5 rounded-lg border border-border/60 bg-card flex-1 min-w-0 text-left ${onClick ? "transition-colors hover:bg-muted/40 cursor-pointer" : "cursor-default"}`}
+  >
     <div className="flex items-center justify-between mb-1.5">
       <div className="flex items-center gap-1.5">
         <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
@@ -143,16 +147,21 @@ const KpiCard = ({ label, value, trend, trendInverse = false, health, sub }: {
       {trend !== undefined && <TrendArrow value={trend} suffix="%" inverse={trendInverse} />}
       {sub && <span className="text-[9px] text-muted-foreground">{sub}</span>}
     </div>
-  </div>
+  </button>
 );
 
-const SectionHeader = ({ title, description }: { title: string; description: string }) => (
-  <div className="mt-10 mb-5">
+const SectionHeader = ({ title, description, contribution, sectionId }: { title: string; description: string; contribution?: string; sectionId?: string }) => (
+  <div id={sectionId} className="mt-10 mb-5 scroll-mt-24">
     <div className="flex items-center gap-3 mb-1.5">
       <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground/80 font-bold whitespace-nowrap">{title}</h3>
       <div className="flex-1 h-px bg-border/50" />
     </div>
     <p className="text-[11px] text-muted-foreground/70 leading-relaxed">{description}</p>
+    {contribution && (
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mt-2">
+        Creative profile contribution: <span className="text-foreground">{contribution}</span>
+      </p>
+    )}
   </div>
 );
 
