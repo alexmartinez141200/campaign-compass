@@ -295,12 +295,12 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     ),
     revenue: (
       <>
-        <SectionHeader title="Revenue" description="This tab isolates revenue and conversion metrics." />
+        <SectionHeader title="Revenue" description="A full view of how efficiently this creative turns site intent into conversion volume, purchase value, and return on spend." />
         <div className="grid gap-3 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-stretch">
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <KpiCard label="Revenue" value={`$${asset.purchaseValue.toLocaleString()}`} sub="Attributed value" />
-            <KpiCard label="ROAS" value={`${asset.roas.toFixed(1)}x`} health={roasHealth} trend={trends.roas} />
-            <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
+            <KpiCard label="ROAS" value={`${asset.roas.toFixed(1)}x`} health={roasHealth} trend={trends.roas} sub="Revenue ÷ spend" />
+            <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% LPV conversion rate`} />
             <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
           </div>
           <div className="rounded-lg border border-border/60 bg-card p-3.5">
@@ -316,6 +316,16 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               </LineChart>
             </ChartContainer>
           </div>
+        </div>
+
+        <SectionHeader title="What builds revenue" description="These are the raw conversion steps behind revenue generation, from landing intent to checkout progression and final purchase efficiency." />
+        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-6">
+          <KpiCard label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} sub="Qualified visit base" />
+          <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.landingPageViews ? ((asset.conversions / asset.landingPageViews) * 100).toFixed(1) : "0.0"}% of LPVs`} />
+          <KpiCard label="Revenue" value={`$${asset.purchaseValue.toLocaleString()}`} sub={`${asset.conversions ? `$${(asset.purchaseValue / asset.conversions).toFixed(2)}` : "$0.00"} per conversion`} />
+          <KpiCard label="ROAS" value={`${asset.roas.toFixed(1)}x`} sub="Revenue ÷ spend" health={roasHealth} trend={trends.roas} />
+          <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Spend ÷ conversions" />
+          <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Budget used to drive revenue" />
         </div>
       </>
     ),
