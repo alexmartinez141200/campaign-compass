@@ -241,9 +241,97 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     return { spend: s, revenue: r, roas: s > 0 ? Math.round(r / s * 100) / 100 : 0 };
   }, [filteredDaily]);
 
+  const campaignAverages = useMemo(() => {
+    const avg = (getValue: (item: CreativeAsset) => number) => campaignAssets.reduce((sum, item) => sum + getValue(item), 0) / campaignAssets.length;
+
+    return {
+      ctr: avg((item) => item.ctr),
+      roas: avg((item) => item.roas),
+      cpm: avg((item) => item.cpm),
+      linkClicks: avg((item) => isGoogle ? item.clicks : item.linkClicks),
+      engagement: avg((item) => item.postReactions + item.postComments + item.postShares + item.postSaves),
+      landingPageViews: avg((item) => item.landingPageViews),
+      addToCart: avg((item) => item.addToCart),
+      checkout: avg((item) => item.initiateCheckout),
+      conversions: avg((item) => item.conversions),
+      avgWatch: avg((item) => item.avgWatchTime || 0),
+      hookRate: avg((item) => item.videoPlays ? ((item.videoViews6s || 0) / item.videoPlays) * 100 : item.ctr),
+    };
+  }, [campaignAssets, isGoogle]);
+
+  const formatDelta = (value: number, baseline: number) => {
+    if (!baseline) return "vs campaign avg";
+    const delta = ((value - baseline) / baseline) * 100;
+    const rounded = Math.round(Math.abs(delta));
+    if (rounded < 1) return "in line with campaign avg";
+    return `${delta >= 0 ? "+" : "-"}${rounded}% vs campaign avg`;
+  };
+
+  const primaryTrafficMetricLabel = isGoogle ? "Clicks" : "Link Clicks";
+  const primaryTrafficMetricValue = isGoogle ? asset.clicks : asset.linkClicks;
+  const hookMetricLabel = isTikTok ? "6s View Rate" : isVideo ? "Avg Watch" : "CTR";
+  const hookMetricValue = isTikTok
+    ? asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays) * 100 : 0
+    : isVideo
+      ? asset.avgWatchTime || 0
+      : asset.ctr;
+  const hookMetricDisplay = isTikTok
+    ? `${hookMetricValue.toFixed(1)}%`
+    : isVideo
+      ? `${hookMetricValue.toFixed(1)}s`
+      : `${hookMetricValue.toFixed(1)}%`;
+  const hookMetricAverage = isTikTok ? campaignAverages.hookRate : isVideo ? campaignAverages.avgWatch : campaignAverages.ctr;
+
+  const diagnosticProfiles = [
+    {
+      output: "Attention & Hook",
+      diagnostic: asset.creativeProfile.motionIntensity === "High" || asset.creativeProfile.productInFirst3s ? "Strong stopping power" : "Moderate stopping power",
+      supports: `${asset.creativeProfile.motionIntensity} motion · ${asset.creativeProfile.productInFirst3s ? "product visible early" : "product introduced later"}`,
+      proof: formatDelta(hookMetricValue, hookMetricAverage),
+      metrics: [
+        { label: hookMetricLabel, value: hookMetricDisplay },
+        { label: "CTR", value: `${asset.ctr.toFixed(1)}%` },
+        { label: "Impressions", value: asset.impressions.toLocaleString() },
+      ],
+    },
+    {
+      output: "Traffic Quality",
+      diagnostic: primaryTrafficMetricValue >= campaignAverages.linkClicks ? "Strong click intent" : "Traffic needs stronger intent",
+      supports: `${asset.creativeProfile.callToAction} CTA · ${asset.creativeProfile.aspectRatio} format framing`,
+      proof: formatDelta(primaryTrafficMetricValue, campaignAverages.linkClicks),
+      metrics: [
+        { label: primaryTrafficMetricLabel, value: primaryTrafficMetricValue.toLocaleString() },
+        { label: isGoogle ? "Website Visits" : "LPV", value: asset.landingPageViews.toLocaleString() },
+        { label: "Click→LPV", value: `${(asset.linkClicks > 0 ? (asset.landingPageViews / asset.linkClicks) * 100 : 0).toFixed(0)}%` },
+      ],
+    },
+    {
+      output: "Funnel Progression",
+      diagnostic: asset.conversions >= campaignAverages.conversions ? "Healthy progression to purchase" : "Drop-off in lower funnel",
+      supports: `${asset.creativeProfile.funnelStage} message fit · ${asset.creativeProfile.brandProminence} brand presence`,
+      proof: formatDelta(asset.conversions, campaignAverages.conversions),
+      metrics: [
+        { label: "ATC", value: asset.addToCart.toLocaleString() },
+        { label: "Checkout", value: asset.initiateCheckout.toLocaleString() },
+        { label: "Purchases", value: asset.conversions.toLocaleString() },
+      ],
+    },
+    {
+      output: "Efficiency Outcome",
+      diagnostic: rangeSummary.roas >= campaignAverages.roas ? "Above-average commercial return" : "Below-average commercial return",
+      supports: `${asset.creativeProfile.colorContrast} contrast · ${asset.creativeProfile.brandConsistency} brand consistency`,
+      proof: `${formatDelta(rangeSummary.roas, campaignAverages.roas)} over selected range`,
+      metrics: [
+        { label: "ROAS", value: `${rangeSummary.roas.toFixed(1)}x` },
+        { label: "Revenue", value: `$${Math.round(rangeSummary.revenue).toLocaleString()}` },
+        { label: "Spend", value: `$${Math.round(rangeSummary.spend).toLocaleString()}` },
+      ],
+    },
+  ];
+
   // Health indicators
-  const cpmAvg = campaignAssets.reduce((s, a) => s + a.cpm, 0) / campaignAssets.length;
-  const ctrAvg = campaignAssets.reduce((s, a) => s + a.ctr, 0) / campaignAssets.length;
+  const cpmAvg = campaignAverages.cpm;
+  const ctrAvg = campaignAverages.ctr;
   const freqHealth: "good" | "warning" | "critical" = asset.frequency > 4 ? "critical" : asset.frequency > 2.5 ? "warning" : "good";
   const cpmHealth: "good" | "warning" | "critical" = asset.cpm < cpmAvg * 0.9 ? "good" : asset.cpm > cpmAvg * 1.2 ? "critical" : "warning";
   const ctrHealth: "good" | "warning" | "critical" = asset.ctr > ctrAvg * 1.1 ? "good" : asset.ctr < ctrAvg * 0.8 ? "critical" : "warning";
@@ -286,63 +374,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     { point: "75%", pct: Math.round((asset.videoWatched75 || 0) / (asset.videoPlays || 1) * 100) },
     { point: "95%", pct: Math.round((asset.videoWatched95 || 0) / (asset.videoPlays || 1) * 100) },
   ]) : [];
-
-  const aspectMetricSummary = [
-    {
-      label: "Format",
-      value: asset.type.charAt(0).toUpperCase() + asset.type.slice(1),
-      metrics: [
-        { name: "CTR", value: `${asset.ctr}%` },
-        { name: "ROAS", value: `${asset.roas}x` },
-        { name: "Conversions", value: asset.conversions.toLocaleString() },
-      ],
-    },
-    {
-      label: "Motion",
-      value: asset.creativeProfile.motionIntensity,
-      metrics: [
-        { name: isTikTok ? "6s View Rate" : isVideo ? "Avg Watch" : "CTR", value: isTikTok ? `${asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays * 100).toFixed(1) : 0}%` : isVideo ? `${asset.avgWatchTime || 0}s` : `${asset.ctr}%` },
-        { name: "Engagement", value: engagementTotal.toLocaleString() },
-        { name: "Clicks", value: asset.clicks.toLocaleString() },
-      ],
-    },
-    {
-      label: "CTA",
-      value: asset.creativeProfile.callToAction,
-      metrics: [
-        { name: isGoogle ? "Clicks" : "Link Clicks", value: (isGoogle ? asset.clicks : asset.linkClicks).toLocaleString() },
-        { name: "CTR", value: `${asset.ctr}%` },
-        { name: "LPV", value: asset.landingPageViews.toLocaleString() },
-      ],
-    },
-    {
-      label: "Funnel",
-      value: asset.creativeProfile.funnelStage,
-      metrics: [
-        { name: "ATC", value: asset.addToCart.toLocaleString() },
-        { name: "Checkout", value: asset.initiateCheckout.toLocaleString() },
-        { name: "ROAS", value: `${asset.roas}x` },
-      ],
-    },
-    {
-      label: "Brand",
-      value: asset.creativeProfile.brandProminence,
-      metrics: [
-        { name: "Quality", value: rankingLabel(asset.qualityRanking) },
-        { name: "Conv. Rank", value: rankingLabel(asset.conversionRateRanking) },
-        { name: "Revenue", value: `$${asset.purchaseValue.toLocaleString()}` },
-      ],
-    },
-    {
-      label: "Contrast",
-      value: asset.creativeProfile.colorContrast,
-      metrics: [
-        { name: "CTR", value: `${asset.ctr}%` },
-        { name: "CPM", value: `$${asset.cpm.toFixed(2)}` },
-        { name: "ROAS", value: `${asset.roas}x` },
-      ],
-    },
-  ];
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -398,27 +429,36 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <div className="rounded-xl border border-border/60 bg-muted/20 mb-6 px-4 py-4 shadow-card">
           <div className="flex items-start justify-between gap-4 mb-3">
             <div>
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Creative aspects → supporting KPIs</p>
-              <p className="text-[11px] text-muted-foreground mt-1">This summary shows how each creative aspect is supported by the individual performance metrics shown below.</p>
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Diagnostic outputs → campaign support → KPI proof</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Each profile output is formed from higher-level campaign analytics, then supported by the smaller metrics driving it.</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Use this to connect</p>
-              <p className="text-[11px] font-semibold text-foreground mt-1">Attributes → KPIs → Insights</p>
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Profile logic</p>
+              <p className="text-[11px] font-semibold text-foreground mt-1">Output → signal → metric proof</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {aspectMetricSummary.map((item) => (
-              <div key={item.label} className="rounded-lg border border-border/60 bg-background p-3">
-                <div className="flex items-center justify-between gap-3 mb-2">
+            {diagnosticProfiles.map((item) => (
+              <div key={item.output} className="rounded-lg border border-border/60 bg-background p-3">
+                <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">{item.label}</p>
-                    <p className="text-[12px] font-semibold text-foreground mt-0.5">{item.value}</p>
+                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Final diagnostic output</p>
+                    <p className="text-[13px] font-semibold text-foreground mt-0.5">{item.output}</p>
+                    <p className="text-[12px] text-foreground/80 mt-1">{item.diagnostic}</p>
                   </div>
+                  <div className="text-right max-w-[140px]">
+                    <p className="text-[8px] uppercase tracking-wider font-semibold text-muted-foreground">Campaign read</p>
+                    <p className="text-[10px] font-mono text-foreground mt-1">{item.proof}</p>
+                  </div>
+                </div>
+                <div className="rounded-md bg-muted/40 px-3 py-2.5 mb-2.5">
+                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">High-level support signal</p>
+                  <p className="text-[11px] text-foreground font-medium mt-1">{item.supports}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   {item.metrics.map((metric) => (
-                    <div key={metric.name} className="rounded-md bg-muted/40 px-2.5 py-2">
-                      <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{metric.name}</p>
+                    <div key={metric.label} className="rounded-md bg-card px-2.5 py-2 border border-border/50">
+                      <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{metric.label}</p>
                       <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{metric.value}</p>
                     </div>
                   ))}
