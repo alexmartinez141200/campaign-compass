@@ -104,9 +104,10 @@ const makeDriver = (
 };
 
 export function getCreativeAttributeDrivers(asset: CreativeAsset, campaignAssets: CreativeAsset[], attributeKey: string): StoryDriverMetric[] {
-  const metaAssets = campaignAssets.filter((item) => item.channel === asset.channel);
-  const scopedAssets = metaAssets.length ? metaAssets : campaignAssets;
+  const sameChannelAssets = campaignAssets.filter((item) => item.channel === asset.channel);
+  const scopedAssets = sameChannelAssets.length ? sameChannelAssets : campaignAssets;
   const base = [asset, ...scopedAssets.filter((item) => item.id !== asset.id)];
+  const platformSection = asset.channel === "tiktok" ? "TikTok Ads" : asset.channel === "google" ? "Google Ads" : "Meta Ads";
 
   const build = (
     metricKey: string,
@@ -114,7 +115,7 @@ export function getCreativeAttributeDrivers(asset: CreativeAsset, campaignAssets
     getter: (item: CreativeAsset) => number,
     format: StoryMetricFormat,
     inverse = false,
-    section = "Meta Ads",
+    section = platformSection,
   ) => {
     const average = safeAverage(base, getter);
     const value = getter(asset);
@@ -139,6 +140,73 @@ export function getCreativeAttributeDrivers(asset: CreativeAsset, campaignAssets
   const saveRate = (item: CreativeAsset) => item.impressions > 0 ? (item.postSaves / item.impressions) * 100 : 0;
   const atcRate = (item: CreativeAsset) => item.landingPageViews > 0 ? (item.addToCart / item.landingPageViews) * 100 : 0;
   const purchaseRate = (item: CreativeAsset) => item.landingPageViews > 0 ? (item.conversions / item.landingPageViews) * 100 : 0;
+  const tiktokViewRate = (item: CreativeAsset) => item.videoViewRate || 0;
+  const tiktokShares = (item: CreativeAsset) => item.paidShares ?? item.postShares;
+  const tiktokProfileVisits = (item: CreativeAsset) => item.profileVisits || 0;
+  const googleWebsiteVisits = (item: CreativeAsset) => item.landingPageViews;
+  const googleInteractionRate = (item: CreativeAsset) => item.interactionRate || item.ctr;
+  const googleViewThroughConversions = (item: CreativeAsset) => item.viewThroughConversions || 0;
+  const googleAvgCpv = (item: CreativeAsset) => item.avgCpv || 0;
+
+  if (asset.channel === "tiktok") {
+    switch (attributeKey) {
+      case "format":
+        return [build("video_view_rate", "Video View Rate", tiktokViewRate, "pct"), build("avg_watch_time", "Avg Watch Time", (item) => item.avgWatchTime || 0, "sec")];
+      case "duration":
+        return [build("avg_watch_time", "Avg Watch Time", (item) => item.avgWatchTime || 0, "sec"), build("completion_rate", "Completion Rate", (item) => item.videoPlays ? ((item.completedViews || 0) / item.videoPlays) * 100 : 0, "pct")];
+      case "aspect":
+        return [build("video_view_rate", "Video View Rate", tiktokViewRate, "pct"), build("profile_visits", "Profile Visits", tiktokProfileVisits, "num")];
+      case "motion":
+        return [build("video_view_rate", "Video View Rate", tiktokViewRate, "pct"), build("hold_rate", "25% Hold Rate", holdRate, "pct")];
+      case "contrast":
+        return [build("video_view_rate", "Video View Rate", tiktokViewRate, "pct"), build("paid_shares", "Paid Shares", tiktokShares, "num")];
+      case "brandProminence":
+        return [build("profile_visits", "Profile Visits", tiktokProfileVisits, "num"), build("paid_shares", "Paid Shares", tiktokShares, "num")];
+      case "brandConsistency":
+        return [build("conversions", "Conversions", (item) => item.conversions, "num"), build("roas", "ROAS", (item) => item.roas, "x")];
+      case "funnelStage":
+        return [build("purchase_rate", "Purchase Rate", purchaseRate, "pct"), build("roas", "ROAS", (item) => item.roas, "x")];
+      case "cta":
+        return [build("link_clicks", "Link Clicks", (item) => item.linkClicks, "num"), build("click_to_lpv", "Click→LPV", clickToLpv, "pct")];
+      case "productInFirst3s":
+        return [build("video_view_rate", "Video View Rate", tiktokViewRate, "pct"), build("hold_rate", "25% Hold Rate", holdRate, "pct")];
+      default:
+        return [];
+    }
+  }
+
+  if (asset.channel === "google") {
+    switch (attributeKey) {
+      case "format":
+        return [build("interaction_rate", "Interaction Rate", googleInteractionRate, "pct"), build("website_visits", "Website Visits", googleWebsiteVisits, "num")];
+      case "duration":
+        return asset.type === "video"
+          ? [build("avg_cpv", "Avg CPV", googleAvgCpv, "dollar2", true), build("view_through_conversions", "View-Through Conv.", googleViewThroughConversions, "num")]
+          : [build("impressions", "Impressions", (item) => item.impressions, "num"), build("cpm", "CPM", (item) => item.cpm, "dollar2", true)];
+      case "aspect":
+        return [build("interaction_rate", "Interaction Rate", googleInteractionRate, "pct"), build("website_visits", "Website Visits", googleWebsiteVisits, "num")];
+      case "motion":
+        return asset.type === "video"
+          ? [build("avg_cpv", "Avg CPV", googleAvgCpv, "dollar2", true), build("interaction_rate", "Interaction Rate", googleInteractionRate, "pct")]
+          : [build("ctr", "CTR", (item) => item.ctr, "pct"), build("website_visits", "Website Visits", googleWebsiteVisits, "num")];
+      case "contrast":
+        return [build("interaction_rate", "Interaction Rate", googleInteractionRate, "pct"), build("view_through_conversions", "View-Through Conv.", googleViewThroughConversions, "num")];
+      case "brandProminence":
+        return [build("interaction_rate", "Interaction Rate", googleInteractionRate, "pct"), build("website_visits", "Website Visits", googleWebsiteVisits, "num")];
+      case "brandConsistency":
+        return [build("conversions", "Conversions", (item) => item.conversions, "num"), build("roas", "ROAS", (item) => item.roas, "x")];
+      case "funnelStage":
+        return [build("view_through_conversions", "View-Through Conv.", googleViewThroughConversions, "num"), build("roas", "ROAS", (item) => item.roas, "x")];
+      case "cta":
+        return [build("clicks", "Clicks", (item) => item.clicks, "num"), build("website_visits", "Website Visits", googleWebsiteVisits, "num")];
+      case "productInFirst3s":
+        return asset.type === "video"
+          ? [build("interaction_rate", "Interaction Rate", googleInteractionRate, "pct"), build("view_through_conversions", "View-Through Conv.", googleViewThroughConversions, "num")]
+          : [build("website_visits", "Website Visits", googleWebsiteVisits, "num"), build("conversions", "Conversions", (item) => item.conversions, "num")];
+      default:
+        return [];
+    }
+  }
 
   switch (attributeKey) {
     case "format":
