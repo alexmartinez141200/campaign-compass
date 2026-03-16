@@ -206,9 +206,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     ];
 
     return profileRows.map((row) => {
-      const mappedDimension = axisStoryDimensionMap[row.key];
-      const summary = mappedDimension ? storySummaryRows.find((item) => item.key === mappedDimension) : undefined;
-      const metrics = (summary?.drivers ?? []).map((driver) => {
+      const metrics = getCreativeAttributeDrivers(asset, campaignAssets, row.key).map((driver) => {
         const pctDiff = driver.average > 0 ? ((driver.value - driver.average) / driver.average) * 100 : 0;
         const inverseMetric = driver.metricKey.includes("cpm") || driver.metricKey.includes("cpc") || driver.metricKey.includes("cpa");
         const adjustedDiff = inverseMetric ? -pctDiff : pctDiff;
