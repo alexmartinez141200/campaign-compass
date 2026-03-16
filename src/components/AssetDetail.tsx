@@ -327,6 +327,14 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Spend ÷ conversions" />
           <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Budget used to drive revenue" />
         </div>
+
+        <SectionHeader title="Conversion funnel" description="This shows how post-click traffic moves through the lower-funnel journey from landing page visit to cart, checkout, and purchase." />
+        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+          <KpiCard label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} sub="Top of conversion funnel" />
+          <KpiCard label="Add to Cart" value={asset.addToCart.toLocaleString()} sub={`${asset.landingPageViews ? ((asset.addToCart / asset.landingPageViews) * 100).toFixed(1) : "0.0"}% of LPVs`} />
+          <KpiCard label="Initiate Checkout" value={asset.initiateCheckout.toLocaleString()} sub={`${asset.addToCart ? ((asset.initiateCheckout / asset.addToCart) * 100).toFixed(1) : "0.0"}% of ATC`} />
+          <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.initiateCheckout ? ((asset.conversions / asset.initiateCheckout) * 100).toFixed(1) : "0.0"}% of checkout`} />
+        </div>
       </>
     ),
   } satisfies Record<PillarKey, JSX.Element>;
