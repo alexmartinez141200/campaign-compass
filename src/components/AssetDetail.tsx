@@ -669,7 +669,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
 
             {/* ═══ B. CLICK PERFORMANCE ═══ */}
-            <SectionHeader title="Click Performance" description="How users interact with your ad. CTR and CPC are Google Ads' core performance signals." />
+            <SectionHeader sectionId="section-click-performance" title="Click Performance" description="How users interact with your ad. CTR and CPC are Google Ads' core performance signals." contribution="CTA and aspect ratio contribute most here because they shape click intent, ad clarity, and landing-page continuation quality." />
             <div className="grid grid-cols-4 gap-3 mb-3">
               <KpiCard label="Clicks" value={asset.clicks.toLocaleString()} trend={trends.clicks} />
               <KpiCard label="CTR" value={`${asset.ctr}%`} trend={trends.ctr} health={ctrHealth} />
