@@ -411,7 +411,15 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                   <p className="text-[11px] text-muted-foreground">{asset.id} · {asset.type}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground">
+                  <span
+                    className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${
+                      asset.channel === "tiktok"
+                        ? "border border-accent/40 bg-accent/10 text-foreground"
+                        : asset.channel === "google"
+                          ? "border border-primary/40 bg-primary/10 text-foreground"
+                          : "border border-primary/30 bg-primary/10 text-foreground"
+                    }`}
+                  >
                     Launched on {asset.channel}
                   </span>
                   <span className="rounded-full border border-border/60 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
