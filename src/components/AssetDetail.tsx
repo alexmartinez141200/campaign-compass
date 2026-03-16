@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowDownRight, ArrowUpRight, AlertTriangle, Info, Minus, TrendingDown, TrendingUp } from "lucide-react";
+import { ArrowLeft, ArrowDownRight, ArrowUpRight, Info, Minus } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import type { CreativeAsset } from "@/data/mockData";
 import { buildCreativeStorySummary, formatStoryMetricValue } from "@/lib/creative-story";
@@ -27,28 +27,16 @@ const kpiInfo: Record<string, string> = {
   Revenue: "Attributed purchase value.",
   CPA: "Cost per conversion.",
   Engagement: "Total reactions, comments, shares, and saves.",
+  "Eng. Rate": "Engagement rate = total reactions, comments, shares, and saves divided by impressions.",
   Shares: "Total shares from the asset.",
   Saves: "How many users saved the creative for later.",
+  Reactions: "Total likes and reactions on the ad.",
+  Comments: "Total comments on the ad.",
   Clicks: "Total ad clicks recorded for this asset.",
   "Website Clicks": "Clicks that send users to the site.",
   "Landing Page Views": "Visits that successfully landed on the page.",
+  "Click → LPV": "Share of clicks that turned into successful landing page views.",
 };
-
-function generateInsights(asset: CreativeAsset, all: CreativeAsset[]) {
-  const insights: { type: "positive" | "warning" | "negative"; text: string }[] = [];
-  const avg = (fn: (a: CreativeAsset) => number) => all.reduce((s, a) => s + fn(a), 0) / all.length;
-  const avgRoas = avg((a) => a.roas);
-  const avgCpm = avg((a) => a.cpm);
-  const avgCtr = avg((a) => a.ctr);
-
-  if (asset.roas >= avgRoas * 1.15) insights.push({ type: "positive", text: `ROAS is outperforming campaign average by ${Math.round(((asset.roas - avgRoas) / avgRoas) * 100)}%.` });
-  if (asset.cpm <= avgCpm * 0.9) insights.push({ type: "positive", text: `CPM is more efficient than campaign average, giving this asset stronger delivery economics.` });
-  if (asset.ctr >= avgCtr * 1.1) insights.push({ type: "positive", text: `CTR is stronger than average, indicating better click intent from the creative.` });
-  if (asset.frequency > 3) insights.push({ type: "warning", text: `Frequency is elevated and may indicate creative fatigue risk.` });
-  if (asset.roas < avgRoas * 0.85) insights.push({ type: "negative", text: `ROAS is below campaign average and may need creative or funnel changes.` });
-  if (!insights.length) insights.push({ type: "warning", text: "Performance is close to the campaign average with no major outlier signal." });
-  return insights;
-}
 
 const healthDot = (status: "good" | "warning" | "critical") =>
   status === "good" ? "bg-accent" : status === "warning" ? "bg-primary" : "bg-destructive";
@@ -56,6 +44,7 @@ const healthDot = (status: "good" | "warning" | "critical") =>
 const InfoButton = ({ label }: { label: string }) => {
   const info = kpiInfo[label];
   if (!info) return null;
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -74,9 +63,15 @@ const TrendArrow = ({ value, inverse = false }: { value?: number; inverse?: bool
   if (value === undefined) return null;
   const isUp = value > 0;
   const isGood = inverse ? !isUp : isUp;
+
   if (Math.abs(value) < 0.1) {
-    return <span className="text-[10px] text-muted-foreground font-mono flex items-center gap-0.5"><Minus className="w-3 h-3" />0%</span>;
+    return (
+      <span className="text-[10px] text-muted-foreground font-mono flex items-center gap-0.5">
+        <Minus className="w-3 h-3" />0%
+      </span>
+    );
   }
+
   return (
     <span className={`text-[10px] font-mono font-medium flex items-center gap-0.5 ${isGood ? "text-accent" : "text-destructive"}`}>
       {isUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
@@ -116,7 +111,7 @@ const KpiCard = ({
       </div>
       {health && <div className={`w-2 h-2 rounded-full ${healthDot(health)}`} />}
     </div>
-    <p className="text-lg font-mono font-bold text-foreground leading-tight">{value}</p>
+    <p className="text-lg font-mono font-bold text-foreground leading-tight break-words">{value}</p>
     <div className="flex items-center gap-2 mt-1">
       <TrendArrow value={trend} inverse={trendInverse} />
       {sub && <span className="text-[9px] text-muted-foreground">{sub}</span>}
@@ -134,36 +129,9 @@ const SectionHeader = ({ title, description }: { title: string; description: str
   </div>
 );
 
-const InsightList = ({ insights }: { insights: { type: "positive" | "warning" | "negative"; text: string }[] }) => (
-  <div className="space-y-1.5">
-    {insights.map((insight, i) => (
-      <div
-        key={i}
-        className={`flex items-start gap-2.5 px-3.5 py-2.5 rounded-md border ${
-          insight.type === "positive"
-            ? "bg-accent/10 border-accent/20"
-            : insight.type === "warning"
-              ? "bg-primary/10 border-primary/20"
-              : "bg-destructive/10 border-destructive/20"
-        }`}
-      >
-        {insight.type === "positive" ? (
-          <TrendingUp className="w-3.5 h-3.5 text-accent mt-0.5 flex-shrink-0" />
-        ) : insight.type === "warning" ? (
-          <AlertTriangle className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
-        ) : (
-          <TrendingDown className="w-3.5 h-3.5 text-destructive mt-0.5 flex-shrink-0" />
-        )}
-        <p className="text-[12px] text-foreground/80 leading-relaxed">{insight.text}</p>
-      </div>
-    ))}
-  </div>
-);
-
 const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const [activePillar, setActivePillar] = useState<PillarKey>("delivery");
 
-  const insights = useMemo(() => generateInsights(asset, campaignAssets), [asset, campaignAssets]);
   const storySummaryRows = useMemo(
     () => buildCreativeStorySummary(asset, campaignAssets, { selectedRoas: asset.roas }),
     [asset, campaignAssets],
@@ -181,6 +149,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     const second = daily.slice(mid);
     const avgOf = (arr: typeof daily, key: "impressions" | "ctr" | "roas" | "cpm") => arr.reduce((sum, row) => sum + row[key], 0) / arr.length;
     const pct = (a: number, b: number) => (b === 0 ? 0 : ((a - b) / b) * 100);
+
     return {
       impressions: pct(avgOf(second, "impressions"), avgOf(first, "impressions")),
       ctr: pct(avgOf(second, "ctr"), avgOf(first, "ctr")),
@@ -199,7 +168,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         lpv: day.landingPageViews,
         roas: day.roas,
         conversions: day.conversions,
-        spend: day.spend,
       })),
     [asset.dailyMetrics],
   );
@@ -253,14 +221,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} sub="Cost per 1,000 impressions" trend={trends.cpm} trendInverse health={cpmHealth} />
           <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Budget used to generate delivery" />
         </div>
-
-        <SectionHeader title="Delivery benchmark" description="Current delivery metrics against the campaign baseline." />
-        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-          <KpiCard label="Impressions Δ" value={storySummaryRows.find((row) => row.key === "delivery")?.drivers[0].benchmark || "0% vs avg"} sub="Vs campaign average" />
-          <KpiCard label="CPM Δ" value={storySummaryRows.find((row) => row.key === "delivery")?.drivers[1].benchmark || "0% vs avg"} sub="Vs campaign average" />
-          <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} sub={freqHealth === "good" ? "Healthy exposure" : freqHealth === "warning" ? "Watch for fatigue" : "Fatigue risk"} health={freqHealth} />
-          <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total invested" />
-        </div>
       </>
     ),
     engagement: (
@@ -296,7 +256,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} sub="Rate denominator" />
           <KpiCard label="Eng. Rate" value={formatStoryMetricValue(storySummaryRows.find((row) => row.key === "engagement")?.drivers[0].value || 0, "pct")} sub="Final blended rate" />
         </div>
-
       </>
     ),
     traffic: (
@@ -397,12 +356,14 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               ["Funnel", asset.creativeProfile.funnelStage],
               ["CTA", asset.creativeProfile.callToAction],
               ["Product in first 3s", asset.type === "video" ? (asset.creativeProfile.productInFirst3s ? "Yes" : "No") : null],
-            ].filter(([, value]) => value !== null).map(([label, value]) => (
-              <div key={label} className="flex items-center justify-between py-0.5">
-                <span className="text-[10px] text-muted-foreground">{label}</span>
-                <span className="text-[11px] font-semibold text-foreground">{value}</span>
-              </div>
-            ))}
+            ]
+              .filter(([, value]) => value !== null)
+              .map(([label, value]) => (
+                <div key={label} className="flex items-center justify-between py-0.5">
+                  <span className="text-[10px] text-muted-foreground">{label}</span>
+                  <span className="text-[11px] font-semibold text-foreground">{value}</span>
+                </div>
+              ))}
           </div>
         </div>
 
