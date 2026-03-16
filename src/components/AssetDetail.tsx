@@ -127,10 +127,14 @@ const InfoButton = ({ label }: { label: string }) => {
   );
 };
 
-const KpiCard = ({ label, value, trend, trendInverse = false, health, sub }: {
-  label: string; value: string; trend?: number; trendInverse?: boolean; health?: "good" | "warning" | "critical"; sub?: string;
+const KpiCard = ({ label, value, trend, trendInverse = false, health, sub, onClick }: {
+  label: string; value: string; trend?: number; trendInverse?: boolean; health?: "good" | "warning" | "critical"; sub?: string; onClick?: () => void;
 }) => (
-  <div className="p-3.5 rounded-lg border border-border/60 bg-card flex-1 min-w-0">
+  <button
+    type="button"
+    onClick={onClick}
+    className={`p-3.5 rounded-lg border border-border/60 bg-card flex-1 min-w-0 text-left ${onClick ? "transition-colors hover:bg-muted/40 cursor-pointer" : "cursor-default"}`}
+  >
     <div className="flex items-center justify-between mb-1.5">
       <div className="flex items-center gap-1.5">
         <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
@@ -143,16 +147,21 @@ const KpiCard = ({ label, value, trend, trendInverse = false, health, sub }: {
       {trend !== undefined && <TrendArrow value={trend} suffix="%" inverse={trendInverse} />}
       {sub && <span className="text-[9px] text-muted-foreground">{sub}</span>}
     </div>
-  </div>
+  </button>
 );
 
-const SectionHeader = ({ title, description }: { title: string; description: string }) => (
-  <div className="mt-10 mb-5">
+const SectionHeader = ({ title, description, contribution, sectionId }: { title: string; description: string; contribution?: string; sectionId?: string }) => (
+  <div id={sectionId} className="mt-10 mb-5 scroll-mt-24">
     <div className="flex items-center gap-3 mb-1.5">
       <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground/80 font-bold whitespace-nowrap">{title}</h3>
       <div className="flex-1 h-px bg-border/50" />
     </div>
     <p className="text-[11px] text-muted-foreground/70 leading-relaxed">{description}</p>
+    {contribution && (
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mt-2">
+        Creative profile contribution: <span className="text-foreground">{contribution}</span>
+      </p>
+    )}
   </div>
 );
 
@@ -188,6 +197,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const isMeta = asset.channel === "meta";
   const isGoogle = asset.channel === "google";
   const daily = asset.dailyMetrics;
+  const scrollToSection = (sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   // Filter daily metrics
   const filteredDaily = useMemo(() => {
@@ -207,9 +219,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     return filtered.map(d => {
       cumSpend += d.spend;
       cumPV += d.purchaseValue;
-      // For TikTok, compute daily video view rate (simulated: base rate + noise from CTR variation)
       const baseVvr = asset.videoViewRate || 88;
-      const vvrNoise = (d.ctr - (asset.ctr || 3)) * 2; // correlate slightly with CTR variance
+      const vvrNoise = (d.ctr - (asset.ctr || 3)) * 2;
       const videoViewRate = Math.round((baseVvr + vvrNoise) * 10) / 10;
       return {
         ...d,
@@ -219,7 +230,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     });
   }, [daily, datePreset, customRange]);
 
-  // Trend calculations
   const trends = useMemo(() => {
     if (filteredDaily.length < 4) return { impressions: 0, cpm: 0, ctr: 0, roas: 0, clicks: 0 };
     const mid = Math.floor(filteredDaily.length / 2);
@@ -264,6 +274,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     () => buildCreativeStorySummary(asset, campaignAssets, { selectedRoas: rangeSummary.roas }),
     [asset, campaignAssets, rangeSummary.roas],
   );
+
+  const pillarSectionMap: Record<string, string> = {
+    delivery: "section-delivery",
+    engagement: isGoogle ? "section-click-performance" : "section-engagement",
+    traffic: "section-traffic",
+    revenue: "section-revenue",
+  };
 
   // Health indicators
   const cpmAvg = campaignAverages.cpm;
@@ -362,51 +379,16 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <div className="rounded-xl border border-border/60 bg-muted/20 mb-6 px-4 py-4 shadow-card">
-          <div className="flex items-center justify-between gap-4 mb-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Creative profile analytics model</p>
-              <p className="text-[11px] text-muted-foreground mt-1">This summary starts with the page’s main analytics pillars—delivery, engagement, traffic, and revenue—then correlates each outcome back to the creative profile used in diagnostics.</p>
-            </div>
-          </div>
-          <div className="overflow-hidden rounded-lg border border-border/60 bg-background">
-            <div className="grid grid-cols-[0.8fr,1.4fr,0.6fr,1fr,1fr,1.35fr] border-b border-border/60 bg-muted/40 px-4 py-2 text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
-              <span>Pillar</span>
-              <span>Profile correlation</span>
-              <span>Score</span>
-              <span>Metric 1</span>
-              <span>Metric 2</span>
-              <span>Analytics story</span>
-            </div>
-            {storySummaryRows.map((row) => (
-              <div key={row.key} className="grid grid-cols-[0.8fr,1.4fr,0.6fr,1fr,1fr,1.35fr] items-start gap-3 border-b border-border/50 px-4 py-3 last:border-b-0">
-                <div>
-                  <p className="text-[11px] font-semibold text-foreground">{row.title}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] text-foreground">{row.profileSignal}</p>
-                </div>
-                <div>
-                  <p className="text-[14px] font-mono font-bold text-foreground">{row.score}</p>
-                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground mt-1">Correlated</p>
-                </div>
-                <div>
-                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.drivers[0].label}</p>
-                  <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{formatStoryMetricValue(row.drivers[0].value, row.drivers[0].format)}</p>
-                  <p className="text-[9px] text-muted-foreground mt-1">{row.drivers[0].benchmark}</p>
-                </div>
-                <div>
-                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.drivers[1].label}</p>
-                  <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{formatStoryMetricValue(row.drivers[1].value, row.drivers[1].format)}</p>
-                  <p className="text-[9px] text-muted-foreground mt-1">{row.drivers[1].benchmark}</p>
-                </div>
-                <div>
-                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.drivers[0].section} + {row.drivers[1].section}</p>
-                  <p className="text-[11px] text-foreground mt-1">{row.story}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="grid grid-cols-4 gap-3 mb-6">
+          {storySummaryRows.map((row) => (
+            <KpiCard
+              key={row.key}
+              label={row.title}
+              value={formatStoryMetricValue(row.drivers[0].value, row.drivers[0].format)}
+              sub={`${row.drivers[0].label} · ${row.profileSignal}`}
+              onClick={() => scrollToSection(pillarSectionMap[row.key])}
+            />
+          ))}
         </div>
 
         {/* ─── DATE FILTER ─── */}
@@ -472,7 +454,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         {isTikTok ? (
           <>
             {/* ═══ A. VIDEO PERFORMANCE (TikTok's core — first) ═══ */}
-            <SectionHeader title="Video Performance" description="TikTok video metrics — 6-second view rate measures hook strength, completion rate shows content quality." />
+            <SectionHeader sectionId="section-delivery" title="Video Performance" description="TikTok video metrics — 6-second view rate measures hook strength, completion rate shows content quality." contribution="Motion intensity, product in first 3s, and video duration strengthen delivery by improving hold and early qualification." />
             <div className="grid grid-cols-2 gap-3">
               <div className="grid grid-cols-3 gap-3">
                 <KpiCard label="Video Views" value={(asset.videoPlays || 0).toLocaleString()} sub="2s+ views" />
@@ -502,7 +484,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
 
             {/* ═══ B. ENGAGEMENT & GROWTH ═══ */}
-            <SectionHeader title="Engagement & Growth" description="On-platform signals — likes, shares, and profile actions that drive organic reach and brand building." />
+            <SectionHeader sectionId="section-engagement" title="Engagement & Growth" description="On-platform signals — likes, shares, and profile actions that drive organic reach and brand building." contribution="Brand prominence and format contribute most here by shaping how worth-sharing and memorable the asset feels." />
             <div className="grid grid-cols-2 gap-3">
               {/* Engagement donut */}
               <div className="rounded-lg border border-border/60 bg-card p-4">
@@ -548,7 +530,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
 
             {/* ═══ C. DELIVERY ═══ */}
-            <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
+            <SectionHeader sectionId="section-delivery" title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." contribution="Motion intensity, product in first 3s, and color contrast contribute to delivery by improving thumb-stop power and scalable reach." />
             <div className="grid grid-cols-5 gap-3">
               <div className="col-span-2 grid grid-cols-2 gap-3">
                 <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
@@ -572,7 +554,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
 
             {/* ═══ D. TRAFFIC ═══ */}
-            <SectionHeader title="Traffic" description="Video view rate trend shows hook effectiveness over time. CPC and website clicks measure off-platform traffic quality." />
+            <SectionHeader sectionId="section-traffic" title="Traffic" description="Video view rate trend shows hook effectiveness over time. CPC and website clicks measure off-platform traffic quality." contribution="CTA and aspect ratio contribute most to traffic because they govern click intent and how natively the asset performs in-feed." />
             <div className="grid grid-cols-3 gap-3 mb-3">
               <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
               <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
@@ -591,7 +573,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </ChartCard>
 
             {/* ═══ E. CONVERSIONS & REVENUE ═══ */}
-            <SectionHeader title="Conversions & Revenue" description="The bottom line — from click-through to purchase, and your return on ad spend." />
+            <SectionHeader sectionId="section-revenue" title="Conversions & Revenue" description="The bottom line — from click-through to purchase, and your return on ad spend." contribution="Funnel stage and brand consistency contribute most to revenue because they influence purchase readiness, trust, and downstream efficiency." />
             <div className="grid grid-cols-3 gap-3 mb-3">
               <KpiCard label="Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} sub="Selected period" />
               <KpiCard label="ROAS" value={`${rangeSummary.roas}x`} health={roasHealth} sub="Revenue ÷ Spend" />
@@ -663,7 +645,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             {/* Flow: Delivery → Click Performance → Conversions & Revenue → Video (if applicable) */}
 
             {/* ═══ A. DELIVERY ═══ */}
-            <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Monitor frequency for fatigue and CPM for cost efficiency." />
+            <SectionHeader sectionId="section-delivery" title="Delivery" description="How efficiently the ad reaches your audience. Monitor frequency for fatigue and CPM for cost efficiency." contribution="Motion intensity, product in first 3s, and color contrast contribute to delivery by improving attention capture and media efficiency." />
             <div className="grid grid-cols-5 gap-3">
               <div className="col-span-2 grid grid-cols-2 gap-3">
                 <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
@@ -687,7 +669,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
 
             {/* ═══ B. CLICK PERFORMANCE ═══ */}
-            <SectionHeader title="Click Performance" description="How users interact with your ad. CTR and CPC are Google Ads' core performance signals." />
+            <SectionHeader sectionId="section-click-performance" title="Click Performance" description="How users interact with your ad. CTR and CPC are Google Ads' core performance signals." contribution="CTA and aspect ratio contribute most here because they shape click intent, ad clarity, and landing-page continuation quality." />
             <div className="grid grid-cols-4 gap-3 mb-3">
               <KpiCard label="Clicks" value={asset.clicks.toLocaleString()} trend={trends.clicks} />
               <KpiCard label="CTR" value={`${asset.ctr}%`} trend={trends.ctr} health={ctrHealth} />
@@ -707,7 +689,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </ChartCard>
 
             {/* ═══ C. CONVERSIONS & REVENUE ═══ */}
-            <SectionHeader title="Conversions & Revenue" description="Direct and view-through conversions. View-through measures users who saw your ad but converted later without clicking." />
+            <SectionHeader sectionId="section-revenue" title="Conversions & Revenue" description="Direct and view-through conversions. View-through measures users who saw your ad but converted later without clicking." contribution="Funnel stage and brand consistency contribute most to revenue by aligning message depth with intent and reinforcing trust through conversion." />
             <div className="grid grid-cols-4 gap-3 mb-3">
               <KpiCard label="Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} sub="Selected period" />
               <KpiCard label="ROAS" value={`${rangeSummary.roas}x`} health={roasHealth} sub="Revenue ÷ Spend" />
@@ -777,7 +759,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             {/* ═══ D. VIDEO PERFORMANCE (Google Video/YouTube — if applicable) ═══ */}
             {isVideo && (
               <>
-                <SectionHeader title="Video Performance" description="YouTube/Google Video metrics — view rate measures creative appeal, quartile retention shows where viewers drop off." />
+                <SectionHeader title="Video Performance" description="YouTube/Google Video metrics — view rate measures creative appeal, quartile retention shows where viewers drop off." contribution="Video duration, motion intensity, and early product visibility support delivery by determining whether viewers stay long enough to qualify." />
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid grid-cols-3 gap-3">
                     <KpiCard label="Video Views (Google)" value={(asset.videoPlays || 0).toLocaleString()} sub="30s+ or interaction" />
@@ -813,7 +795,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             {/* ═══════ META FLOW ═══════ */}
 
             {/* ═══ A. DELIVERY ═══ */}
-            <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
+            <SectionHeader sectionId="section-delivery" title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." contribution="Motion intensity, product in first 3s, and color contrast contribute to delivery by increasing visibility, hold, and scalable reach." />
             <div className="grid grid-cols-5 gap-3">
               <div className="col-span-2 grid grid-cols-2 gap-3">
                 <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
@@ -837,7 +819,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
 
             {/* ═══ B. ENGAGEMENT ═══ */}
-            <SectionHeader title="Engagement" description="On-platform signals showing how users respond to the creative before clicking through." />
+            <SectionHeader sectionId="section-engagement" title="Engagement" description="On-platform signals showing how users respond to the creative before clicking through." contribution="Brand prominence and format contribute most to engagement because they influence recognizability, interaction depth, and save/share behavior." />
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-lg border border-border/60 bg-card p-4">
                 <div className="flex items-center gap-5">
@@ -892,7 +874,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
 
             {/* ═══ C. TRAFFIC ═══ */}
-            <SectionHeader title="Traffic" description="Users clicking through to your site. CTR trends reveal creative effectiveness over time." />
+            <SectionHeader sectionId="section-traffic" title="Traffic" description="Users clicking through to your site. CTR trends reveal creative effectiveness over time." contribution="CTA and aspect ratio contribute most to traffic because they drive the click decision and improve feed-native layout performance." />
             <div className="grid grid-cols-3 gap-3 mb-3">
               <KpiCard label="CPC (Link)" value={`$${asset.cpc.toFixed(2)}`} sub="Cost per link click" />
               <KpiCard label="CPC (All)" value={`$${asset.cpcAll.toFixed(2)}`} sub="All click types" />
@@ -911,7 +893,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </ChartCard>
 
             {/* ═══ D. CONVERSIONS & REVENUE ═══ */}
-            <SectionHeader title="Conversions & Revenue" description="The bottom line — from landing page through purchase, and your return on ad spend." />
+            <SectionHeader sectionId="section-revenue" title="Conversions & Revenue" description="The bottom line — from landing page through purchase, and your return on ad spend." contribution="Funnel stage and brand consistency contribute most to revenue by improving conversion fit, trust, and purchase completion." />
             <div className="grid grid-cols-3 gap-3 mb-3">
               <KpiCard label="Revenue" value={`$${rangeSummary.revenue.toLocaleString()}`} sub="Selected period" />
               <KpiCard label="ROAS" value={`${rangeSummary.roas}x`} health={roasHealth} sub="Revenue ÷ Spend" />
