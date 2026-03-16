@@ -625,9 +625,8 @@ const Insights = () => {
           r={active ? 7 : 6}
           fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"}
           stroke="hsl(var(--primary))"
-          strokeWidth={2.5}
+          strokeWidth={2}
         />
-        {active && <circle cx={cx} cy={cy} r={11} fill="none" stroke="hsl(var(--primary) / 0.18)" strokeWidth={1.5} />}
       </g>
     );
   };
