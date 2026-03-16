@@ -7,6 +7,7 @@ import type { CreativeAsset, Channel } from "@/data/mockData";
 import { channelConfig } from "@/components/ChannelIcon";
 import { useMemo, useRef, useCallback, useState } from "react";
 import { ChartContainer } from "@/components/ui/chart";
+import { axisStoryDimensionMap, buildCreativeStorySummary } from "@/lib/creative-story";
 
 /* ─── Helpers ─── */
 
@@ -540,64 +541,73 @@ const Insights = () => {
   const selectedPerformanceScore = rankedWithOverall.find(({ asset }) => asset.id === selectedAsset?.id)?.performanceScore ?? 0;
   const selectedProfileAxis = profileAxes.find((axis) => axis.key === selectedProfileKey) ?? profileAxes[0];
 
+  const selectedStorySummary = useMemo(() => {
+    if (!selectedAsset) return [];
+    return buildCreativeStorySummary(selectedAsset, assets, { selectedRoas: selectedAsset.roas });
+  }, [selectedAsset, assets]);
+
+  const storyScoreByDimension = useMemo(() => {
+    const scores = new Map<string, number>();
+    selectedStorySummary.forEach((row) => scores.set(row.key, row.score));
+    return scores;
+  }, [selectedStorySummary]);
+
   const radarData = useMemo(() => {
     if (!selectedAsset) return [];
-    return profileAxes.map((axis) => ({
-      key: axis.key,
-      label: axis.shortLabel,
-      fullLabel: axis.label,
-      value: axis.score(selectedAsset),
-      detail: axis.getValue(selectedAsset),
-    }));
-  }, [selectedAsset]);
+    return profileAxes.map((axis) => {
+      const mappedDimension = axisStoryDimensionMap[axis.key];
+      const derivedScore = mappedDimension ? storyScoreByDimension.get(mappedDimension) : undefined;
+      return {
+        key: axis.key,
+        label: axis.shortLabel,
+        fullLabel: axis.label,
+        value: derivedScore ?? axis.score(selectedAsset),
+        detail: axis.getValue(selectedAsset),
+      };
+    });
+  }, [selectedAsset, storyScoreByDimension]);
+
+  const selectedProfileDerivedScore = useMemo(() => {
+    if (!selectedAsset || !selectedProfileAxis) return 0;
+    const mappedDimension = axisStoryDimensionMap[selectedProfileAxis.key];
+    if (!mappedDimension) return selectedProfileAxis.score(selectedAsset);
+    return storyScoreByDimension.get(mappedDimension) ?? selectedProfileAxis.score(selectedAsset);
+  }, [selectedAsset, selectedProfileAxis, storyScoreByDimension]);
 
   const selectedProfileAnalysis = useMemo(() => {
     if (!selectedAsset || !selectedProfileAxis) return null;
     return getProfileAnalysis(selectedProfileAxis, selectedAsset);
   }, [selectedAsset, selectedProfileAxis]);
 
-  const profileMetricMap: Record<string, string[]> = {
-    format: ["roas", "ctr", "conv", "revenue"],
-    duration: ["avgWatch", "thruRate", "ctr", "conv"],
-    aspect: ["impressions", "ctr", "engRate", "conv"],
-    motion: ["engRate", "ctr", "avgWatch", "thruRate"],
-    contrast: ["ctr", "engRate", "convRate", "revenue"],
-    brandProminence: ["qualRank", "engRank", "ctr", "convRate"],
-    brandConsistency: ["qualRank", "engRank", "convRank", "roas"],
-    funnelStage: ["ctr", "lpv", "convRate", "roas"],
-    cta: ["ctr", "linkClicks", "convRate", "roas"],
-    productInFirst3s: ["avgWatch", "thruRate", "ctr", "convRate"],
-  };
-
   const profileMetricRows = useMemo(() => {
     if (!selectedAsset || !selectedProfileAxis) return [];
-    const keys = profileMetricMap[selectedProfileAxis.key] || ["roas", "ctr", "convRate", "revenue"];
-    return keys
-      .map((key) => metrics.find((metric) => metric.key === key))
-      .filter((metric): metric is MetricDef => Boolean(metric))
-      .map((metric) => {
-        const value = metric.get(selectedAsset);
-        const average = assets.reduce((sum, asset) => sum + metric.get(asset), 0) / assets.length;
-        const pctDiff = average > 0 ? ((value - average) / average) * 100 : 0;
-        const positive = metric.higherIsBetter ? pctDiff >= 0 : pctDiff <= 0;
-        const note = Math.abs(pctDiff) < 5
-          ? "In line with the comparison average"
-          : positive
-            ? `Supports this category with ${Math.round(Math.abs(pctDiff))}% better-than-average performance`
-            : `Weakens this category with ${Math.round(Math.abs(pctDiff))}% worse-than-average performance`;
+    const mappedDimension = axisStoryDimensionMap[selectedProfileAxis.key];
+    const summary = mappedDimension ? selectedStorySummary.find((row) => row.key === mappedDimension) : null;
+    if (!summary) return [];
 
-        return {
-          key: metric.key,
-          label: metric.label,
-          format: metric.format,
-          value,
-          average,
-          pctDiff,
-          positive,
-          note,
-        };
-      });
-  }, [selectedAsset, selectedProfileAxis, metrics, assets]);
+    return summary.drivers.map((driver) => {
+      const pctDiff = driver.average > 0 ? ((driver.value - driver.average) / driver.average) * 100 : 0;
+      const inverseMetric = driver.metricKey.includes("cpm") || driver.metricKey.includes("cpc") || driver.metricKey.includes("cpa");
+      const positive = inverseMetric ? pctDiff <= 0 : pctDiff >= 0;
+      const rounded = Math.round(Math.abs(pctDiff));
+      const note = rounded < 5
+        ? `In line with campaign average (${driver.section})`
+        : positive
+          ? `${rounded}% favorable vs campaign average (${driver.section})`
+          : `${rounded}% unfavorable vs campaign average (${driver.section})`;
+
+      return {
+        key: driver.metricKey,
+        label: driver.label,
+        format: driver.format,
+        value: driver.value,
+        average: driver.average,
+        pctDiff,
+        positive,
+        note,
+      };
+    });
+  }, [selectedAsset, selectedProfileAxis, selectedStorySummary]);
 
   const handleProfileModalOpen = useCallback((profileKey: string) => {
     setSelectedProfileKey(profileKey);

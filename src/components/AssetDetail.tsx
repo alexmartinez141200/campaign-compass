@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ArrowUpRight, ArrowDownRight, Minus, TrendingUp, TrendingDown, AlertTriangle, Info, CalendarDays } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import type { CreativeAsset, DailyMetric } from "@/data/mockData";
+import { buildCreativeStorySummary, formatStoryMetricValue } from "@/lib/creative-story";
 import ChannelIcon from "./ChannelIcon";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -259,88 +260,10 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     };
   }, [campaignAssets, isGoogle]);
 
-  const formatDelta = (value: number, baseline: number) => {
-    if (!baseline) return "0% vs campaign avg";
-    const delta = ((value - baseline) / baseline) * 100;
-    const rounded = Math.round(Math.abs(delta));
-    if (rounded < 1) return "0% vs campaign avg";
-    return `${delta >= 0 ? "+" : "-"}${rounded}% vs campaign avg`;
-  };
-
-  const normalizeScore = (deltaA: number, deltaB: number) => {
-    const avgDelta = (deltaA + deltaB) / 2;
-    return Math.max(0, Math.min(100, Math.round(50 + avgDelta * 2)));
-  };
-
-  const primaryTrafficMetricLabel = isGoogle ? "Clicks" : "Link Clicks";
-  const primaryTrafficMetricValue = isGoogle ? asset.clicks : asset.linkClicks;
-  const hookMetricLabel = isTikTok ? "6s View Rate" : isVideo ? "Avg Watch" : "CTR";
-  const hookMetricValue = isTikTok
-    ? asset.videoPlays ? ((asset.videoViews6s || 0) / asset.videoPlays) * 100 : 0
-    : isVideo
-      ? asset.avgWatchTime || 0
-      : asset.ctr;
-  const hookMetricDisplay = isTikTok
-    ? `${hookMetricValue.toFixed(1)}%`
-    : isVideo
-      ? `${hookMetricValue.toFixed(1)}s`
-      : `${hookMetricValue.toFixed(1)}%`;
-  const hookMetricAverage = isTikTok ? campaignAverages.hookRate : isVideo ? campaignAverages.avgWatch : campaignAverages.ctr;
-
-  const clickToLpv = asset.linkClicks > 0 ? (asset.landingPageViews / asset.linkClicks) * 100 : 0;
-  const avgClickToLpv = campaignAverages.linkClicks > 0 ? (campaignAverages.landingPageViews / campaignAverages.linkClicks) * 100 : 0;
-  const lpvToAtc = asset.landingPageViews > 0 ? (asset.addToCart / asset.landingPageViews) * 100 : 0;
-  const avgLpvToAtc = campaignAverages.landingPageViews > 0 ? (campaignAverages.addToCart / campaignAverages.landingPageViews) * 100 : 0;
-  const purchaseRate = asset.initiateCheckout > 0 ? (asset.conversions / asset.initiateCheckout) * 100 : asset.conversionRate;
-  const avgPurchaseRate = campaignAverages.checkout > 0 ? (campaignAverages.conversions / campaignAverages.checkout) * 100 : 0;
-
-  const hookDelta = hookMetricAverage > 0 ? ((hookMetricValue - hookMetricAverage) / hookMetricAverage) * 100 : 0;
-  const ctrDelta = campaignAverages.ctr > 0 ? ((asset.ctr - campaignAverages.ctr) / campaignAverages.ctr) * 100 : 0;
-  const trafficDelta = campaignAverages.linkClicks > 0 ? ((primaryTrafficMetricValue - campaignAverages.linkClicks) / campaignAverages.linkClicks) * 100 : 0;
-  const lpvQualityDelta = avgClickToLpv > 0 ? ((clickToLpv - avgClickToLpv) / avgClickToLpv) * 100 : 0;
-  const conversionDelta = campaignAverages.conversions > 0 ? ((asset.conversions - campaignAverages.conversions) / campaignAverages.conversions) * 100 : 0;
-  const purchaseRateDelta = avgPurchaseRate > 0 ? ((purchaseRate - avgPurchaseRate) / avgPurchaseRate) * 100 : 0;
-  const roasDelta = campaignAverages.roas > 0 ? ((rangeSummary.roas - campaignAverages.roas) / campaignAverages.roas) * 100 : 0;
-  const cpmDelta = campaignAverages.cpm > 0 ? ((campaignAverages.cpm - asset.cpm) / campaignAverages.cpm) * 100 : 0;
-
-  const profileMetricSummary = [
-    {
-      output: "Hook",
-      profile: `${asset.creativeProfile.motionIntensity} motion · ${asset.creativeProfile.productInFirst3s ? "Product in first 3s" : "Product after 3s"}`,
-      score: normalizeScore(hookDelta, ctrDelta),
-      source: isTikTok || isVideo ? "Video Performance + Top-line KPIs" : "Top-line KPIs",
-      metricA: { label: hookMetricLabel, value: hookMetricDisplay, benchmark: formatDelta(hookMetricValue, hookMetricAverage) },
-      metricB: { label: "CTR", value: `${asset.ctr.toFixed(1)}%`, benchmark: formatDelta(asset.ctr, campaignAverages.ctr) },
-      story: `Driven by ${hookMetricLabel} and CTR from the sections below.`,
-    },
-    {
-      output: "Traffic",
-      profile: `${asset.creativeProfile.callToAction} CTA · ${asset.creativeProfile.aspectRatio}`,
-      score: normalizeScore(trafficDelta, lpvQualityDelta),
-      source: "Top-line KPIs + Conversion",
-      metricA: { label: primaryTrafficMetricLabel, value: primaryTrafficMetricValue.toLocaleString(), benchmark: formatDelta(primaryTrafficMetricValue, campaignAverages.linkClicks) },
-      metricB: { label: "Click→LPV", value: `${clickToLpv.toFixed(0)}%`, benchmark: formatDelta(clickToLpv, avgClickToLpv) },
-      story: "Shows whether the profile turns attention into qualified visits.",
-    },
-    {
-      output: "Conversion",
-      profile: `${asset.creativeProfile.funnelStage} funnel · ${asset.creativeProfile.brandProminence} brand`,
-      score: normalizeScore(conversionDelta, purchaseRateDelta),
-      source: "Conversion",
-      metricA: { label: "Purchases", value: asset.conversions.toLocaleString(), benchmark: formatDelta(asset.conversions, campaignAverages.conversions) },
-      metricB: { label: "Checkout→Purchase", value: `${purchaseRate.toFixed(0)}%`, benchmark: formatDelta(purchaseRate, avgPurchaseRate) },
-      story: "Shows whether the profile sustains intent through the lower funnel.",
-    },
-    {
-      output: "Efficiency",
-      profile: `${asset.creativeProfile.colorContrast} contrast · ${asset.creativeProfile.brandConsistency} consistency`,
-      score: normalizeScore(roasDelta, cpmDelta),
-      source: "Top-line KPIs + Delivery",
-      metricA: { label: "ROAS", value: `${rangeSummary.roas.toFixed(1)}x`, benchmark: formatDelta(rangeSummary.roas, campaignAverages.roas) },
-      metricB: { label: "CPM", value: `$${asset.cpm.toFixed(2)}`, benchmark: formatDelta(campaignAverages.cpm - asset.cpm, campaignAverages.cpm) },
-      story: "Shows whether the profile converts efficiently relative to delivery cost.",
-    },
-  ];
+  const storySummaryRows = useMemo(
+    () => buildCreativeStorySummary(asset, campaignAssets, { selectedRoas: rangeSummary.roas }),
+    [asset, campaignAssets, rangeSummary.roas],
+  );
 
   // Health indicators
   const cpmAvg = campaignAverages.cpm;
@@ -455,30 +378,30 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               <span>Driver 2</span>
               <span>Story link</span>
             </div>
-            {profileMetricSummary.map((row) => (
-              <div key={row.output} className="grid grid-cols-[0.8fr,1.35fr,0.6fr,1fr,1fr,1.15fr] items-start gap-3 border-b border-border/50 px-4 py-3 last:border-b-0">
+            {storySummaryRows.map((row) => (
+              <div key={row.key} className="grid grid-cols-[0.8fr,1.35fr,0.6fr,1fr,1fr,1.15fr] items-start gap-3 border-b border-border/50 px-4 py-3 last:border-b-0">
                 <div>
-                  <p className="text-[11px] font-semibold text-foreground">{row.output}</p>
+                  <p className="text-[11px] font-semibold text-foreground">{row.title}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-foreground">{row.profile}</p>
+                  <p className="text-[11px] text-foreground">{row.profileSignal}</p>
                 </div>
                 <div>
                   <p className="text-[14px] font-mono font-bold text-foreground">{row.score}</p>
                   <p className="text-[8px] uppercase tracking-wider text-muted-foreground mt-1">Derived</p>
                 </div>
                 <div>
-                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.metricA.label}</p>
-                  <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{row.metricA.value}</p>
-                  <p className="text-[9px] text-muted-foreground mt-1">{row.metricA.benchmark}</p>
+                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.drivers[0].label}</p>
+                  <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{formatStoryMetricValue(row.drivers[0].value, row.drivers[0].format)}</p>
+                  <p className="text-[9px] text-muted-foreground mt-1">{row.drivers[0].benchmark}</p>
                 </div>
                 <div>
-                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.metricB.label}</p>
-                  <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{row.metricB.value}</p>
-                  <p className="text-[9px] text-muted-foreground mt-1">{row.metricB.benchmark}</p>
+                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.drivers[1].label}</p>
+                  <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{formatStoryMetricValue(row.drivers[1].value, row.drivers[1].format)}</p>
+                  <p className="text-[9px] text-muted-foreground mt-1">{row.drivers[1].benchmark}</p>
                 </div>
                 <div>
-                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.source}</p>
+                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.drivers[0].section} + {row.drivers[1].section}</p>
                   <p className="text-[11px] text-foreground mt-1">{row.story}</p>
                 </div>
               </div>
