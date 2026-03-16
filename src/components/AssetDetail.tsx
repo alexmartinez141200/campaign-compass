@@ -512,36 +512,37 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <SectionHeader title="Creative diagnostics" description="Each creative attribute is scored against assets with the same attribute value. Deltas are averaged from pillar volume and efficiency metrics, so weak spots are numerical under-indexes, not theory." />
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <div className="rounded-lg border border-border/60 bg-card p-4">
-            <div className="grid grid-cols-[minmax(0,1.4fr)_repeat(5,minmax(0,0.72fr))] gap-x-3 gap-y-2 text-[10px]">
-              <div className="text-muted-foreground uppercase tracking-[0.18em] font-semibold">Attribute</div>
-              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Del</div>
-              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Eng</div>
-              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Tra</div>
-              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Rev</div>
-              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Net</div>
-              {creativeDiagnostics.map((item) => (
-                <>
-                  <div key={`${item.label}-label`} className="border-t border-border/50 pt-2 min-w-0">
-                    <p className="truncate text-[11px] font-semibold text-foreground">{item.label}</p>
-                    <p className="truncate text-[10px] text-muted-foreground">{item.value} · n={item.sampleSize}</p>
+        <SectionHeader title="Creative diagnostics" description="Each creative category is judged only by the metrics it should directly influence, so you can see whether it is strong, mixed, or needs improvement." />
+        <div className="grid grid-cols-1 gap-3">
+          {creativeDiagnostics.map((item) => (
+            <div key={item.label} className="rounded-lg border border-border/60 bg-card p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{item.label}</p>
+                    <span className="text-[10px] font-mono text-muted-foreground">{item.value} · n={item.sampleSize}</span>
                   </div>
-                  <div key={`${item.label}-delivery`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-semibold text-foreground">{item.deliveryDelta > 0 ? "+" : ""}{item.deliveryDelta}%</div>
-                  <div key={`${item.label}-engagement`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-semibold text-foreground">{item.engagementDelta > 0 ? "+" : ""}{item.engagementDelta}%</div>
-                  <div key={`${item.label}-traffic`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-semibold text-foreground">{item.trafficDelta > 0 ? "+" : ""}{item.trafficDelta}%</div>
-                  <div key={`${item.label}-revenue`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-semibold text-foreground">{item.revenueDelta > 0 ? "+" : ""}{item.revenueDelta}%</div>
-                  <div key={`${item.label}-net`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-bold text-foreground">{item.net > 0 ? "+" : ""}{item.net}%</div>
-                </>
-              ))}
+                  <p className="mt-1 text-sm font-semibold text-foreground">{item.status === "good" ? "This category is helping performance" : item.status === "mixed" ? "This category is not a clear problem" : "This category is limiting performance"}</p>
+                  <p className="text-[11px] text-muted-foreground">{item.action} · weakest metric: {item.weakestMetric.label} ({item.weakestMetric.delta > 0 ? "+" : ""}{item.weakestMetric.delta}% vs matched avg)</p>
+                </div>
+                <div className="text-left lg:text-right">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Recommendation</p>
+                  <p className="text-sm font-semibold text-foreground">{item.action}</p>
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-1 gap-2.5 md:grid-cols-3">
+                {item.metrics.map((metric) => (
+                  <KpiCard
+                    key={`${item.label}-${metric.label}`}
+                    label={metric.label}
+                    value={typeof metric.value === "number" && metric.label !== "Revenue" && metric.label !== "Impressions" && metric.label !== "Conversions" && metric.label !== "Landing Page Views" && metric.label !== "Shares" && metric.label !== "Clicks" && metric.label !== "Link Clicks" && metric.label !== "Website Visits" ? `${metric.value.toFixed(1)}${metric.label.includes("CTR") || metric.label.includes("Rate") || metric.label.includes("LPV") ? "%" : metric.label === "ROAS" ? "x" : metric.label === "CPA" ? "" : ""}` : metric.label === "Revenue" || metric.label === "CPA" ? `$${metric.value.toFixed(metric.label === "CPA" ? 2 : 0)}` : Math.round(metric.value).toLocaleString()}
+                    sub={`Avg ${metric.label === "Revenue" || metric.label === "CPA" ? `$${metric.average.toFixed(metric.label === "CPA" ? 2 : 0)}` : metric.label === "ROAS" ? `${metric.average.toFixed(1)}x` : metric.label.includes("CTR") || metric.label.includes("Rate") || metric.label.includes("LPV") ? `${metric.average.toFixed(1)}%` : Math.round(metric.average).toLocaleString()}`}
+                    trend={metric.delta}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <KpiCard label="Best creative aspect" value={strongestCreativeAspect ? strongestCreativeAspect.label : "—"} sub={strongestCreativeAspect ? `${strongestCreativeAspect.value} · ${strongestCreativeAspect.net > 0 ? "+" : ""}${strongestCreativeAspect.net}% net` : undefined} />
-            <KpiCard label="Priority to improve" value={weakestCreativeAspect ? weakestCreativeAspect.label : "—"} sub={weakestCreativeAspect ? `${weakestCreativeAspect.value} · weakest in ${weakestCreativeAspect.weakestPillar}` : undefined} />
-          </div>
+          ))}
         </div>
 
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
