@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowDownRight, ArrowUpRight, AlertTriangle, Info, Minus, TrendingDown, TrendingUp } from "lucide-react";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import type { CreativeAsset } from "@/data/mockData";
 import { buildCreativeStorySummary, formatStoryMetricValue } from "@/lib/creative-story";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 interface AssetDetailProps {
@@ -26,6 +28,8 @@ const kpiInfo: Record<string, string> = {
   CPA: "Cost per conversion.",
   Engagement: "Total reactions, comments, shares, and saves.",
   Shares: "Total shares from the asset.",
+  Saves: "How many users saved the creative for later.",
+  Clicks: "Total ad clicks recorded for this asset.",
   "Website Clicks": "Clicks that send users to the site.",
   "Landing Page Views": "Visits that successfully landed on the page.",
 };
@@ -130,6 +134,32 @@ const SectionHeader = ({ title, description }: { title: string; description: str
   </div>
 );
 
+const InsightList = ({ insights }: { insights: { type: "positive" | "warning" | "negative"; text: string }[] }) => (
+  <div className="space-y-1.5">
+    {insights.map((insight, i) => (
+      <div
+        key={i}
+        className={`flex items-start gap-2.5 px-3.5 py-2.5 rounded-md border ${
+          insight.type === "positive"
+            ? "bg-accent/10 border-accent/20"
+            : insight.type === "warning"
+              ? "bg-primary/10 border-primary/20"
+              : "bg-destructive/10 border-destructive/20"
+        }`}
+      >
+        {insight.type === "positive" ? (
+          <TrendingUp className="w-3.5 h-3.5 text-accent mt-0.5 flex-shrink-0" />
+        ) : insight.type === "warning" ? (
+          <AlertTriangle className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
+        ) : (
+          <TrendingDown className="w-3.5 h-3.5 text-destructive mt-0.5 flex-shrink-0" />
+        )}
+        <p className="text-[12px] text-foreground/80 leading-relaxed">{insight.text}</p>
+      </div>
+    ))}
+  </div>
+);
+
 const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const [activePillar, setActivePillar] = useState<PillarKey>("delivery");
 
@@ -159,6 +189,21 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     };
   }, [asset.dailyMetrics]);
 
+  const chartData = useMemo(
+    () =>
+      asset.dailyMetrics.map((day) => ({
+        date: day.date,
+        cpm: day.cpm,
+        ctr: day.ctr,
+        clicks: day.clicks,
+        lpv: day.landingPageViews,
+        roas: day.roas,
+        conversions: day.conversions,
+        spend: day.spend,
+      })),
+    [asset.dailyMetrics],
+  );
+
   const cpmAvg = campaignAssets.reduce((sum, item) => sum + item.cpm, 0) / campaignAssets.length;
   const ctrAvg = campaignAssets.reduce((sum, item) => sum + item.ctr, 0) / campaignAssets.length;
   const freqHealth: "good" | "warning" | "critical" = asset.frequency > 4 ? "critical" : asset.frequency > 2.5 ? "warning" : "good";
@@ -166,48 +211,118 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const ctrHealth: "good" | "warning" | "critical" = asset.ctr > ctrAvg * 1.1 ? "good" : asset.ctr < ctrAvg * 0.8 ? "critical" : "warning";
   const roasHealth: "good" | "warning" | "critical" = asset.roas > 2 ? "good" : asset.roas > 1 ? "warning" : "critical";
 
+  const chartConfig = {
+    cpm: { label: "CPM", color: "hsl(var(--destructive))" },
+    ctr: { label: "CTR", color: "hsl(var(--accent))" },
+    clicks: { label: "Clicks", color: "hsl(var(--primary))" },
+    lpv: { label: "LPV", color: "hsl(var(--accent))" },
+    roas: { label: "ROAS", color: "hsl(var(--primary))" },
+    conversions: { label: "Conversions", color: "hsl(var(--destructive))" },
+  };
+
   const pillarContent = {
     delivery: (
       <>
-        <SectionHeader title="Delivery" description="This tab isolates delivery-only metrics." />
-        <div className="grid grid-cols-4 gap-3">
-          <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
-          <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
-          <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub="Audience repetition" />
-          <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
+        <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
+            <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub="Healthy range" />
+            <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
+            <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total budget used" />
+          </div>
+          <div className="rounded-lg border border-border/60 bg-card p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">CPM over time</p>
+            <ChartContainer config={chartConfig} className="h-[260px] w-full">
+              <LineChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
+                <CartesianGrid vertical={true} strokeDasharray="4 4" />
+                <XAxis dataKey="date" tickLine={false} axisLine={false} />
+                <YAxis tickLine={false} axisLine={false} width={42} tickFormatter={(value) => `$${value}`} />
+                <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+                <Line type="monotone" dataKey="cpm" stroke="var(--color-cpm)" strokeWidth={3} dot={false} />
+              </LineChart>
+            </ChartContainer>
+          </div>
         </div>
+
+        <SectionHeader title="Insights" description="Summary takeaways for this asset versus the campaign average." />
+        <InsightList insights={insights.filter((item) => item.text.toLowerCase().includes("cpm") || item.text.toLowerCase().includes("frequency") || item.text.toLowerCase().includes("delivery"))} />
       </>
     ),
     engagement: (
       <>
-        <SectionHeader title="Engagement" description="This tab isolates engagement-only signals." />
-        <div className="grid grid-cols-4 gap-3">
-          <KpiCard label="Engagement" value={engagementTotal.toLocaleString()} sub="Total interactions" />
-          <KpiCard label="CTR" value={`${asset.ctr}%`} trend={trends.ctr} health={ctrHealth} />
-          <KpiCard label="Shares" value={asset.postShares.toLocaleString()} sub="Share depth" />
-          <KpiCard label="Saves" value={asset.postSaves.toLocaleString()} sub="Save intent" />
+        <SectionHeader title="Engagement" description="How strongly the creative earns attention and interaction from the audience." />
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <KpiCard label="Engagement" value={engagementTotal.toLocaleString()} sub="Total interactions" />
+            <KpiCard label="CTR" value={`${asset.ctr}%`} trend={trends.ctr} health={ctrHealth} />
+            <KpiCard label="Shares" value={asset.postShares.toLocaleString()} sub="Share depth" />
+            <KpiCard label="Saves" value={asset.postSaves.toLocaleString()} sub="Save intent" />
+          </div>
+          <div className="rounded-lg border border-border/60 bg-card p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">CTR over time</p>
+            <ChartContainer config={chartConfig} className="h-[260px] w-full">
+              <LineChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
+                <CartesianGrid vertical={true} strokeDasharray="4 4" />
+                <XAxis dataKey="date" tickLine={false} axisLine={false} />
+                <YAxis tickLine={false} axisLine={false} width={42} tickFormatter={(value) => `${value}%`} />
+                <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+                <Line type="monotone" dataKey="ctr" stroke="var(--color-ctr)" strokeWidth={3} dot={false} />
+              </LineChart>
+            </ChartContainer>
+          </div>
         </div>
       </>
     ),
     traffic: (
       <>
-        <SectionHeader title="Traffic" description="This tab isolates traffic-only metrics." />
-        <div className="grid grid-cols-4 gap-3">
-          <KpiCard label={asset.channel === "google" ? "Clicks" : "Link Clicks"} value={trafficClicks.toLocaleString()} sub="Qualified traffic" />
-          <KpiCard label="Website Clicks" value={asset.outboundClicks.toLocaleString()} sub="Outbound visits" />
-          <KpiCard label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} sub="Successful loads" />
-          <KpiCard label="CTR" value={`${trafficRate.toFixed(1)}%`} sub="Click → LPV" />
+        <SectionHeader title="Traffic" description="How effectively the creative turns attention into site visits and qualified landing sessions." />
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <KpiCard label={asset.channel === "google" ? "Clicks" : "Link Clicks"} value={trafficClicks.toLocaleString()} sub="Qualified traffic" />
+            <KpiCard label="Website Clicks" value={asset.outboundClicks.toLocaleString()} sub="Outbound visits" />
+            <KpiCard label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} sub="Successful loads" />
+            <KpiCard label="CTR" value={`${trafficRate.toFixed(1)}%`} sub="Click → LPV" />
+          </div>
+          <div className="rounded-lg border border-border/60 bg-card p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Traffic over time</p>
+            <ChartContainer config={chartConfig} className="h-[260px] w-full">
+              <LineChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
+                <CartesianGrid vertical={true} strokeDasharray="4 4" />
+                <XAxis dataKey="date" tickLine={false} axisLine={false} />
+                <YAxis tickLine={false} axisLine={false} width={42} />
+                <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+                <Line type="monotone" dataKey="clicks" stroke="var(--color-clicks)" strokeWidth={3} dot={false} />
+                <Line type="monotone" dataKey="lpv" stroke="var(--color-lpv)" strokeWidth={2.5} dot={false} />
+              </LineChart>
+            </ChartContainer>
+          </div>
         </div>
       </>
     ),
     revenue: (
       <>
         <SectionHeader title="Revenue" description="This tab isolates revenue and conversion metrics." />
-        <div className="grid grid-cols-4 gap-3">
-          <KpiCard label="Revenue" value={`$${asset.purchaseValue.toLocaleString()}`} sub="Attributed value" />
-          <KpiCard label="ROAS" value={`${asset.roas.toFixed(1)}x`} health={roasHealth} trend={trends.roas} />
-          <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
-          <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <KpiCard label="Revenue" value={`$${asset.purchaseValue.toLocaleString()}`} sub="Attributed value" />
+            <KpiCard label="ROAS" value={`${asset.roas.toFixed(1)}x`} health={roasHealth} trend={trends.roas} />
+            <KpiCard label="Conversions" value={asset.conversions.toLocaleString()} sub={`${asset.conversionRate}% rate`} />
+            <KpiCard label="CPA" value={`$${asset.costPerResult.toFixed(2)}`} sub="Cost per purchase" />
+          </div>
+          <div className="rounded-lg border border-border/60 bg-card p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">ROAS over time</p>
+            <ChartContainer config={chartConfig} className="h-[260px] w-full">
+              <LineChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
+                <CartesianGrid vertical={true} strokeDasharray="4 4" />
+                <XAxis dataKey="date" tickLine={false} axisLine={false} />
+                <YAxis tickLine={false} axisLine={false} width={42} />
+                <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+                <Line type="monotone" dataKey="roas" stroke="var(--color-roas)" strokeWidth={3} dot={false} />
+                <Line type="monotone" dataKey="conversions" stroke="var(--color-conversions)" strokeWidth={2.5} dot={false} />
+              </LineChart>
+            </ChartContainer>
+          </div>
         </div>
       </>
     ),
@@ -246,7 +361,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
           {storySummaryRows.map((row) => (
             <KpiCard
               key={row.key}
@@ -260,31 +375,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
 
         {pillarContent[activePillar]}
-
-        <SectionHeader title="Insights" description="Summary takeaways for this asset versus the campaign average." />
-        <div className="space-y-1.5">
-          {insights.map((insight, i) => (
-            <div
-              key={i}
-              className={`flex items-start gap-2.5 px-3.5 py-2.5 rounded-md border ${
-                insight.type === "positive"
-                  ? "bg-accent/10 border-accent/20"
-                  : insight.type === "warning"
-                    ? "bg-primary/10 border-primary/20"
-                    : "bg-destructive/10 border-destructive/20"
-              }`}
-            >
-              {insight.type === "positive" ? (
-                <TrendingUp className="w-3.5 h-3.5 text-accent mt-0.5 flex-shrink-0" />
-              ) : insight.type === "warning" ? (
-                <AlertTriangle className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
-              ) : (
-                <TrendingDown className="w-3.5 h-3.5 text-destructive mt-0.5 flex-shrink-0" />
-              )}
-              <p className="text-[12px] text-foreground/80 leading-relaxed">{insight.text}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </TooltipProvider>
   );
