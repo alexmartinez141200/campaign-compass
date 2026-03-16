@@ -512,25 +512,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <SectionHeader title="Asset performance" description="A simple read on whether this asset is performing across the core pillars, based only on observed metrics versus campaign averages." />
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
-          {storySummaryRows.map((row) => {
-            const benchmarkText = row.drivers[0].benchmark;
-            const benchmarkValue = Number.parseInt(benchmarkText.replace(/[^-\d]/g, ""), 10) || 0;
-            const status = benchmarkValue >= 10 ? "Performing" : benchmarkValue <= -10 ? "Underperforming" : "Mixed";
-
-            return (
-              <KpiCard
-                key={row.key}
-                label={row.title}
-                value={status}
-                sub={`${row.drivers[0].label} · ${benchmarkText}`}
-                active={activePillar === row.key}
-                onClick={() => setActivePillar(row.key)}
-              />
-            );
-          })}
-        </div>
 
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
           {storySummaryRows.map((row) => (
