@@ -792,6 +792,7 @@ const Insights = () => {
                         fill="var(--color-score)"
                         fillOpacity={0.14}
                         strokeWidth={2.5}
+                        dot={renderRadarDot}
                       />
                     </RadarChart>
                   </ChartContainer>
