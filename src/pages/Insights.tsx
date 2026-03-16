@@ -599,6 +599,11 @@ const Insights = () => {
       });
   }, [selectedAsset, selectedProfileAxis, metrics, assets]);
 
+  const handleProfileModalOpen = useCallback((profileKey: string) => {
+    setSelectedProfileKey(profileKey);
+    setOpenModal(`profile:${profileKey}`);
+  }, []);
+
   const renderRadarDot = (props: any) => {
     const { cx, cy, payload } = props;
     if (typeof cx !== "number" || typeof cy !== "number" || !payload?.key) return null;
@@ -606,20 +611,23 @@ const Insights = () => {
     const active = payload.key === selectedProfileKey;
 
     return (
-      <circle
-        cx={cx}
-        cy={cy}
-        r={active ? 6.5 : 5.5}
-        fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"}
-        stroke="hsl(var(--primary))"
-        strokeWidth={2}
-        className="cursor-pointer"
+      <g
+        style={{ cursor: "pointer" }}
         onClick={(event) => {
           event.stopPropagation();
-          setSelectedProfileKey(payload.key);
-          setOpenModal(`profile:${payload.key}`);
+          handleProfileModalOpen(payload.key);
         }}
-      />
+      >
+        <circle cx={cx} cy={cy} r={11} fill="transparent" />
+        <circle
+          cx={cx}
+          cy={cy}
+          r={active ? 7 : 6}
+          fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"}
+          stroke="hsl(var(--primary))"
+          strokeWidth={2}
+        />
+      </g>
     );
   };
 
