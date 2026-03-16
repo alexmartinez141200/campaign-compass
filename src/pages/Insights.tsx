@@ -599,6 +599,11 @@ const Insights = () => {
       });
   }, [selectedAsset, selectedProfileAxis, metrics, assets]);
 
+  const handleProfileModalOpen = useCallback((profileKey: string) => {
+    setSelectedProfileKey(profileKey);
+    setOpenModal(`profile:${profileKey}`);
+  }, []);
+
   const renderRadarDot = (props: any) => {
     const { cx, cy, payload } = props;
     if (typeof cx !== "number" || typeof cy !== "number" || !payload?.key) return null;
@@ -606,20 +611,23 @@ const Insights = () => {
     const active = payload.key === selectedProfileKey;
 
     return (
-      <circle
-        cx={cx}
-        cy={cy}
-        r={active ? 6.5 : 5.5}
-        fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"}
-        stroke="hsl(var(--primary))"
-        strokeWidth={2}
-        className="cursor-pointer"
+      <g
+        style={{ cursor: "pointer" }}
         onClick={(event) => {
           event.stopPropagation();
-          setSelectedProfileKey(payload.key);
-          setOpenModal(`profile:${payload.key}`);
+          handleProfileModalOpen(payload.key);
         }}
-      />
+      >
+        <circle cx={cx} cy={cy} r={11} fill="hsl(var(--background))" fillOpacity={0.01} />
+        <circle
+          cx={cx}
+          cy={cy}
+          r={active ? 7 : 6}
+          fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"}
+          stroke="hsl(var(--primary))"
+          strokeWidth={2}
+        />
+      </g>
     );
   };
 
@@ -701,11 +709,18 @@ const Insights = () => {
   );
 
   const isCorrelationModal = openModal?.startsWith("correlation:");
+  const isProfileModal = openModal?.startsWith("profile:");
   const correlationAttrKey = isCorrelationModal ? openModal!.split(":")[1] : null;
   const correlationCard = correlationAttrKey ? correlationCards.find(c => c.attr.key === correlationAttrKey) : null;
-  const modalGroup = openModal && !isCorrelationModal ? metricGroups.find(g => g.name === openModal) : null;
-  const modalTitle = isCorrelationModal && correlationCard ? correlationCard.attr.label : openModal || "";
-  const ModalIcon = isCorrelationModal ? Layers : openModal ? (groupIcons[openModal] || BarChart3) : BarChart3;
+  const profileModalKey = isProfileModal ? openModal!.split(":")[1] : null;
+  const profileModalAxis = profileModalKey ? profileAxes.find((axis) => axis.key === profileModalKey) : null;
+  const modalGroup = openModal && !isCorrelationModal && !isProfileModal ? metricGroups.find(g => g.name === openModal) : null;
+  const modalTitle = isCorrelationModal && correlationCard
+    ? correlationCard.attr.label
+    : isProfileModal && profileModalAxis
+      ? profileModalAxis.label
+      : openModal || "";
+  const ModalIcon = isCorrelationModal ? Layers : isProfileModal ? Target : openModal ? (groupIcons[openModal] || BarChart3) : BarChart3;
 
   return (
     <div className="min-h-screen bg-background">
@@ -779,7 +794,7 @@ const Insights = () => {
                               fontSize={10}
                               fontWeight={active ? 700 : 600}
                               style={{ cursor: axis ? "pointer" : "default" }}
-                              onClick={() => axis && setOpenModal(`profile:${axis.key}`)}
+                              onClick={() => axis && handleProfileModalOpen(axis.key)}
                             >
                               {payload.value}
                             </text>
@@ -804,36 +819,6 @@ const Insights = () => {
                   </div>
                 </div>
 
-                {selectedProfileAxis && selectedProfileAnalysis && selectedAsset && (
-                  <div className="mt-4 rounded-xl border border-border bg-background p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Category Analysis</p>
-                        <h3 className="text-[14px] font-semibold text-foreground mt-1">{selectedProfileAxis.label}</h3>
-                        <p className="text-[10px] text-muted-foreground mt-1">Click any label directly on the radar chart to open the full metric popup.</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Current Value</p>
-                        <p className="text-[11px] font-medium text-foreground mt-1">{selectedProfileAxis.getValue(selectedAsset)}</p>
-                      </div>
-                    </div>
-                    <div className="mt-3 rounded-lg border border-border/70 bg-muted/20 p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-[12px] font-semibold text-foreground">{selectedProfileAnalysis.headline}</p>
-                        <span className={`text-[16px] font-mono font-bold ${scoreColor(selectedProfileAxis.score(selectedAsset))}`}>{selectedProfileAxis.score(selectedAsset)}</span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground mt-2">{selectedProfileAnalysis.summary}</p>
-                      <ul className="mt-3 space-y-1.5">
-                        {selectedProfileAnalysis.why.map((reason) => (
-                          <li key={reason} className="flex gap-2 text-[11px] text-foreground">
-                            <span className="text-primary">•</span>
-                            <span>{reason}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="space-y-2">
