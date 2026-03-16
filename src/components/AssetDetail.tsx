@@ -420,30 +420,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           ))}
         </div>
 
-        <div className="rounded-lg border border-border/60 bg-card p-4">
-          <div className="grid grid-cols-2 gap-x-8 gap-y-1">
-            {[
-              ["Platform", asset.channel],
-              ["Format", asset.type],
-              ["Video Duration", asset.creativeProfile.videoDuration ? `${asset.creativeProfile.videoDuration}s` : null],
-              ["Aspect Ratio", asset.creativeProfile.aspectRatio],
-              ["Motion", asset.creativeProfile.motionIntensity],
-              ["Contrast", asset.creativeProfile.colorContrast],
-              ["Brand", asset.creativeProfile.brandProminence],
-              ["Consistency", asset.creativeProfile.brandConsistency],
-              ["Funnel", asset.creativeProfile.funnelStage],
-              ["CTA", asset.creativeProfile.callToAction],
-              ["Product in first 3s", asset.type === "video" ? (asset.creativeProfile.productInFirst3s ? "Yes" : "No") : null],
-            ]
-              .filter(([, value]) => value !== null)
-              .map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between py-0.5">
-                  <span className="text-[10px] text-muted-foreground">{label}</span>
-                  <span className="text-[11px] font-semibold text-foreground">{value}</span>
-                </div>
-              ))}
-          </div>
-        </div>
 
         <SectionHeader title="Campaign performance" description="" />
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
