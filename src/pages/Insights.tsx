@@ -767,8 +767,8 @@ const Insights = () => {
               <div className="rounded-xl border border-border bg-muted/10 p-4">
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
-                    <p className="text-[12px] font-semibold text-foreground">{selectedAsset?.name}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Interactive profile shape for the selected creative asset.</p>
+                    <p className="text-[12px] font-semibold text-foreground">Creative Attribute Analysis Chart</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Click any chart point or attribute label to open a detailed analytics breakdown for that creative attribute.</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Overall Score</p>
