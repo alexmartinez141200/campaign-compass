@@ -197,6 +197,9 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const isMeta = asset.channel === "meta";
   const isGoogle = asset.channel === "google";
   const daily = asset.dailyMetrics;
+  const scrollToSection = (sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   // Filter daily metrics
   const filteredDaily = useMemo(() => {
@@ -216,9 +219,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     return filtered.map(d => {
       cumSpend += d.spend;
       cumPV += d.purchaseValue;
-      // For TikTok, compute daily video view rate (simulated: base rate + noise from CTR variation)
       const baseVvr = asset.videoViewRate || 88;
-      const vvrNoise = (d.ctr - (asset.ctr || 3)) * 2; // correlate slightly with CTR variance
+      const vvrNoise = (d.ctr - (asset.ctr || 3)) * 2;
       const videoViewRate = Math.round((baseVvr + vvrNoise) * 10) / 10;
       return {
         ...d,
@@ -228,7 +230,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     });
   }, [daily, datePreset, customRange]);
 
-  // Trend calculations
   const trends = useMemo(() => {
     if (filteredDaily.length < 4) return { impressions: 0, cpm: 0, ctr: 0, roas: 0, clicks: 0 };
     const mid = Math.floor(filteredDaily.length / 2);
@@ -273,6 +274,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     () => buildCreativeStorySummary(asset, campaignAssets, { selectedRoas: rangeSummary.roas }),
     [asset, campaignAssets, rangeSummary.roas],
   );
+
+  const pillarSectionMap: Record<string, string> = {
+    delivery: "section-delivery",
+    engagement: isGoogle ? "section-click-performance" : "section-engagement",
+    traffic: "section-traffic",
+    revenue: "section-revenue",
+  };
 
   // Health indicators
   const cpmAvg = campaignAverages.cpm;
