@@ -291,14 +291,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           <KpiCard label="Click → LPV" value={`${trafficRate.toFixed(1)}%`} sub="Final landing efficiency" />
           <KpiCard label="CTR" value={`${asset.ctr.toFixed(1)}%`} sub="Impression to click rate" health={ctrHealth} trend={trends.ctr} />
         </div>
-
-        <SectionHeader title="Traffic benchmark" description="Current traffic metrics against the campaign baseline." />
-        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-          <KpiCard label="Clicks Δ" value={storySummaryRows.find((row) => row.key === "traffic")?.drivers[0].benchmark || "0% vs avg"} sub="Vs campaign average" />
-          <KpiCard label="Click → LPV Δ" value={storySummaryRows.find((row) => row.key === "traffic")?.drivers[1].benchmark || "0% vs avg"} sub="Vs campaign average" />
-          <KpiCard label="Website Clicks" value={asset.outboundClicks.toLocaleString()} sub="Outbound traffic volume" />
-          <KpiCard label="Landing Page Views" value={asset.landingPageViews.toLocaleString()} sub="Resolved sessions" />
-        </div>
       </>
     ),
     revenue: (
