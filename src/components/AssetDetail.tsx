@@ -795,7 +795,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             {/* ═══════ META FLOW ═══════ */}
 
             {/* ═══ A. DELIVERY ═══ */}
-            <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
+            <SectionHeader sectionId="section-delivery" title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." contribution="Motion intensity, product in first 3s, and color contrast contribute to delivery by increasing visibility, hold, and scalable reach." />
             <div className="grid grid-cols-5 gap-3">
               <div className="col-span-2 grid grid-cols-2 gap-3">
                 <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
