@@ -556,6 +556,49 @@ const Insights = () => {
     return getProfileAnalysis(selectedProfileAxis, selectedAsset);
   }, [selectedAsset, selectedProfileAxis]);
 
+  const profileMetricMap: Record<string, string[]> = {
+    format: ["roas", "ctr", "conv", "revenue"],
+    duration: ["avgWatch", "thruRate", "ctr", "conv"],
+    aspect: ["impressions", "ctr", "engRate", "conv"],
+    motion: ["engRate", "ctr", "avgWatch", "thruRate"],
+    contrast: ["ctr", "engRate", "convRate", "revenue"],
+    brandProminence: ["qualRank", "engRank", "ctr", "convRate"],
+    brandConsistency: ["qualRank", "engRank", "convRank", "roas"],
+    funnelStage: ["ctr", "lpv", "convRate", "roas"],
+    cta: ["ctr", "linkClicks", "convRate", "roas"],
+    productInFirst3s: ["avgWatch", "thruRate", "ctr", "convRate"],
+  };
+
+  const profileMetricRows = useMemo(() => {
+    if (!selectedAsset || !selectedProfileAxis) return [];
+    const keys = profileMetricMap[selectedProfileAxis.key] || ["roas", "ctr", "convRate", "revenue"];
+    return keys
+      .map((key) => metrics.find((metric) => metric.key === key))
+      .filter((metric): metric is MetricDef => Boolean(metric))
+      .map((metric) => {
+        const value = metric.get(selectedAsset);
+        const average = assets.reduce((sum, asset) => sum + metric.get(asset), 0) / assets.length;
+        const pctDiff = average > 0 ? ((value - average) / average) * 100 : 0;
+        const positive = metric.higherIsBetter ? pctDiff >= 0 : pctDiff <= 0;
+        const note = Math.abs(pctDiff) < 5
+          ? "In line with the comparison average"
+          : positive
+            ? `Supports this category with ${Math.round(Math.abs(pctDiff))}% better-than-average performance`
+            : `Weakens this category with ${Math.round(Math.abs(pctDiff))}% worse-than-average performance`;
+
+        return {
+          key: metric.key,
+          label: metric.label,
+          format: metric.format,
+          value,
+          average,
+          pctDiff,
+          positive,
+          note,
+        };
+      });
+  }, [selectedAsset, selectedProfileAxis, metrics, assets]);
+
   if (assets.length === 0) {
     return (
       <div className="min-h-screen bg-background">
@@ -712,7 +755,7 @@ const Insights = () => {
                               fontSize={10}
                               fontWeight={active ? 700 : 600}
                               style={{ cursor: axis ? "pointer" : "default" }}
-                              onClick={() => axis && setSelectedProfileKey(axis.key)}
+                              onClick={() => axis && setOpenModal(`profile:${axis.key}`)}
                             >
                               {payload.value}
                             </text>
@@ -983,6 +1026,55 @@ const Insights = () => {
               </div>
               <div className="p-5 overflow-auto max-h-[calc(85vh-56px)]">
                 {modalGroup && renderGroupTable(modalGroup)}
+                {openModal?.startsWith("profile:") && selectedAsset && selectedProfileAxis && selectedProfileAnalysis && (
+                  <div className="space-y-4">
+                    <div className="rounded-xl border border-border bg-muted/10 p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Creative Profile Category</p>
+                          <h3 className="text-[16px] font-semibold text-foreground mt-1">{selectedProfileAxis.label}</h3>
+                          <p className="text-[11px] text-muted-foreground mt-2 max-w-[620px]">{selectedProfileAnalysis.summary}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Current Value</p>
+                          <p className="text-[12px] font-medium text-foreground mt-1">{selectedProfileAxis.getValue(selectedAsset)}</p>
+                          <p className={`text-[22px] font-mono font-bold mt-2 ${scoreColor(selectedProfileAxis.score(selectedAsset))}`}>{selectedProfileAxis.score(selectedAsset)}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-border overflow-hidden">
+                      <div className="bg-muted/20 px-4 py-3 border-b border-border/40">
+                        <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Metric Analysis</p>
+                        <p className="text-[11px] text-muted-foreground mt-1">These metrics explain why <span className="text-foreground font-medium">{selectedProfileAxis.label}</span> looks good or bad for <span className="text-foreground font-medium">{selectedAsset.name}</span>.</p>
+                      </div>
+                      <table className="w-full">
+                        <thead>
+                          <tr className="bg-background border-b border-border/40">
+                            <th className="px-4 py-2.5 text-left text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Metric</th>
+                            <th className="px-4 py-2.5 text-right text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Asset</th>
+                            <th className="px-4 py-2.5 text-right text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Avg</th>
+                            <th className="px-4 py-2.5 text-right text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Delta</th>
+                            <th className="px-4 py-2.5 text-left text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Analysis</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {profileMetricRows.map((row) => (
+                            <tr key={row.key} className="border-b border-border/20 last:border-0 align-top">
+                              <td className="px-4 py-3 text-[11px] font-semibold text-foreground">{row.label}</td>
+                              <td className="px-4 py-3 text-right text-[11px] font-mono text-foreground">{fmt(row.value, row.format)}</td>
+                              <td className="px-4 py-3 text-right text-[11px] font-mono text-muted-foreground">{fmt(row.average, row.format)}</td>
+                              <td className={`px-4 py-3 text-right text-[11px] font-mono font-semibold ${row.positive ? "text-accent" : "text-destructive"}`}>
+                                {row.pctDiff > 0 ? "+" : ""}{Math.round(row.pctDiff)}%
+                              </td>
+                              <td className="px-4 py-3 text-[11px] text-muted-foreground">{row.note}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
                 {isCorrelationModal && correlationCard && (
                   <div className="rounded-lg border border-border overflow-hidden">
                     <div className="bg-muted/20 px-3 py-2 border-b border-border/40">
