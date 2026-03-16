@@ -188,6 +188,67 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     conversions: { label: "Conversions", color: "hsl(var(--destructive))" },
   };
 
+  const creativeDiagnostics = useMemo(() => {
+    const safePct = (value: number, average: number) => (average ? ((value - average) / average) * 100 : 0);
+    const deliveryMetric = (item: CreativeAsset) => ({ primary: item.impressions, efficiency: item.cpm });
+    const engagementMetric = (item: CreativeAsset) => ({
+      primary: item.impressions ? ((item.postReactions + item.postComments + item.postShares + item.postSaves) / item.impressions) * 100 : 0,
+      efficiency: item.postShares,
+    });
+    const trafficMetric = (item: CreativeAsset) => ({
+      primary: item.channel === "google" ? item.clicks : item.linkClicks,
+      efficiency: (item.channel === "google" ? item.clicks : item.linkClicks) ? (item.landingPageViews / (item.channel === "google" ? item.clicks : item.linkClicks)) * 100 : 0,
+    });
+    const revenueMetric = (item: CreativeAsset) => ({ primary: item.purchaseValue, efficiency: item.roas });
+
+    const attributeDefs = [
+      { label: "Format", value: asset.type, getValue: (item: CreativeAsset) => item.type },
+      { label: "Aspect Ratio", value: asset.creativeProfile.aspectRatio, getValue: (item: CreativeAsset) => item.creativeProfile.aspectRatio },
+      { label: "Motion", value: asset.creativeProfile.motionIntensity, getValue: (item: CreativeAsset) => item.creativeProfile.motionIntensity },
+      { label: "Contrast", value: asset.creativeProfile.colorContrast, getValue: (item: CreativeAsset) => item.creativeProfile.colorContrast },
+      { label: "Brand", value: asset.creativeProfile.brandProminence, getValue: (item: CreativeAsset) => item.creativeProfile.brandProminence },
+      { label: "Consistency", value: asset.creativeProfile.brandConsistency, getValue: (item: CreativeAsset) => item.creativeProfile.brandConsistency },
+      { label: "Funnel", value: asset.creativeProfile.funnelStage, getValue: (item: CreativeAsset) => item.creativeProfile.funnelStage },
+      { label: "CTA", value: asset.creativeProfile.callToAction, getValue: (item: CreativeAsset) => item.creativeProfile.callToAction },
+      { label: "Product in 3s", value: asset.type === "video" ? (asset.creativeProfile.productInFirst3s ? "Yes" : "No") : "N/A", getValue: (item: CreativeAsset) => item.type === "video" ? (item.creativeProfile.productInFirst3s ? "Yes" : "No") : "N/A" },
+    ];
+
+    return attributeDefs.map((attribute) => {
+      const peerSet = campaignAssets.filter((item) => attribute.getValue(item) === attribute.value);
+      const baseSet = peerSet.length > 0 ? peerSet : campaignAssets;
+      const deliveryPeers = baseSet.map(deliveryMetric);
+      const engagementPeers = baseSet.map(engagementMetric);
+      const trafficPeers = baseSet.map(trafficMetric);
+      const revenuePeers = baseSet.map(revenueMetric);
+      const deliveryDelta = Math.round((safePct(deliveryMetric(asset).primary, deliveryPeers.reduce((sum, item) => sum + item.primary, 0) / deliveryPeers.length) + safePct((deliveryPeers.reduce((sum, item) => sum + item.efficiency, 0) / deliveryPeers.length), deliveryMetric(asset).efficiency)) / 2);
+      const engagementDelta = Math.round((safePct(engagementMetric(asset).primary, engagementPeers.reduce((sum, item) => sum + item.primary, 0) / engagementPeers.length) + safePct(engagementMetric(asset).efficiency, engagementPeers.reduce((sum, item) => sum + item.efficiency, 0) / engagementPeers.length)) / 2);
+      const trafficDelta = Math.round((safePct(trafficMetric(asset).primary, trafficPeers.reduce((sum, item) => sum + item.primary, 0) / trafficPeers.length) + safePct(trafficMetric(asset).efficiency, trafficPeers.reduce((sum, item) => sum + item.efficiency, 0) / trafficPeers.length)) / 2);
+      const revenueDelta = Math.round((safePct(revenueMetric(asset).primary, revenuePeers.reduce((sum, item) => sum + item.primary, 0) / revenuePeers.length) + safePct(revenueMetric(asset).efficiency, revenuePeers.reduce((sum, item) => sum + item.efficiency, 0) / revenuePeers.length)) / 2);
+      const net = Math.round((deliveryDelta + engagementDelta + trafficDelta + revenueDelta) / 4);
+      const worst = [
+        { key: "Delivery", value: deliveryDelta },
+        { key: "Engagement", value: engagementDelta },
+        { key: "Traffic", value: trafficDelta },
+        { key: "Revenue", value: revenueDelta },
+      ].sort((a, b) => a.value - b.value)[0];
+
+      return {
+        label: attribute.label,
+        value: attribute.value,
+        sampleSize: baseSet.length,
+        deliveryDelta,
+        engagementDelta,
+        trafficDelta,
+        revenueDelta,
+        net,
+        weakestPillar: worst.key,
+      };
+    }).sort((a, b) => a.net - b.net);
+  }, [asset, campaignAssets]);
+
+  const weakestCreativeAspect = creativeDiagnostics[0];
+  const strongestCreativeAspect = creativeDiagnostics[creativeDiagnostics.length - 1];
+
   const pillarContent = {
     delivery: (
       <>
