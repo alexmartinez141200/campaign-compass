@@ -461,38 +461,55 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
 
             {showUpdateRecommendations && (
-              <div className="rounded-xl border border-border bg-card p-4 shadow-card">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Creative update option</p>
-                    <p className="mt-1 text-[12px] font-semibold text-foreground">Update this asset using low-performing categories</p>
-                    <p className="mt-1 text-[10px] text-muted-foreground">Focus revision on the weakest profile signals so the next iteration addresses the biggest performance gaps first.</p>
+              <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <button
+                  type="button"
+                  aria-label="Close update recommendations"
+                  className="absolute inset-0 bg-foreground/20 backdrop-blur-[2px]"
+                  onClick={() => setShowUpdateRecommendations(false)}
+                />
+                <div className="relative z-10 w-[min(760px,calc(100vw-2rem))] rounded-xl border border-border bg-background p-4 shadow-2xl">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Creative update option</p>
+                      <p className="mt-1 text-[12px] font-semibold text-foreground">Update this asset using low-performing categories</p>
+                      <p className="mt-1 text-[10px] text-muted-foreground">Focus revision on the weakest profile signals so the next iteration addresses the biggest performance gaps first.</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-right">
+                        <p className="text-[8px] uppercase tracking-[0.16em] text-muted-foreground">Selected</p>
+                        <p className="mt-1 text-[13px] font-mono font-semibold text-foreground">{selectedCategory?.label ?? "—"}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowUpdateRecommendations(false)}
+                        className="rounded-md border border-border/60 px-2.5 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground"
+                      >
+                        Close
+                      </button>
+                    </div>
                   </div>
-                  <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-right">
-                    <p className="text-[8px] uppercase tracking-[0.16em] text-muted-foreground">Selected</p>
-                    <p className="mt-1 text-[13px] font-mono font-semibold text-foreground">{selectedCategory?.label ?? "—"}</p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {updateTargets.map((item) => (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() => setSelectedCategoryKey(item.key)}
+                        className={`rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] transition-colors ${selectedCategoryKey === item.key ? "border-primary/40 bg-primary/10 text-foreground" : "border-border/60 bg-background text-muted-foreground hover:bg-muted/30"}`}
+                      >
+                        {item.label} · {item.score}
+                      </button>
+                    ))}
                   </div>
-                </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {updateTargets.map((item) => (
-                    <button
-                      key={item.key}
-                      type="button"
-                      onClick={() => setSelectedCategoryKey(item.key)}
-                      className={`rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] transition-colors ${selectedCategoryKey === item.key ? "border-primary/40 bg-primary/10 text-foreground" : "border-border/60 bg-background text-muted-foreground hover:bg-muted/30"}`}
-                    >
-                      {item.label} · {item.score}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="mt-4 rounded-lg border border-border/60 bg-muted/20 p-3">
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Recommended update focus</p>
-                  <p className="mt-1 text-[11px] text-foreground">
-                    Prioritize <span className="font-semibold">{updateTargets.map((item) => item.label).join(", ")}</span>
-                    {selectedCategory ? <> and review <span className="font-semibold">{selectedCategory.label}</span> before producing the next variant.</> : "."}
-                  </p>
+                  <div className="mt-4 rounded-lg border border-border/60 bg-muted/20 p-3">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Recommended update focus</p>
+                    <p className="mt-1 text-[11px] text-foreground">
+                      Prioritize <span className="font-semibold">{updateTargets.map((item) => item.label).join(", ")}</span>
+                      {selectedCategory ? <> and review <span className="font-semibold">{selectedCategory.label}</span> before producing the next variant.</> : "."}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
