@@ -223,12 +223,12 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const pillarContent = {
     delivery: (
       <>
-        <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
+        <SectionHeader title="Delivery" description="A full view of how efficiently this creative scales reach, controls cost, and manages audience exposure." />
         <div className="grid gap-3 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-stretch">
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
             <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
-            <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub="Healthy range" />
+            <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub="Avg exposures per person" />
             <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
           </div>
           <div className="rounded-lg border border-border/60 bg-card p-3.5">
@@ -245,8 +245,22 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <SectionHeader title="Insights" description="Summary takeaways for this asset versus the campaign average." />
-        <InsightList insights={insights.filter((item) => item.text.toLowerCase().includes("cpm") || item.text.toLowerCase().includes("frequency") || item.text.toLowerCase().includes("delivery"))} />
+        <SectionHeader title="What builds delivery" description="These are the core inputs behind delivery quality: total scale, unique reach, audience repetition, and cost efficiency." />
+        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-5">
+          <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} sub="Total ad delivery" trend={trends.impressions} />
+          <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique people reached" />
+          <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} sub="Impressions ÷ reach" health={freqHealth} />
+          <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} sub="Cost per 1,000 impressions" trend={trends.cpm} trendInverse health={cpmHealth} />
+          <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Budget used to generate delivery" />
+        </div>
+
+        <SectionHeader title="Delivery benchmark" description="Current delivery metrics against the campaign baseline." />
+        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+          <KpiCard label="Impressions Δ" value={storySummaryRows.find((row) => row.key === "delivery")?.drivers[0].benchmark || "0% vs avg"} sub="Vs campaign average" />
+          <KpiCard label="CPM Δ" value={storySummaryRows.find((row) => row.key === "delivery")?.drivers[1].benchmark || "0% vs avg"} sub="Vs campaign average" />
+          <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} sub={freqHealth === "good" ? "Healthy exposure" : freqHealth === "warning" ? "Watch for fatigue" : "Fatigue risk"} health={freqHealth} />
+          <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total invested" />
+        </div>
       </>
     ),
     engagement: (
