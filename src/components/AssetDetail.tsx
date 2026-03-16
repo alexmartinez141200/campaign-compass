@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowDownRight, ArrowUpRight, Info, Minus } from "lucide-react";
 import { CartesianGrid, Line, LineChart, PolarAngleAxis, PolarGrid, Radar, RadarChart, XAxis, YAxis } from "recharts";
 import type { CreativeAsset } from "@/data/mockData";
-import { axisStoryDimensionMap, buildCreativeStorySummary, formatStoryMetricValue } from "@/lib/creative-story";
+import { axisStoryDimensionMap, buildCreativeStorySummary, formatStoryMetricValue, getCreativeAttributeDrivers } from "@/lib/creative-story";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -206,9 +206,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     ];
 
     return profileRows.map((row) => {
-      const mappedDimension = axisStoryDimensionMap[row.key];
-      const summary = mappedDimension ? storySummaryRows.find((item) => item.key === mappedDimension) : undefined;
-      const metrics = (summary?.drivers ?? []).map((driver) => {
+      const metrics = getCreativeAttributeDrivers(asset, campaignAssets, row.key).map((driver) => {
         const pctDiff = driver.average > 0 ? ((driver.value - driver.average) / driver.average) * 100 : 0;
         const inverseMetric = driver.metricKey.includes("cpm") || driver.metricKey.includes("cpc") || driver.metricKey.includes("cpa");
         const adjustedDiff = inverseMetric ? -pctDiff : pctDiff;

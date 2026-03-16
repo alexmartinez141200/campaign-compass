@@ -76,20 +76,101 @@ const hookMetric = (asset: CreativeAsset) => {
   if (asset.type === "video") return asset.avgWatchTime || 0;
   return asset.frequency;
 };
-const hookMetricLabel = (asset: CreativeAsset) => {
-  if (asset.channel === "tiktok") return "6s View Rate";
-  if (asset.type === "video") return "Avg Watch";
-  return "Frequency";
-};
-const hookMetricFormat = (asset: CreativeAsset): StoryMetricFormat => {
-  if (asset.channel === "tiktok") return "pct";
-  if (asset.type === "video") return "sec";
-  return "num";
-};
 const deliveryProfileSignal = (asset: CreativeAsset) => `${asset.creativeProfile.motionIntensity} motion · ${asset.creativeProfile.productInFirst3s ? "product visible early" : "product introduced late"} · ${asset.creativeProfile.colorContrast} contrast`;
 const engagementProfileSignal = (asset: CreativeAsset) => `${asset.creativeProfile.brandProminence} branding · ${asset.type} format`;
 const trafficProfileSignal = (asset: CreativeAsset) => `${asset.creativeProfile.callToAction} CTA · ${asset.creativeProfile.aspectRatio}`;
 const revenueProfileSignal = (asset: CreativeAsset) => `${asset.creativeProfile.funnelStage} funnel · ${asset.creativeProfile.brandConsistency} consistency`;
+
+const makeDriver = (
+  campaignAssets: CreativeAsset[],
+  metricKey: string,
+  label: string,
+  section: string,
+  getter: (item: CreativeAsset) => number,
+  format: StoryMetricFormat,
+  inverse = false,
+): StoryDriverMetric => {
+  const average = safeAverage(campaignAssets, getter);
+  const value = getter(campaignAssets[0]!);
+  return {
+    metricKey,
+    label,
+    section,
+    value,
+    average,
+    format,
+    benchmark: benchmarkText(value, average, inverse),
+  };
+};
+
+export function getCreativeAttributeDrivers(asset: CreativeAsset, campaignAssets: CreativeAsset[], attributeKey: string): StoryDriverMetric[] {
+  const metaAssets = campaignAssets.filter((item) => item.channel === asset.channel);
+  const scopedAssets = metaAssets.length ? metaAssets : campaignAssets;
+  const base = [asset, ...scopedAssets.filter((item) => item.id !== asset.id)];
+
+  const build = (
+    metricKey: string,
+    label: string,
+    getter: (item: CreativeAsset) => number,
+    format: StoryMetricFormat,
+    inverse = false,
+    section = "Meta Ads",
+  ) => {
+    const average = safeAverage(base, getter);
+    const value = getter(asset);
+    return {
+      metricKey,
+      label,
+      section,
+      value,
+      average,
+      format,
+      benchmark: benchmarkText(value, average, inverse),
+    } satisfies StoryDriverMetric;
+  };
+
+  const ctrLink = (item: CreativeAsset) => (item.impressions > 0 ? (item.linkClicks / item.impressions) * 100 : 0);
+  const engagementRanking = (item: CreativeAsset) => item.engagementRateRanking === "above_average" ? 100 : item.engagementRateRanking === "average" ? 50 : 0;
+  const conversionRanking = (item: CreativeAsset) => item.conversionRateRanking === "above_average" ? 100 : item.conversionRateRanking === "average" ? 50 : 0;
+  const qualityRanking = (item: CreativeAsset) => item.qualityRanking === "above_average" ? 100 : item.qualityRanking === "average" ? 50 : 0;
+  const thumbStopRate = (item: CreativeAsset) => item.impressions > 0 && item.videoPlays ? (item.videoPlays / item.impressions) * 100 : 0;
+  const holdRate = (item: CreativeAsset) => item.videoPlays ? ((item.videoWatched25 || 0) / item.videoPlays) * 100 : 0;
+  const thruPlayRate = (item: CreativeAsset) => item.impressions > 0 ? ((item.thruPlays || 0) / item.impressions) * 100 : 0;
+  const saveRate = (item: CreativeAsset) => item.impressions > 0 ? (item.postSaves / item.impressions) * 100 : 0;
+  const atcRate = (item: CreativeAsset) => item.landingPageViews > 0 ? (item.addToCart / item.landingPageViews) * 100 : 0;
+  const purchaseRate = (item: CreativeAsset) => item.landingPageViews > 0 ? (item.conversions / item.landingPageViews) * 100 : 0;
+
+  switch (attributeKey) {
+    case "format":
+      return [build("engagement_rate", "Eng. Rate", engagementRate, "pct"), build("shares", "Shares", (item) => item.postShares, "num")];
+    case "duration":
+      return asset.type === "video"
+        ? [build("thruplay_rate", "ThruPlay Rate", thruPlayRate, "pct"), build("avg_watch_time", "Avg Watch Time", (item) => item.avgWatchTime || 0, "sec")]
+        : [build("impressions", "Impressions", (item) => item.impressions, "num"), build("cpm", "CPM", (item) => item.cpm, "dollar2", true)];
+    case "aspect":
+      return [build("link_ctr", "Link CTR", ctrLink, "pct"), build("click_to_lpv", "Click→LPV", clickToLpv, "pct")];
+    case "motion":
+      return asset.type === "video"
+        ? [build("thumbstop_rate", "Play Rate", thumbStopRate, "pct"), build("hold_rate", "25% Hold Rate", holdRate, "pct")]
+        : [build("ctr", "CTR", (item) => item.ctr, "pct"), build("engagement_rate", "Eng. Rate", engagementRate, "pct")];
+    case "contrast":
+      return [build("quality_ranking", "Quality Rank", qualityRanking, "num"), build("ctr", "CTR", (item) => item.ctr, "pct")];
+    case "brandProminence":
+      return [build("engagement_ranking", "Engagement Rank", engagementRanking, "num"), build("save_rate", "Save Rate", saveRate, "pct")];
+    case "brandConsistency":
+      return [build("conversion_ranking", "Conversion Rank", conversionRanking, "num"), build("roas", "ROAS", (item) => item.roas, "x")];
+    case "funnelStage":
+      return [build("purchase_rate", "Purchase Rate", purchaseRate, "pct"), build("roas", "ROAS", (item) => item.roas, "x")];
+    case "cta":
+      return [build("link_clicks", "Link Clicks", (item) => item.linkClicks, "num"), build("link_ctr", "Link CTR", ctrLink, "pct")];
+    case "productInFirst3s":
+      return asset.type === "video"
+        ? [build("thumbstop_rate", "Play Rate", thumbStopRate, "pct"), build("thruplay_rate", "ThruPlay Rate", thruPlayRate, "pct")]
+        : [build("quality_ranking", "Quality Rank", qualityRanking, "num"), build("atc_rate", "ATC Rate", atcRate, "pct")];
+    default:
+      return [];
+  }
+}
 
 export function buildCreativeStorySummary(
   asset: CreativeAsset,
@@ -120,24 +201,10 @@ export function buildCreativeStorySummary(
   const currentConvRate = conversionRateFromClicks(asset);
   const avgConvRate = safeAverage(campaignAssets, (item) => conversionRateFromClicks(item));
 
-  const deliveryScore = toScore(
-    pctDelta(currentImpressions, avgImpressions),
-    pctDelta(currentHook, avgHook),
-    pctDelta(avgCpm - currentCpm, avgCpm),
-  );
-  const engagementScore = toScore(
-    pctDelta(currentEngagementRate, avgEngagementRate),
-    pctDelta(currentShares, avgShares),
-  );
-  const trafficScore = toScore(
-    pctDelta(currentClicks, avgClicks),
-    pctDelta(currentClickToLpv, avgClickToLpv),
-  );
-  const revenueScore = toScore(
-    pctDelta(currentRevenue, avgRevenue),
-    pctDelta(currentRoas, safeAverage(campaignAssets, (item) => item.roas)),
-    pctDelta(currentConvRate, avgConvRate),
-  );
+  const deliveryScore = toScore(pctDelta(currentImpressions, avgImpressions), pctDelta(currentHook, avgHook), pctDelta(avgCpm - currentCpm, avgCpm));
+  const engagementScore = toScore(pctDelta(currentEngagementRate, avgEngagementRate), pctDelta(currentShares, avgShares));
+  const trafficScore = toScore(pctDelta(currentClicks, avgClicks), pctDelta(currentClickToLpv, avgClickToLpv));
+  const revenueScore = toScore(pctDelta(currentRevenue, avgRevenue), pctDelta(currentRoas, safeAverage(campaignAssets, (item) => item.roas)), pctDelta(currentConvRate, avgConvRate));
 
   return [
     {
@@ -147,24 +214,8 @@ export function buildCreativeStorySummary(
       score: deliveryScore,
       story: `Delivery is built from scale and cost efficiency, then explained by ${asset.creativeProfile.motionIntensity.toLowerCase()} motion, ${asset.creativeProfile.colorContrast.toLowerCase()} contrast, and ${asset.creativeProfile.productInFirst3s ? "early product visibility" : "later product reveal"}.`,
       drivers: [
-        {
-          metricKey: "impressions",
-          label: "Impressions",
-          section: "Top-line KPIs",
-          value: currentImpressions,
-          average: avgImpressions,
-          format: "num",
-          benchmark: benchmarkText(currentImpressions, avgImpressions),
-        },
-        {
-          metricKey: "cpm",
-          label: "CPM",
-          section: "Delivery",
-          value: currentCpm,
-          average: avgCpm,
-          format: "dollar2",
-          benchmark: benchmarkText(currentCpm, avgCpm, true),
-        },
+        { metricKey: "impressions", label: "Impressions", section: "Top-line KPIs", value: currentImpressions, average: avgImpressions, format: "num", benchmark: benchmarkText(currentImpressions, avgImpressions) },
+        { metricKey: "cpm", label: "CPM", section: "Delivery", value: currentCpm, average: avgCpm, format: "dollar2", benchmark: benchmarkText(currentCpm, avgCpm, true) },
       ],
     },
     {
@@ -174,24 +225,8 @@ export function buildCreativeStorySummary(
       score: engagementScore,
       story: `Engagement is anchored in how strongly this creative earns reactions and shares, which is why brand prominence and format are the main profile correlates for diagnostics.`,
       drivers: [
-        {
-          metricKey: "engagement_rate",
-          label: "Eng. Rate",
-          section: asset.channel === "tiktok" ? "Engagement & Growth" : "Engagement",
-          value: currentEngagementRate,
-          average: avgEngagementRate,
-          format: "pct",
-          benchmark: benchmarkText(currentEngagementRate, avgEngagementRate),
-        },
-        {
-          metricKey: "shares",
-          label: "Shares",
-          section: asset.channel === "tiktok" ? "Engagement & Growth" : "Engagement",
-          value: currentShares,
-          average: avgShares,
-          format: "num",
-          benchmark: benchmarkText(currentShares, avgShares),
-        },
+        { metricKey: "engagement_rate", label: "Eng. Rate", section: asset.channel === "tiktok" ? "Engagement & Growth" : "Engagement", value: currentEngagementRate, average: avgEngagementRate, format: "pct", benchmark: benchmarkText(currentEngagementRate, avgEngagementRate) },
+        { metricKey: "shares", label: "Shares", section: asset.channel === "tiktok" ? "Engagement & Growth" : "Engagement", value: currentShares, average: avgShares, format: "num", benchmark: benchmarkText(currentShares, avgShares) },
       ],
     },
     {
@@ -201,24 +236,8 @@ export function buildCreativeStorySummary(
       score: trafficScore,
       story: `Traffic is defined by how much qualified visit volume the asset creates, so CTA and aspect ratio become the clearest creative profile explanations.`,
       drivers: [
-        {
-          metricKey: "clicks",
-          label: asset.channel === "google" ? "Clicks" : "Link Clicks",
-          section: "Top-line KPIs",
-          value: currentClicks,
-          average: avgClicks,
-          format: "num",
-          benchmark: benchmarkText(currentClicks, avgClicks),
-        },
-        {
-          metricKey: "click_to_lpv",
-          label: "Click→LPV",
-          section: "Traffic",
-          value: currentClickToLpv,
-          average: avgClickToLpv,
-          format: "pct",
-          benchmark: benchmarkText(currentClickToLpv, avgClickToLpv),
-        },
+        { metricKey: "clicks", label: asset.channel === "google" ? "Clicks" : "Link Clicks", section: "Top-line KPIs", value: currentClicks, average: avgClicks, format: "num", benchmark: benchmarkText(currentClicks, avgClicks) },
+        { metricKey: "click_to_lpv", label: "Click→LPV", section: "Traffic", value: currentClickToLpv, average: avgClickToLpv, format: "pct", benchmark: benchmarkText(currentClickToLpv, avgClickToLpv) },
       ],
     },
     {
@@ -228,24 +247,8 @@ export function buildCreativeStorySummary(
       score: revenueScore,
       story: `Revenue is the downstream outcome of the page: total revenue and return quality are linked back to funnel stage and brand consistency so diagnostics explain why this asset monetizes better or worse.`,
       drivers: [
-        {
-          metricKey: "revenue",
-          label: "Revenue",
-          section: "Conversions & Revenue",
-          value: currentRevenue,
-          average: avgRevenue,
-          format: "num",
-          benchmark: benchmarkText(currentRevenue, avgRevenue),
-        },
-        {
-          metricKey: "roas",
-          label: "ROAS",
-          section: "Conversions & Revenue",
-          value: currentRoas,
-          average: safeAverage(campaignAssets, (item) => item.roas),
-          format: "x",
-          benchmark: benchmarkText(currentRoas, safeAverage(campaignAssets, (item) => item.roas)),
-        },
+        { metricKey: "revenue", label: "Revenue", section: "Conversions & Revenue", value: currentRevenue, average: avgRevenue, format: "num", benchmark: benchmarkText(currentRevenue, avgRevenue) },
+        { metricKey: "roas", label: "ROAS", section: "Conversions & Revenue", value: currentRoas, average: safeAverage(campaignAssets, (item) => item.roas), format: "x", benchmark: benchmarkText(currentRoas, safeAverage(campaignAssets, (item) => item.roas)) },
       ],
     },
   ];
