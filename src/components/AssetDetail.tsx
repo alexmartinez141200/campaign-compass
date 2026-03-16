@@ -759,7 +759,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             {/* ═══ D. VIDEO PERFORMANCE (Google Video/YouTube — if applicable) ═══ */}
             {isVideo && (
               <>
-                <SectionHeader title="Video Performance" description="YouTube/Google Video metrics — view rate measures creative appeal, quartile retention shows where viewers drop off." />
+                <SectionHeader title="Video Performance" description="YouTube/Google Video metrics — view rate measures creative appeal, quartile retention shows where viewers drop off." contribution="Video duration, motion intensity, and early product visibility support delivery by determining whether viewers stay long enough to qualify." />
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid grid-cols-3 gap-3">
                     <KpiCard label="Video Views (Google)" value={(asset.videoPlays || 0).toLocaleString()} sub="30s+ or interaction" />
