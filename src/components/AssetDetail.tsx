@@ -133,7 +133,7 @@ const SectionHeader = ({ title, description }: { title: string; description: str
 const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const [activePillar, setActivePillar] = useState<PillarKey>("delivery");
   const [selectedCategoryKey, setSelectedCategoryKey] = useState("format");
-  const [activeTopTab, setActiveTopTab] = useState<"creative" | "campaign">("creative");
+  const [activeTopTab, setActiveTopTab] = useState<"creative" | "campaign">("campaign");
 
   const storySummaryRows = useMemo(
     () => buildCreativeStorySummary(asset, campaignAssets, { selectedRoas: asset.roas }),
