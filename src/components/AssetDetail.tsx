@@ -426,79 +426,124 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
 
           <TabsContent value="creative" className="mt-0 space-y-4">
             <SectionHeader title="Creative asset performance" description="Each row shows whether a creative profile category is doing good, mixed, or weak based on the campaign-average metrics used to evaluate it." />
-            <div className="grid gap-4 lg:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.45fr)] lg:items-start">
-              <div className="rounded-lg border border-border/60 bg-card p-4">
-                <ChartContainer config={{ score: { label: "Score", color: "hsl(var(--primary))" } }} className="mx-auto h-[360px] w-full max-w-[420px]">
-                  <RadarChart data={radarData} outerRadius="72%">
-                    <PolarGrid radialLines gridType="polygon" stroke="hsl(var(--border))" strokeOpacity={0.75} />
-                    <PolarAngleAxis
-                      dataKey="label"
-                      tick={(tickProps: any) => {
-                        const { payload, x, y, textAnchor } = tickProps;
-                        const active = payload?.payload?.key === selectedCategoryKey;
-                        return (
-                          <text
-                            x={x}
-                            y={y}
-                            textAnchor={textAnchor}
-                            className={active ? "fill-foreground" : "fill-muted-foreground"}
-                            style={{ fontSize: 11, fontWeight: active ? 700 : 600, cursor: "pointer" }}
-                            onClick={() => payload?.payload?.key && setSelectedCategoryKey(payload.payload.key)}
-                          >
-                            {payload?.value}
-                          </text>
-                        );
-                      }}
-                    />
-                    <Radar
-                      dataKey="value"
-                      stroke="var(--color-score)"
-                      fill="var(--color-score)"
-                      fillOpacity={0.1}
-                      strokeWidth={2.5}
-                      dot={(props: any) => {
-                        const active = props?.payload?.key === selectedCategoryKey;
-                        return (
-                          <g onClick={() => props?.payload?.key && setSelectedCategoryKey(props.payload.key)} style={{ cursor: "pointer" }}>
-                            <circle cx={props.cx} cy={props.cy} r={18} fill="hsl(var(--background))" fillOpacity={0.01} />
-                            <circle cx={props.cx} cy={props.cy} r={active ? 8 : 6.5} fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"} stroke="hsl(var(--primary))" strokeWidth={2} />
-                          </g>
-                        );
-                      }}
-                    />
-                  </RadarChart>
-                </ChartContainer>
-                <div className="mt-3 text-center">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Overall score</p>
-                  <p className="text-3xl font-mono font-bold text-accent">{Math.round(radarData.reduce((sum, item) => sum + item.value, 0) / radarData.length)}</p>
+            <div className="grid gap-4 lg:grid-cols-[minmax(320px,0.92fr)_minmax(0,1.08fr)]">
+              <div className="rounded-xl border border-border bg-muted/30 p-4 shadow-card">
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div>
+                    <p className="text-[12px] font-semibold text-foreground">Creative Attribute Analysis Chart</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Click any chart point or attribute label to inspect the matching category in the table.</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Overall Score</p>
+                    <p className="text-[26px] leading-none font-mono font-bold mt-1 text-accent">{Math.round(radarData.reduce((sum, item) => sum + item.value, 0) / radarData.length)}</p>
+                  </div>
+                </div>
+
+                <div className="relative rounded-lg border border-border/70 bg-background">
+                  <div className="pointer-events-none absolute inset-x-6 top-1/2 h-px -translate-y-1/2 border-t border-dashed border-border/60" />
+                  <div className="pointer-events-none absolute left-1/2 top-6 bottom-6 w-px -translate-x-1/2 border-l border-dashed border-border/60" />
+                  <ChartContainer config={{ score: { label: "Score", color: "hsl(var(--primary))" } }} className="mx-auto h-[360px] w-full max-w-[520px]">
+                    <RadarChart data={radarData} outerRadius="72%">
+                      <PolarGrid radialLines={true} gridType="polygon" stroke="hsl(var(--border))" strokeOpacity={0.75} />
+                      <PolarAngleAxis
+                        dataKey="label"
+                        tick={(tickProps: any) => {
+                          const { payload, x, y, textAnchor } = tickProps;
+                          const active = payload?.payload?.key === selectedCategoryKey;
+                          const labelWidth = Math.max(String(payload?.value ?? "").length * 7.2, 44);
+                          return (
+                            <g
+                              transform={`translate(${x}, ${y})`}
+                              style={{ cursor: payload?.payload?.key ? "pointer" : "default" }}
+                              onClick={() => payload?.payload?.key && setSelectedCategoryKey(payload.payload.key)}
+                            >
+                              <rect
+                                x={textAnchor === "start" ? -4 : textAnchor === "end" ? -labelWidth + 4 : -labelWidth / 2}
+                                y={-12}
+                                width={labelWidth}
+                                height={24}
+                                rx={6}
+                                fill="hsl(var(--background))"
+                                fillOpacity={0.01}
+                              />
+                              <text
+                                textAnchor={textAnchor}
+                                fill={active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))"}
+                                fontSize={10}
+                                fontWeight={active ? 700 : 600}
+                              >
+                                {payload?.value}
+                              </text>
+                            </g>
+                          );
+                        }}
+                      />
+                      <Radar
+                        dataKey="value"
+                        stroke="var(--color-score)"
+                        fill="var(--color-score)"
+                        fillOpacity={0.1}
+                        strokeWidth={2.5}
+                        dot={(props: any) => {
+                          const { cx, cy, payload } = props;
+                          if (typeof cx !== "number" || typeof cy !== "number" || !payload?.key) return null;
+                          const active = payload.key === selectedCategoryKey;
+                          return (
+                            <g style={{ cursor: "pointer" }} onClick={() => setSelectedCategoryKey(payload.key)}>
+                              <circle cx={cx} cy={cy} r={18} fill="hsl(var(--background))" fillOpacity={0.01} />
+                              <circle
+                                cx={cx}
+                                cy={cy}
+                                r={active ? 8 : 6.5}
+                                fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"}
+                                stroke="hsl(var(--primary))"
+                                strokeWidth={2}
+                              />
+                            </g>
+                          );
+                        }}
+                      />
+                    </RadarChart>
+                  </ChartContainer>
                 </div>
               </div>
 
-              <div className="rounded-lg border border-border/60 bg-card overflow-hidden">
-                <div className="grid grid-cols-[minmax(0,1.05fr)_120px_minmax(0,2.2fr)] gap-3 border-b border-border/60 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <div className="rounded-xl border border-border bg-card overflow-hidden shadow-card">
+                <div className="grid grid-cols-[minmax(0,0.9fr)_96px_minmax(0,1.5fr)] gap-3 border-b border-border bg-muted/20 px-4 py-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80">
                   <div>Category</div>
                   <div>Status</div>
-                  <div>Metrics used vs avg</div>
+                  <div>Metric comparison</div>
                 </div>
                 {creativeDiagnostics.map((item) => (
                   <button
                     key={item.key}
                     type="button"
                     onClick={() => setSelectedCategoryKey(item.key)}
-                    className={`grid w-full grid-cols-[minmax(0,1.05fr)_120px_minmax(0,2.2fr)] gap-3 border-b border-border/60 px-4 py-3 text-left last:border-b-0 transition-colors ${selectedCategoryKey === item.key ? "bg-primary/5" : "hover:bg-muted/30"}`}
+                    className={`grid w-full grid-cols-[minmax(0,0.9fr)_96px_minmax(0,1.5fr)] gap-3 border-b border-border/60 px-4 py-3 text-left transition-colors last:border-b-0 ${selectedCategoryKey === item.key ? "bg-primary/5" : "hover:bg-muted/20"}`}
                   >
                     <div className="min-w-0">
                       <p className="text-[11px] font-semibold text-foreground">{item.label}</p>
                       <p className="text-[10px] text-muted-foreground">{item.value}</p>
                     </div>
-                    <div>
+                    <div className="pt-0.5">
                       <p className="text-[11px] font-semibold text-foreground">{item.status}</p>
                     </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    <div className="space-y-1.5">
                       {item.metrics.map((metric) => (
-                        <span key={`${item.label}-${metric.label}`} className="text-[10px] text-muted-foreground">
-                          <span className="font-semibold text-foreground">{metric.label}</span> {metric.value} vs {metric.average} ({metric.delta > 0 ? "+" : ""}{metric.delta}%)
-                        </span>
+                        <div key={`${item.key}-${metric.label}`} className="grid grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,1fr)_72px] items-center gap-2 rounded-md border border-border/50 bg-background/70 px-2.5 py-2">
+                          <p className="text-[10px] font-semibold text-foreground">{metric.label}</p>
+                          <div>
+                            <p className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Actual</p>
+                            <p className="text-[10px] font-mono font-semibold text-foreground">{metric.value}</p>
+                          </div>
+                          <div>
+                            <p className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Average</p>
+                            <p className="text-[10px] font-mono text-muted-foreground">{metric.average}</p>
+                          </div>
+                          <p className={`text-right text-[10px] font-mono font-semibold ${metric.delta > 0 ? "text-accent" : metric.delta < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                            {metric.delta > 0 ? "+" : ""}{metric.delta}%
+                          </p>
+                        </div>
                       ))}
                     </div>
                   </button>
