@@ -512,7 +512,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <SectionHeader title="Creative diagnostics" description="Each creative category is judged only by the metrics it should directly influence, so you can see whether it is strong, mixed, or needs improvement." />
+        <SectionHeader title="Creative diagnostics" description="Each creative category is evaluated from the metrics observed on assets with the same profile value, so the output tells you whether that category is currently strong, mixed, or weak based on performance." />
         <div className="grid grid-cols-1 gap-3">
           {creativeDiagnostics.map((item) => (
             <div key={item.label} className="rounded-lg border border-border/60 bg-card p-4">
@@ -522,11 +522,11 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                     <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{item.label}</p>
                     <span className="text-[10px] font-mono text-muted-foreground">{item.value} · n={item.sampleSize}</span>
                   </div>
-                  <p className="mt-1 text-sm font-semibold text-foreground">{item.status === "good" ? "This category is helping performance" : item.status === "mixed" ? "This category is not a clear problem" : "This category is limiting performance"}</p>
-                  <p className="text-[11px] text-muted-foreground">{item.action} · weakest metric: {item.weakestMetric.label} ({item.weakestMetric.delta > 0 ? "+" : ""}{item.weakestMetric.delta}% vs matched avg)</p>
+                  <p className="mt-1 text-sm font-semibold text-foreground">{item.status === "good" ? "This category evaluates as strong" : item.status === "mixed" ? "This category evaluates as mixed" : "This category evaluates as weak"}</p>
+                  <p className="text-[11px] text-muted-foreground">Decision: {item.action} · lowest relative metric: {item.weakestMetric.label} ({item.weakestMetric.delta > 0 ? "+" : ""}{item.weakestMetric.delta}% vs matched avg)</p>
                 </div>
                 <div className="text-left lg:text-right">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Recommendation</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Evaluation</p>
                   <p className="text-sm font-semibold text-foreground">{item.action}</p>
                 </div>
               </div>
@@ -536,7 +536,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                     key={`${item.label}-${metric.label}`}
                     label={metric.label}
                     value={typeof metric.value === "number" && metric.label !== "Revenue" && metric.label !== "Impressions" && metric.label !== "Conversions" && metric.label !== "Landing Page Views" && metric.label !== "Shares" && metric.label !== "Clicks" && metric.label !== "Link Clicks" && metric.label !== "Website Visits" ? `${metric.value.toFixed(1)}${metric.label.includes("CTR") || metric.label.includes("Rate") || metric.label.includes("LPV") ? "%" : metric.label === "ROAS" ? "x" : metric.label === "CPA" ? "" : ""}` : metric.label === "Revenue" || metric.label === "CPA" ? `$${metric.value.toFixed(metric.label === "CPA" ? 2 : 0)}` : Math.round(metric.value).toLocaleString()}
-                    sub={`Avg ${metric.label === "Revenue" || metric.label === "CPA" ? `$${metric.average.toFixed(metric.label === "CPA" ? 2 : 0)}` : metric.label === "ROAS" ? `${metric.average.toFixed(1)}x` : metric.label.includes("CTR") || metric.label.includes("Rate") || metric.label.includes("LPV") ? `${metric.average.toFixed(1)}%` : Math.round(metric.average).toLocaleString()}`}
+                    sub={`Observed vs avg ${metric.label === "Revenue" || metric.label === "CPA" ? `$${metric.average.toFixed(metric.label === "CPA" ? 2 : 0)}` : metric.label === "ROAS" ? `${metric.average.toFixed(1)}x` : metric.label.includes("CTR") || metric.label.includes("Rate") || metric.label.includes("LPV") ? `${metric.average.toFixed(1)}%` : Math.round(metric.average).toLocaleString()}`}
                     trend={metric.delta}
                   />
                 ))}
