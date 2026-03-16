@@ -530,15 +530,15 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                     </div>
                     <div className="space-y-1.5">
                       {item.metrics.map((metric) => (
-                        <div key={`${item.key}-${metric.label}`} className="grid grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,1fr)_72px] items-center gap-2 rounded-md border border-border/50 bg-background/70 px-2.5 py-2">
-                          <p className="text-[10px] font-semibold text-foreground">{metric.label}</p>
-                          <div>
-                            <p className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Actual</p>
-                            <p className="text-[10px] font-mono font-semibold text-foreground">{metric.value}</p>
+                        <div key={`${item.key}-${metric.label}`} className="grid grid-cols-[minmax(88px,0.95fr)_minmax(76px,0.8fr)_minmax(76px,0.8fr)_56px] items-center gap-3 rounded-md border border-border/50 bg-background/70 px-3 py-2">
+                          <p className="text-[10px] font-semibold leading-snug text-foreground break-words">{metric.label}</p>
+                          <div className="min-w-0">
+                            <p className="text-[8px] uppercase tracking-[0.14em] text-muted-foreground">Actual</p>
+                            <p className="text-[10px] font-mono font-semibold leading-tight text-foreground break-words">{metric.value}</p>
                           </div>
-                          <div>
-                            <p className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Average</p>
-                            <p className="text-[10px] font-mono text-muted-foreground">{metric.average}</p>
+                          <div className="min-w-0">
+                            <p className="text-[8px] uppercase tracking-[0.14em] text-muted-foreground">Average</p>
+                            <p className="text-[10px] font-mono leading-tight text-muted-foreground break-words">{metric.average}</p>
                           </div>
                           <p className={`text-right text-[10px] font-mono font-semibold ${metric.delta > 0 ? "text-accent" : metric.delta < 0 ? "text-destructive" : "text-muted-foreground"}`}>
                             {metric.delta > 0 ? "+" : ""}{metric.delta}%
