@@ -7,7 +7,7 @@ import type { CreativeAsset, Channel } from "@/data/mockData";
 import { channelConfig } from "@/components/ChannelIcon";
 import { useMemo, useRef, useCallback, useState } from "react";
 import { ChartContainer } from "@/components/ui/chart";
-import { axisStoryDimensionMap, buildCreativeStorySummary } from "@/lib/creative-story";
+import { axisStoryDimensionMap, buildCreativeStorySummary, formatStoryMetricValue, getCreativeAttributeDrivers } from "@/lib/creative-story";
 
 /* ─── Helpers ─── */
 
