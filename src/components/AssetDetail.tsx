@@ -150,18 +150,13 @@ const KpiCard = ({ label, value, trend, trendInverse = false, health, sub, onCli
   </button>
 );
 
-const SectionHeader = ({ title, description, contribution, sectionId }: { title: string; description: string; contribution?: string; sectionId?: string }) => (
+const SectionHeader = ({ title, description, sectionId }: { title: string; description: string; contribution?: string; sectionId?: string }) => (
   <div id={sectionId} className="mt-10 mb-5 scroll-mt-24">
     <div className="flex items-center gap-3 mb-1.5">
       <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground/80 font-bold whitespace-nowrap">{title}</h3>
       <div className="flex-1 h-px bg-border/50" />
     </div>
     <p className="text-[11px] text-muted-foreground/70 leading-relaxed">{description}</p>
-    {contribution && (
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mt-2">
-        Creative profile contribution: <span className="text-foreground">{contribution}</span>
-      </p>
-    )}
   </div>
 );
 
