@@ -226,10 +226,10 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <SectionHeader title="Delivery" description="How efficiently the ad reaches your audience. Watch frequency for fatigue and CPM for cost efficiency." />
         <div className="grid gap-3 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-stretch">
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} trend={trends.impressions} />
             <KpiCard label="Reach" value={asset.reach.toLocaleString()} sub="Unique users" />
             <KpiCard label="Frequency" value={asset.frequency.toFixed(2)} health={freqHealth} sub="Healthy range" />
             <KpiCard label="CPM" value={`$${asset.cpm.toFixed(2)}`} trend={trends.cpm} trendInverse health={cpmHealth} />
-            <KpiCard label="Spend" value={`$${asset.spend.toLocaleString()}`} sub="Total budget used" />
           </div>
           <div className="rounded-lg border border-border/60 bg-card p-3.5">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">CPM over time</p>
