@@ -427,7 +427,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           <TabsContent value="creative" className="mt-0 space-y-4">
             <SectionHeader title="Creative asset performance" description="Each row shows whether a creative profile category is doing good, mixed, or weak based on the campaign-average metrics used to evaluate it." />
             <div className="grid gap-4 lg:grid-cols-[minmax(320px,0.92fr)_minmax(0,1.08fr)]">
-              <div className="rounded-xl border border-border bg-muted/30 p-4 shadow-card">
+              <div className="rounded-xl border border-border bg-muted/30 p-4 shadow-card self-start">
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
                     <p className="text-[12px] font-semibold text-foreground">Creative Attribute Analysis Chart</p>
@@ -442,8 +442,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                 <div className="relative rounded-lg border border-border/70 bg-background">
                   <div className="pointer-events-none absolute inset-x-6 top-1/2 h-px -translate-y-1/2 border-t border-dashed border-border/60" />
                   <div className="pointer-events-none absolute left-1/2 top-6 bottom-6 w-px -translate-x-1/2 border-l border-dashed border-border/60" />
-                  <ChartContainer config={{ score: { label: "Score", color: "hsl(var(--primary))" } }} className="mx-auto h-[360px] w-full max-w-[520px]">
-                    <RadarChart data={radarData} outerRadius="72%">
+                  <ChartContainer config={{ score: { label: "Score", color: "hsl(var(--primary))" } }} className="mx-auto h-[280px] w-full max-w-[420px]">
+                    <RadarChart data={radarData} outerRadius="68%">
                       <PolarGrid radialLines={true} gridType="polygon" stroke="hsl(var(--border))" strokeOpacity={0.75} />
                       <PolarAngleAxis
                         dataKey="label"
