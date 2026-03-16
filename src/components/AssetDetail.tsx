@@ -442,20 +442,21 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         <div className="rounded-xl border border-border/60 bg-muted/20 mb-6 px-4 py-4 shadow-card">
           <div className="flex items-center justify-between gap-4 mb-3">
             <div>
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Creative profile metric summary</p>
-              <p className="text-[11px] text-muted-foreground mt-1">Compact mapping of performance metrics to profile attributes for diagnostics.</p>
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Creative profile analytics model</p>
+              <p className="text-[11px] text-muted-foreground mt-1">High-level outputs are calculated from the same proof metrics used in the sections below and later reused in diagnostics.</p>
             </div>
           </div>
           <div className="overflow-hidden rounded-lg border border-border/60 bg-background">
-            <div className="grid grid-cols-[0.9fr,1.4fr,1fr,1fr,1.1fr] border-b border-border/60 bg-muted/40 px-4 py-2 text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
+            <div className="grid grid-cols-[0.8fr,1.35fr,0.6fr,1fr,1fr,1.15fr] border-b border-border/60 bg-muted/40 px-4 py-2 text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
               <span>Output</span>
               <span>Creative profile</span>
-              <span>Metric 1</span>
-              <span>Metric 2</span>
-              <span>Links to section</span>
+              <span>Score</span>
+              <span>Driver 1</span>
+              <span>Driver 2</span>
+              <span>Story link</span>
             </div>
             {profileMetricSummary.map((row) => (
-              <div key={row.output} className="grid grid-cols-[0.9fr,1.4fr,1fr,1fr,1.1fr] items-center gap-3 border-b border-border/50 px-4 py-3 last:border-b-0">
+              <div key={row.output} className="grid grid-cols-[0.8fr,1.35fr,0.6fr,1fr,1fr,1.15fr] items-start gap-3 border-b border-border/50 px-4 py-3 last:border-b-0">
                 <div>
                   <p className="text-[11px] font-semibold text-foreground">{row.output}</p>
                 </div>
@@ -463,12 +464,18 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                   <p className="text-[11px] text-foreground">{row.profile}</p>
                 </div>
                 <div>
+                  <p className="text-[14px] font-mono font-bold text-foreground">{row.score}</p>
+                  <p className="text-[8px] uppercase tracking-wider text-muted-foreground mt-1">Derived</p>
+                </div>
+                <div>
                   <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.metricA.label}</p>
                   <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{row.metricA.value}</p>
+                  <p className="text-[9px] text-muted-foreground mt-1">{row.metricA.benchmark}</p>
                 </div>
                 <div>
                   <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.metricB.label}</p>
                   <p className="text-[11px] font-mono font-semibold text-foreground mt-1">{row.metricB.value}</p>
+                  <p className="text-[9px] text-muted-foreground mt-1">{row.metricB.benchmark}</p>
                 </div>
                 <div>
                   <p className="text-[8px] uppercase tracking-wider text-muted-foreground font-semibold">{row.source}</p>
