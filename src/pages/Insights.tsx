@@ -491,7 +491,45 @@ const Insights = () => {
               <p className="text-[10px] text-muted-foreground">Compare selected creative assets, ranked by performance, and inspect how their profile attributes shape the overall score.</p>
             </div>
 
-            <div className="grid grid-cols-[280px_minmax(0,1fr)] gap-5 rounded-xl border border-border bg-card shadow-card p-4">
+            <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-5 rounded-xl border border-border bg-card shadow-card p-4">
+              <div className="rounded-xl border border-border bg-muted/10 p-4">
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div>
+                    <p className="text-[12px] font-semibold text-foreground">{selectedAsset?.name}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Interactive profile shape for the selected creative asset.</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Overall Score</p>
+                    <p className={`text-[26px] leading-none font-mono font-bold mt-1 ${scoreColor(selectedPerformanceScore)}`}>{selectedPerformanceScore}</p>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <ChartContainer config={chartConfig} className="mx-auto h-[360px] w-full max-w-[520px]">
+                    <RadarChart data={radarData} outerRadius="72%">
+                      <PolarGrid radialLines={true} />
+                      <PolarAngleAxis
+                        dataKey="label"
+                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10, fontWeight: 600 }}
+                      />
+                      <Radar
+                        dataKey="value"
+                        stroke="var(--color-score)"
+                        fill="var(--color-score)"
+                        fillOpacity={0.14}
+                        strokeWidth={2.5}
+                      />
+                    </RadarChart>
+                  </ChartContainer>
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <div className="rounded-full border border-border bg-background/92 px-5 py-4 text-center shadow-card">
+                      <p className={`text-[34px] leading-none font-mono font-bold ${scoreColor(selectedPerformanceScore)}`}>{selectedPerformanceScore}</p>
+                      <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">Profile Score</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Compared Assets</span>
@@ -530,61 +568,6 @@ const Insights = () => {
                       </button>
                     );
                   })}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-[minmax(0,1fr)_220px] gap-5">
-                <div className="rounded-xl border border-border bg-muted/10 p-4">
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div>
-                      <p className="text-[12px] font-semibold text-foreground">{selectedAsset?.name}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">Interactive profile shape for the selected creative asset.</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Overall Score</p>
-                      <p className={`text-[26px] leading-none font-mono font-bold mt-1 ${scoreColor(selectedPerformanceScore)}`}>{selectedPerformanceScore}</p>
-                    </div>
-                  </div>
-
-                  <div className="relative">
-                    <ChartContainer config={chartConfig} className="mx-auto h-[360px] w-full max-w-[520px]">
-                      <RadarChart data={radarData} outerRadius="72%">
-                        <PolarGrid radialLines={true} />
-                        <PolarAngleAxis
-                          dataKey="label"
-                          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10, fontWeight: 600 }}
-                        />
-                        <Radar
-                          dataKey="value"
-                          stroke="var(--color-score)"
-                          fill="var(--color-score)"
-                          fillOpacity={0.14}
-                          strokeWidth={2.5}
-                        />
-                      </RadarChart>
-                    </ChartContainer>
-                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                      <div className="rounded-full border border-border bg-background/92 px-5 py-4 text-center shadow-card">
-                        <p className={`text-[34px] leading-none font-mono font-bold ${scoreColor(selectedPerformanceScore)}`}>{selectedPerformanceScore}</p>
-                        <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">Profile Score</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-border bg-background p-4">
-                  <div className="mb-3">
-                    <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Profile Attributes</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Current values used in the diagnostic chart.</p>
-                  </div>
-                  <div className="space-y-2">
-                    {profileFacts.map((fact) => (
-                      <div key={fact.key} className="rounded-lg border border-border/70 bg-muted/20 px-3 py-2">
-                        <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">{fact.label}</p>
-                        <p className="text-[11px] font-medium text-foreground mt-1 break-words">{fact.value}</p>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
             </div>
