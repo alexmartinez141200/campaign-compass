@@ -449,6 +449,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               </div>
             </div>
           </div>
+        </div>
 
         <Tabs value={activeTopTab} onValueChange={(value) => setActiveTopTab(value as "creative" | "campaign")} className="space-y-3">
           <TabsList className="grid h-auto w-full grid-cols-2 rounded-lg border border-border/60 bg-muted/20 p-0.5 shadow-card">
