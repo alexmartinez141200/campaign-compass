@@ -399,13 +399,15 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
       <div className="pt-5 space-y-5">
 
         <div className="rounded-xl border border-border/60 bg-card/60 p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Creative asset being analyzed</p>
-          <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-start gap-4">
-              <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted shadow-card">
-                <img src={asset.thumbnail} alt={asset.name} className="h-full w-full object-cover" />
+              <div className="space-y-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Creative asset being analyzed</p>
+                <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted shadow-card">
+                  <img src={asset.thumbnail} alt={asset.name} className="h-full w-full object-cover" />
+                </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 pt-8">
                 <div>
                   <p className="text-xl font-semibold text-foreground">{asset.name}</p>
                   <p className="text-[11px] text-muted-foreground">{asset.id} · {asset.type}</p>
