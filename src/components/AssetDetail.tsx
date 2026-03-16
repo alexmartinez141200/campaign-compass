@@ -189,65 +189,139 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   };
 
   const creativeDiagnostics = useMemo(() => {
-    const safePct = (value: number, average: number) => (average ? ((value - average) / average) * 100 : 0);
-    const deliveryMetric = (item: CreativeAsset) => ({ primary: item.impressions, efficiency: item.cpm });
-    const engagementMetric = (item: CreativeAsset) => ({
-      primary: item.impressions ? ((item.postReactions + item.postComments + item.postShares + item.postSaves) / item.impressions) * 100 : 0,
-      efficiency: item.postShares,
-    });
-    const trafficMetric = (item: CreativeAsset) => ({
-      primary: item.channel === "google" ? item.clicks : item.linkClicks,
-      efficiency: (item.channel === "google" ? item.clicks : item.linkClicks) ? (item.landingPageViews / (item.channel === "google" ? item.clicks : item.linkClicks)) * 100 : 0,
-    });
-    const revenueMetric = (item: CreativeAsset) => ({ primary: item.purchaseValue, efficiency: item.roas });
+    const safeDelta = (value: number, average: number, inverse = false) => {
+      if (!average) return 0;
+      return inverse ? ((average - value) / average) * 100 : ((value - average) / average) * 100;
+    };
+
+    const totalEngagementRate = (item: CreativeAsset) =>
+      item.impressions ? ((item.postReactions + item.postComments + item.postShares + item.postSaves) / item.impressions) * 100 : 0;
+    const clickToLpvRate = (item: CreativeAsset) => {
+      const clicks = item.channel === "google" ? item.clicks : item.linkClicks;
+      return clicks ? (item.landingPageViews / clicks) * 100 : 0;
+    };
+    const lpvToConvRate = (item: CreativeAsset) => (item.landingPageViews ? (item.conversions / item.landingPageViews) * 100 : 0);
 
     const attributeDefs = [
-      { label: "Format", value: asset.type, getValue: (item: CreativeAsset) => item.type },
-      { label: "Aspect Ratio", value: asset.creativeProfile.aspectRatio, getValue: (item: CreativeAsset) => item.creativeProfile.aspectRatio },
-      { label: "Motion", value: asset.creativeProfile.motionIntensity, getValue: (item: CreativeAsset) => item.creativeProfile.motionIntensity },
-      { label: "Contrast", value: asset.creativeProfile.colorContrast, getValue: (item: CreativeAsset) => item.creativeProfile.colorContrast },
-      { label: "Brand", value: asset.creativeProfile.brandProminence, getValue: (item: CreativeAsset) => item.creativeProfile.brandProminence },
-      { label: "Consistency", value: asset.creativeProfile.brandConsistency, getValue: (item: CreativeAsset) => item.creativeProfile.brandConsistency },
-      { label: "Funnel", value: asset.creativeProfile.funnelStage, getValue: (item: CreativeAsset) => item.creativeProfile.funnelStage },
-      { label: "CTA", value: asset.creativeProfile.callToAction, getValue: (item: CreativeAsset) => item.creativeProfile.callToAction },
-      { label: "Product in 3s", value: asset.type === "video" ? (asset.creativeProfile.productInFirst3s ? "Yes" : "No") : "N/A", getValue: (item: CreativeAsset) => item.type === "video" ? (item.creativeProfile.productInFirst3s ? "Yes" : "No") : "N/A" },
+      {
+        label: "Format",
+        value: asset.type,
+        getValue: (item: CreativeAsset) => item.type,
+        metrics: [
+          { label: "Eng. Rate", value: totalEngagementRate(asset), get: totalEngagementRate },
+          { label: "CTR", value: asset.ctr, get: (item: CreativeAsset) => item.ctr },
+          { label: "ROAS", value: asset.roas, get: (item: CreativeAsset) => item.roas },
+        ],
+      },
+      {
+        label: "Aspect Ratio",
+        value: asset.creativeProfile.aspectRatio,
+        getValue: (item: CreativeAsset) => item.creativeProfile.aspectRatio,
+        metrics: [
+          { label: asset.channel === "google" ? "Clicks" : "Link Clicks", value: trafficClicks, get: (item: CreativeAsset) => (item.channel === "google" ? item.clicks : item.linkClicks) },
+          { label: asset.channel === "google" ? "Website Visits" : "Landing Page Views", value: asset.landingPageViews, get: (item: CreativeAsset) => item.landingPageViews },
+          { label: "Click → LPV", value: trafficRate, get: clickToLpvRate },
+        ],
+      },
+      {
+        label: "Motion",
+        value: asset.creativeProfile.motionIntensity,
+        getValue: (item: CreativeAsset) => item.creativeProfile.motionIntensity,
+        metrics: [
+          { label: "Impressions", value: asset.impressions, get: (item: CreativeAsset) => item.impressions },
+          { label: "CPM", value: asset.cpm, get: (item: CreativeAsset) => item.cpm, inverse: true },
+          { label: "CTR", value: asset.ctr, get: (item: CreativeAsset) => item.ctr },
+        ],
+      },
+      {
+        label: "Contrast",
+        value: asset.creativeProfile.colorContrast,
+        getValue: (item: CreativeAsset) => item.creativeProfile.colorContrast,
+        metrics: [
+          { label: "CTR", value: asset.ctr, get: (item: CreativeAsset) => item.ctr },
+          { label: "Eng. Rate", value: totalEngagementRate(asset), get: totalEngagementRate },
+          { label: "ROAS", value: asset.roas, get: (item: CreativeAsset) => item.roas },
+        ],
+      },
+      {
+        label: "Brand",
+        value: asset.creativeProfile.brandProminence,
+        getValue: (item: CreativeAsset) => item.creativeProfile.brandProminence,
+        metrics: [
+          { label: "Eng. Rate", value: totalEngagementRate(asset), get: totalEngagementRate },
+          { label: "Shares", value: asset.postShares, get: (item: CreativeAsset) => item.postShares },
+          { label: "Revenue", value: asset.purchaseValue, get: (item: CreativeAsset) => item.purchaseValue },
+        ],
+      },
+      {
+        label: "Consistency",
+        value: asset.creativeProfile.brandConsistency,
+        getValue: (item: CreativeAsset) => item.creativeProfile.brandConsistency,
+        metrics: [
+          { label: "ROAS", value: asset.roas, get: (item: CreativeAsset) => item.roas },
+          { label: "Revenue", value: asset.purchaseValue, get: (item: CreativeAsset) => item.purchaseValue },
+          { label: "CPA", value: asset.costPerResult, get: (item: CreativeAsset) => item.costPerResult, inverse: true },
+        ],
+      },
+      {
+        label: "Funnel",
+        value: asset.creativeProfile.funnelStage,
+        getValue: (item: CreativeAsset) => item.creativeProfile.funnelStage,
+        metrics: [
+          { label: "Conversions", value: asset.conversions, get: (item: CreativeAsset) => item.conversions },
+          { label: "LPV → Conv", value: lpvToConvRate(asset), get: lpvToConvRate },
+          { label: "ROAS", value: asset.roas, get: (item: CreativeAsset) => item.roas },
+        ],
+      },
+      {
+        label: "CTA",
+        value: asset.creativeProfile.callToAction,
+        getValue: (item: CreativeAsset) => item.creativeProfile.callToAction,
+        metrics: [
+          { label: "CTR", value: asset.ctr, get: (item: CreativeAsset) => item.ctr },
+          { label: asset.channel === "google" ? "Clicks" : "Link Clicks", value: trafficClicks, get: (item: CreativeAsset) => (item.channel === "google" ? item.clicks : item.linkClicks) },
+          { label: "Click → LPV", value: trafficRate, get: clickToLpvRate },
+        ],
+      },
+      ...(asset.type === "video"
+        ? [{
+            label: "Product in first 3s",
+            value: asset.creativeProfile.productInFirst3s ? "Yes" : "No",
+            getValue: (item: CreativeAsset) => (item.type === "video" ? (item.creativeProfile.productInFirst3s ? "Yes" : "No") : "N/A"),
+            metrics: [
+              { label: "CTR", value: asset.ctr, get: (item: CreativeAsset) => item.ctr },
+              { label: "Landing Page Views", value: asset.landingPageViews, get: (item: CreativeAsset) => item.landingPageViews },
+              { label: "ROAS", value: asset.roas, get: (item: CreativeAsset) => item.roas },
+            ],
+          }]
+        : []),
     ];
 
     return attributeDefs.map((attribute) => {
-      const peerSet = campaignAssets.filter((item) => attribute.getValue(item) === attribute.value);
-      const baseSet = peerSet.length > 0 ? peerSet : campaignAssets;
-      const deliveryPeers = baseSet.map(deliveryMetric);
-      const engagementPeers = baseSet.map(engagementMetric);
-      const trafficPeers = baseSet.map(trafficMetric);
-      const revenuePeers = baseSet.map(revenueMetric);
-      const deliveryDelta = Math.round((safePct(deliveryMetric(asset).primary, deliveryPeers.reduce((sum, item) => sum + item.primary, 0) / deliveryPeers.length) + safePct((deliveryPeers.reduce((sum, item) => sum + item.efficiency, 0) / deliveryPeers.length), deliveryMetric(asset).efficiency)) / 2);
-      const engagementDelta = Math.round((safePct(engagementMetric(asset).primary, engagementPeers.reduce((sum, item) => sum + item.primary, 0) / engagementPeers.length) + safePct(engagementMetric(asset).efficiency, engagementPeers.reduce((sum, item) => sum + item.efficiency, 0) / engagementPeers.length)) / 2);
-      const trafficDelta = Math.round((safePct(trafficMetric(asset).primary, trafficPeers.reduce((sum, item) => sum + item.primary, 0) / trafficPeers.length) + safePct(trafficMetric(asset).efficiency, trafficPeers.reduce((sum, item) => sum + item.efficiency, 0) / trafficPeers.length)) / 2);
-      const revenueDelta = Math.round((safePct(revenueMetric(asset).primary, revenuePeers.reduce((sum, item) => sum + item.primary, 0) / revenuePeers.length) + safePct(revenueMetric(asset).efficiency, revenuePeers.reduce((sum, item) => sum + item.efficiency, 0) / revenuePeers.length)) / 2);
-      const net = Math.round((deliveryDelta + engagementDelta + trafficDelta + revenueDelta) / 4);
-      const worst = [
-        { key: "Delivery", value: deliveryDelta },
-        { key: "Engagement", value: engagementDelta },
-        { key: "Traffic", value: trafficDelta },
-        { key: "Revenue", value: revenueDelta },
-      ].sort((a, b) => a.value - b.value)[0];
+      const peers = campaignAssets.filter((item) => attribute.getValue(item) === attribute.value);
+      const benchmarkSet = peers.length >= 2 ? peers : campaignAssets;
+      const scoredMetrics = attribute.metrics.map((metric) => {
+        const average = benchmarkSet.reduce((sum, item) => sum + metric.get(item), 0) / benchmarkSet.length;
+        const delta = Math.round(safeDelta(metric.value, average, metric.inverse));
+        return { label: metric.label, value: metric.value, average, delta };
+      });
+      const score = Math.round(scoredMetrics.reduce((sum, metric) => sum + metric.delta, 0) / scoredMetrics.length);
+      const status = score >= 12 ? "good" : score >= -8 ? "mixed" : "weak";
+      const action = status === "good" ? "Keep" : status === "mixed" ? "Monitor" : "Improve";
+      const weakestMetric = [...scoredMetrics].sort((a, b) => a.delta - b.delta)[0];
 
       return {
         label: attribute.label,
         value: attribute.value,
-        sampleSize: baseSet.length,
-        deliveryDelta,
-        engagementDelta,
-        trafficDelta,
-        revenueDelta,
-        net,
-        weakestPillar: worst.key,
+        sampleSize: benchmarkSet.length,
+        status,
+        action,
+        score,
+        weakestMetric,
+        metrics: scoredMetrics,
       };
-    }).sort((a, b) => a.net - b.net);
-  }, [asset, campaignAssets]);
-
-  const weakestCreativeAspect = creativeDiagnostics[0];
-  const strongestCreativeAspect = creativeDiagnostics[creativeDiagnostics.length - 1];
+    });
+  }, [asset, campaignAssets, trafficClicks, trafficRate]);
 
   const pillarContent = {
     delivery: (
@@ -438,36 +512,37 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <SectionHeader title="Creative diagnostics" description="Each creative attribute is scored against assets with the same attribute value. Deltas are averaged from pillar volume and efficiency metrics, so weak spots are numerical under-indexes, not theory." />
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <div className="rounded-lg border border-border/60 bg-card p-4">
-            <div className="grid grid-cols-[minmax(0,1.4fr)_repeat(5,minmax(0,0.72fr))] gap-x-3 gap-y-2 text-[10px]">
-              <div className="text-muted-foreground uppercase tracking-[0.18em] font-semibold">Attribute</div>
-              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Del</div>
-              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Eng</div>
-              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Tra</div>
-              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Rev</div>
-              <div className="text-right text-muted-foreground uppercase tracking-[0.18em] font-semibold">Net</div>
-              {creativeDiagnostics.map((item) => (
-                <>
-                  <div key={`${item.label}-label`} className="border-t border-border/50 pt-2 min-w-0">
-                    <p className="truncate text-[11px] font-semibold text-foreground">{item.label}</p>
-                    <p className="truncate text-[10px] text-muted-foreground">{item.value} · n={item.sampleSize}</p>
+        <SectionHeader title="Creative diagnostics" description="Each creative category is judged only by the metrics it should directly influence, so you can see whether it is strong, mixed, or needs improvement." />
+        <div className="grid grid-cols-1 gap-3">
+          {creativeDiagnostics.map((item) => (
+            <div key={item.label} className="rounded-lg border border-border/60 bg-card p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{item.label}</p>
+                    <span className="text-[10px] font-mono text-muted-foreground">{item.value} · n={item.sampleSize}</span>
                   </div>
-                  <div key={`${item.label}-delivery`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-semibold text-foreground">{item.deliveryDelta > 0 ? "+" : ""}{item.deliveryDelta}%</div>
-                  <div key={`${item.label}-engagement`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-semibold text-foreground">{item.engagementDelta > 0 ? "+" : ""}{item.engagementDelta}%</div>
-                  <div key={`${item.label}-traffic`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-semibold text-foreground">{item.trafficDelta > 0 ? "+" : ""}{item.trafficDelta}%</div>
-                  <div key={`${item.label}-revenue`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-semibold text-foreground">{item.revenueDelta > 0 ? "+" : ""}{item.revenueDelta}%</div>
-                  <div key={`${item.label}-net`} className="border-t border-border/50 pt-2 text-right text-[11px] font-mono font-bold text-foreground">{item.net > 0 ? "+" : ""}{item.net}%</div>
-                </>
-              ))}
+                  <p className="mt-1 text-sm font-semibold text-foreground">{item.status === "good" ? "This category is helping performance" : item.status === "mixed" ? "This category is not a clear problem" : "This category is limiting performance"}</p>
+                  <p className="text-[11px] text-muted-foreground">{item.action} · weakest metric: {item.weakestMetric.label} ({item.weakestMetric.delta > 0 ? "+" : ""}{item.weakestMetric.delta}% vs matched avg)</p>
+                </div>
+                <div className="text-left lg:text-right">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Recommendation</p>
+                  <p className="text-sm font-semibold text-foreground">{item.action}</p>
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-1 gap-2.5 md:grid-cols-3">
+                {item.metrics.map((metric) => (
+                  <KpiCard
+                    key={`${item.label}-${metric.label}`}
+                    label={metric.label}
+                    value={typeof metric.value === "number" && metric.label !== "Revenue" && metric.label !== "Impressions" && metric.label !== "Conversions" && metric.label !== "Landing Page Views" && metric.label !== "Shares" && metric.label !== "Clicks" && metric.label !== "Link Clicks" && metric.label !== "Website Visits" ? `${metric.value.toFixed(1)}${metric.label.includes("CTR") || metric.label.includes("Rate") || metric.label.includes("LPV") ? "%" : metric.label === "ROAS" ? "x" : metric.label === "CPA" ? "" : ""}` : metric.label === "Revenue" || metric.label === "CPA" ? `$${metric.value.toFixed(metric.label === "CPA" ? 2 : 0)}` : Math.round(metric.value).toLocaleString()}
+                    sub={`Avg ${metric.label === "Revenue" || metric.label === "CPA" ? `$${metric.average.toFixed(metric.label === "CPA" ? 2 : 0)}` : metric.label === "ROAS" ? `${metric.average.toFixed(1)}x` : metric.label.includes("CTR") || metric.label.includes("Rate") || metric.label.includes("LPV") ? `${metric.average.toFixed(1)}%` : Math.round(metric.average).toLocaleString()}`}
+                    trend={metric.delta}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <KpiCard label="Best creative aspect" value={strongestCreativeAspect ? strongestCreativeAspect.label : "—"} sub={strongestCreativeAspect ? `${strongestCreativeAspect.value} · ${strongestCreativeAspect.net > 0 ? "+" : ""}${strongestCreativeAspect.net}% net` : undefined} />
-            <KpiCard label="Priority to improve" value={weakestCreativeAspect ? weakestCreativeAspect.label : "—"} sub={weakestCreativeAspect ? `${weakestCreativeAspect.value} · weakest in ${weakestCreativeAspect.weakestPillar}` : undefined} />
-          </div>
+          ))}
         </div>
 
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
