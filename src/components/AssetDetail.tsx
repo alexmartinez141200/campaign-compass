@@ -448,17 +448,23 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </TabsList>
 
           <TabsContent value="creative" className="mt-0 space-y-3">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0 flex-1">
-                <SectionHeader title="Creative asset performance" description="Each row shows whether a creative profile category is doing good, mixed, or weak based on the campaign-average metrics used to evaluate it." />
+            <div className="mt-6 mb-4">
+              <div className="mb-1.5 flex items-center gap-3">
+                <h3 className="whitespace-nowrap text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">Creative asset performance</h3>
+                <div className="h-px flex-1 bg-border/50" />
               </div>
-              <button
-                type="button"
-                onClick={() => setShowUpdateRecommendations((prev) => !prev)}
-                className="mt-1 rounded-lg border border-primary/30 bg-primary/10 px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground transition-colors hover:bg-primary/15"
-              >
-                Update Creative
-              </button>
+              <div className="flex items-start justify-between gap-4">
+                <p className="max-w-[980px] text-[11px] leading-relaxed text-muted-foreground/70">
+                  Each row shows whether a creative profile category is doing good, mixed, or weak based on the campaign-average metrics used to evaluate it.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowUpdateRecommendations((prev) => !prev)}
+                  className="rounded-lg border border-primary/30 bg-primary/10 px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground transition-colors hover:bg-primary/15"
+                >
+                  Update Creative
+                </button>
+              </div>
             </div>
 
             {showUpdateRecommendations && (
