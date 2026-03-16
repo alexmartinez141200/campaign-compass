@@ -410,7 +410,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
                 <PolarGrid radialLines gridType="polygon" stroke="hsl(var(--border))" strokeOpacity={0.75} />
                 <PolarAngleAxis
                   dataKey="label"
-                  tick={({ payload, x, y, textAnchor }) => {
+                  tick={(tickProps: any) => {
+                    const { payload, x, y, textAnchor } = tickProps;
                     const active = payload?.payload?.key === selectedCategoryKey;
                     return (
                       <text
