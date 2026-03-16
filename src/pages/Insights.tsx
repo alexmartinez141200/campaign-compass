@@ -763,7 +763,7 @@ const Insights = () => {
               <p className="text-[10px] text-muted-foreground">Review the selected asset’s creative profile and click any chart point or label to open detailed analytics for that specific attribute.</p>
             </div>
 
-            <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-5 rounded-xl border border-border bg-card shadow-card p-4">
+            <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-5 rounded-xl border border-border bg-muted/30 shadow-card p-4">
               <div className="rounded-xl border border-border bg-muted/10 p-4">
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
