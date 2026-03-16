@@ -480,6 +480,33 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
+        <SectionHeader title="Creative asset performance" description="Each row shows whether a creative profile category is doing good, mixed, or weak based on the campaign-average metrics used to evaluate it." />
+        <div className="rounded-lg border border-border/60 bg-card overflow-hidden">
+          <div className="grid grid-cols-[minmax(0,1.05fr)_120px_minmax(0,2.2fr)] gap-3 border-b border-border/60 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <div>Category</div>
+            <div>Status</div>
+            <div>Metrics used vs avg</div>
+          </div>
+          {creativeDiagnostics.map((item) => (
+            <div key={item.label} className="grid grid-cols-[minmax(0,1.05fr)_120px_minmax(0,2.2fr)] gap-3 border-b border-border/60 px-4 py-3 last:border-b-0">
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold text-foreground">{item.label}</p>
+                <p className="text-[10px] text-muted-foreground">{item.value}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold text-foreground">{item.status}</p>
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1">
+                {item.metrics.map((metric) => (
+                  <span key={`${item.label}-${metric.label}`} className="text-[10px] text-muted-foreground">
+                    <span className="font-semibold text-foreground">{metric.label}</span> {metric.value} vs {metric.average} ({metric.delta > 0 ? "+" : ""}{metric.delta}%)
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
         <div className="rounded-lg border border-border/60 bg-card p-4">
           <div className="grid grid-cols-2 gap-x-8 gap-y-1">
             {[
@@ -504,7 +531,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
               ))}
           </div>
         </div>
-
 
         <SectionHeader title="Campaign performance" description="" />
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
