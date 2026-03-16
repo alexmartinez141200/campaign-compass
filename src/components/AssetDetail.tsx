@@ -273,12 +273,13 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-5">
-          <KpiCard label="Eng. Rate" value={formatStoryMetricValue(storySummaryRows.find((row) => row.key === "engagement")?.drivers[0].value || 0, "pct")} sub="(Reactions + Comments + Shares + Saves) / Impressions" />
+        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-6">
+          <KpiCard label="Eng. Rate" value={formatStoryMetricValue(storySummaryRows.find((row) => row.key === "engagement")?.drivers[0].value || 0, "pct")} sub="Total engagement ÷ impressions" />
           <KpiCard label="Reactions" value={asset.postReactions.toLocaleString()} sub="Likes and reactions" />
           <KpiCard label="Comments" value={asset.postComments.toLocaleString()} sub="Conversation volume" />
           <KpiCard label="Shares" value={asset.postShares.toLocaleString()} sub="Amplification" />
           <KpiCard label="Saves" value={asset.postSaves.toLocaleString()} sub="Retention signal" />
+          <KpiCard label="Impressions" value={asset.impressions.toLocaleString()} sub="Rate denominator" />
         </div>
       </>
     ),
