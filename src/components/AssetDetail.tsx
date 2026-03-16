@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowDownRight, ArrowUpRight, Info, Minus } from "lucide-react";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, PolarAngleAxis, PolarGrid, Radar, RadarChart, XAxis, YAxis } from "recharts";
 import type { CreativeAsset } from "@/data/mockData";
 import { axisStoryDimensionMap, buildCreativeStorySummary, formatStoryMetricValue } from "@/lib/creative-story";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -131,6 +131,7 @@ const SectionHeader = ({ title, description }: { title: string; description: str
 
 const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   const [activePillar, setActivePillar] = useState<PillarKey>("delivery");
+  const [selectedCategoryKey, setSelectedCategoryKey] = useState("format");
 
   const storySummaryRows = useMemo(
     () => buildCreativeStorySummary(asset, campaignAssets, { selectedRoas: asset.roas }),
@@ -218,16 +219,24 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         };
       });
 
-      const score = metrics.length ? Math.round(metrics.reduce((sum, metric) => sum + metric.delta, 0) / metrics.length) : 0;
+      const score = metrics.length ? Math.max(0, Math.min(100, Math.round(50 + metrics.reduce((sum, metric) => sum + metric.delta, 0) / metrics.length))) : 50;
 
       return {
+        key: row.key,
         label: row.label,
         value: row.value,
-        status: score >= 12 ? "Good" : score <= -8 ? "Weak" : "Mixed",
+        score,
+        status: score >= 70 ? "Good" : score <= 40 ? "Weak" : "Mixed",
         metrics,
       };
     });
   }, [asset, storySummaryRows]);
+
+  const radarData = creativeDiagnostics.map((item) => ({
+    key: item.key,
+    label: item.label === "Aspect Ratio" ? "Aspect" : item.label,
+    value: item.score,
+  }));
 
   const pillarContent = {
     delivery: (
@@ -394,30 +403,84 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
 
         <SectionHeader title="Creative asset performance" description="Each row shows whether a creative profile category is doing good, mixed, or weak based on the campaign-average metrics used to evaluate it." />
-        <div className="rounded-lg border border-border/60 bg-card overflow-hidden">
-          <div className="grid grid-cols-[minmax(0,1.05fr)_120px_minmax(0,2.2fr)] gap-3 border-b border-border/60 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            <div>Category</div>
-            <div>Status</div>
-            <div>Metrics used vs avg</div>
-          </div>
-          {creativeDiagnostics.map((item) => (
-            <div key={item.label} className="grid grid-cols-[minmax(0,1.05fr)_120px_minmax(0,2.2fr)] gap-3 border-b border-border/60 px-4 py-3 last:border-b-0">
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold text-foreground">{item.label}</p>
-                <p className="text-[10px] text-muted-foreground">{item.value}</p>
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold text-foreground">{item.status}</p>
-              </div>
-              <div className="flex flex-wrap gap-x-4 gap-y-1">
-                {item.metrics.map((metric) => (
-                  <span key={`${item.label}-${metric.label}`} className="text-[10px] text-muted-foreground">
-                    <span className="font-semibold text-foreground">{metric.label}</span> {metric.value} vs {metric.average} ({metric.delta > 0 ? "+" : ""}{metric.delta}%)
-                  </span>
-                ))}
-              </div>
+        <div className="grid gap-4 lg:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.45fr)] lg:items-start">
+          <div className="rounded-lg border border-border/60 bg-card p-4">
+            <ChartContainer config={{ score: { label: "Score", color: "hsl(var(--primary))" } }} className="mx-auto h-[360px] w-full max-w-[420px]">
+              <RadarChart data={radarData} outerRadius="72%">
+                <PolarGrid radialLines gridType="polygon" stroke="hsl(var(--border))" strokeOpacity={0.75} />
+                <PolarAngleAxis
+                  dataKey="label"
+                  tick={(tickProps: any) => {
+                    const { payload, x, y, textAnchor } = tickProps;
+                    const active = payload?.payload?.key === selectedCategoryKey;
+                    return (
+                      <text
+                        x={x}
+                        y={y}
+                        textAnchor={textAnchor}
+                        className={active ? "fill-foreground" : "fill-muted-foreground"}
+                        style={{ fontSize: 11, fontWeight: active ? 700 : 600, cursor: "pointer" }}
+                        onClick={() => payload?.payload?.key && setSelectedCategoryKey(payload.payload.key)}
+                      >
+                        {payload?.value}
+                      </text>
+                    );
+                  }}
+                />
+                <Radar
+                  dataKey="value"
+                  stroke="var(--color-score)"
+                  fill="var(--color-score)"
+                  fillOpacity={0.1}
+                  strokeWidth={2.5}
+                  dot={(props: any) => {
+                    const active = props?.payload?.key === selectedCategoryKey;
+                    return (
+                      <g onClick={() => props?.payload?.key && setSelectedCategoryKey(props.payload.key)} style={{ cursor: "pointer" }}>
+                        <circle cx={props.cx} cy={props.cy} r={18} fill="hsl(var(--background))" fillOpacity={0.01} />
+                        <circle cx={props.cx} cy={props.cy} r={active ? 8 : 6.5} fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"} stroke="hsl(var(--primary))" strokeWidth={2} />
+                      </g>
+                    );
+                  }}
+                />
+              </RadarChart>
+            </ChartContainer>
+            <div className="mt-3 text-center">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Overall score</p>
+              <p className="text-3xl font-mono font-bold text-accent">{Math.round(radarData.reduce((sum, item) => sum + item.value, 0) / radarData.length)}</p>
             </div>
-          ))}
+          </div>
+
+          <div className="rounded-lg border border-border/60 bg-card overflow-hidden">
+            <div className="grid grid-cols-[minmax(0,1.05fr)_120px_minmax(0,2.2fr)] gap-3 border-b border-border/60 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <div>Category</div>
+              <div>Status</div>
+              <div>Metrics used vs avg</div>
+            </div>
+            {creativeDiagnostics.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setSelectedCategoryKey(item.key)}
+                className={`grid w-full grid-cols-[minmax(0,1.05fr)_120px_minmax(0,2.2fr)] gap-3 border-b border-border/60 px-4 py-3 text-left last:border-b-0 transition-colors ${selectedCategoryKey === item.key ? "bg-primary/5" : "hover:bg-muted/30"}`}
+              >
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold text-foreground">{item.label}</p>
+                  <p className="text-[10px] text-muted-foreground">{item.value}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-foreground">{item.status}</p>
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                  {item.metrics.map((metric) => (
+                    <span key={`${item.label}-${metric.label}`} className="text-[10px] text-muted-foreground">
+                      <span className="font-semibold text-foreground">{metric.label}</span> {metric.value} vs {metric.average} ({metric.delta > 0 ? "+" : ""}{metric.delta}%)
+                    </span>
+                  ))}
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
 
