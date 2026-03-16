@@ -4,6 +4,7 @@ import { CartesianGrid, Line, LineChart, PolarAngleAxis, PolarGrid, Radar, Radar
 import type { CreativeAsset } from "@/data/mockData";
 import { axisStoryDimensionMap, buildCreativeStorySummary, formatStoryMetricValue } from "@/lib/creative-story";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 interface AssetDetailProps {
