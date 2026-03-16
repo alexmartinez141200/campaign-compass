@@ -394,15 +394,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
   return (
     <TooltipProvider>
       <div className="p-6 space-y-6">
-        <div className="flex items-center gap-3">
-          <button type="button" onClick={onBack} className="text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div>
-            <p className="text-lg font-semibold text-foreground">{asset.name}</p>
-            <p className="text-[11px] text-muted-foreground">{asset.id} · {asset.channel} · {asset.type}</p>
-          </div>
-        </div>
 
         <div className="rounded-xl border border-border/60 bg-card/60 p-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Creative asset being analyzed</p>
