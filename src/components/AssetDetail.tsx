@@ -513,6 +513,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
         </div>
 
 
+        <SectionHeader title="Campaign performance" description="" />
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
           {storySummaryRows.map((row) => (
             <KpiCard
