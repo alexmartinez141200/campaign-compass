@@ -260,6 +260,8 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     { name: "Comments", value: asset.postComments, color: "hsl(174, 100%, 33%)" },
     { name: "Shares", value: asset.postShares, color: "hsl(45, 93%, 47%)" },
     { name: "Saves", value: asset.postSaves, color: "hsl(346, 84%, 61%)" },
+  ];
+  const engagementTotal = engagementData.reduce((s, d) => s + d.value, 0);
 
   // Funnel steps — platform-aware labels
   const funnelSteps = [
@@ -268,7 +270,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
     { label: "Checkout", value: asset.initiateCheckout, color: "hsl(45, 93%, 47%)" },
     { label: "Purchase", value: asset.conversions, color: "hsl(142, 71%, 45%)" },
   ];
-  const engagementTotal = engagementData.reduce((s, d) => s + d.value, 0);
 
   // Video retention
   const videoRetentionData = isVideo ? (isTikTok ? [
