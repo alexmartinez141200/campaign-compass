@@ -674,7 +674,15 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </TabsContent>
 
           <TabsContent value="campaign" className="mt-0 space-y-4">
-            <SectionHeader title="Campaign performance" description="" />
+            <div className="mt-6 mb-4">
+              <div className="mb-1.5 flex items-center gap-3">
+                <h3 className="whitespace-nowrap text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">Campaign performance</h3>
+                <div className="h-px flex-1 bg-border/50" />
+              </div>
+              <p className="text-[11px] leading-relaxed text-muted-foreground/70">
+                Click any performance card to toggle deeper metrics, context, and guidance for that area.
+              </p>
+            </div>
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
               {storySummaryRows.map((row) => (
                 <KpiCard
