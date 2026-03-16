@@ -283,31 +283,6 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           <KpiCard label="Eng. Rate" value={formatStoryMetricValue(storySummaryRows.find((row) => row.key === "engagement")?.drivers[0].value || 0, "pct")} sub="Final blended rate" />
         </div>
 
-        <SectionHeader title="Engagement story" description="A quick read on what kind of interaction this creative is actually generating." />
-        <div className="grid gap-2.5 lg:grid-cols-3">
-          <div className="rounded-lg border border-border/60 bg-card px-4 py-3">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Primary signal</p>
-            <p className="mt-1 text-sm text-foreground leading-relaxed">
-              {asset.postSaves >= asset.postShares && asset.postSaves >= asset.postComments
-                ? "Saves lead the engagement mix, which suggests the creative has strong keep-for-later value."
-                : asset.postShares >= asset.postComments
-                  ? "Shares are a major part of engagement, which suggests the creative is resonating enough to be passed along."
-                  : "Comments are a meaningful part of engagement, which suggests the creative is creating conversation."}
-            </p>
-          </div>
-          <div className="rounded-lg border border-border/60 bg-card px-4 py-3">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Scale context</p>
-            <p className="mt-1 text-sm text-foreground leading-relaxed">
-              {formatStoryMetricValue(storySummaryRows.find((row) => row.key === "engagement")?.drivers[0].value || 0, "pct")} engagement rate is generated from {engagementTotal.toLocaleString()} total interactions across {asset.impressions.toLocaleString()} impressions.
-            </p>
-          </div>
-          <div className="rounded-lg border border-border/60 bg-card px-4 py-3">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Campaign benchmark</p>
-            <p className="mt-1 text-sm text-foreground leading-relaxed">
-              {storySummaryRows.find((row) => row.key === "engagement")?.drivers[0].benchmark || "0% vs campaign avg"} on engagement rate and {storySummaryRows.find((row) => row.key === "engagement")?.drivers[1].benchmark || "0% vs campaign avg"} on shares.
-            </p>
-          </div>
-        </div>
       </>
     ),
     traffic: (
