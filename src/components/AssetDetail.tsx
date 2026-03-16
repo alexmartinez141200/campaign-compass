@@ -404,103 +404,127 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
           </div>
         </div>
 
-        <SectionHeader title="Creative asset performance" description="Each row shows whether a creative profile category is doing good, mixed, or weak based on the campaign-average metrics used to evaluate it." />
-        <div className="grid gap-4 lg:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.45fr)] lg:items-start">
-          <div className="rounded-lg border border-border/60 bg-card p-4">
-            <ChartContainer config={{ score: { label: "Score", color: "hsl(var(--primary))" } }} className="mx-auto h-[360px] w-full max-w-[420px]">
-              <RadarChart data={radarData} outerRadius="72%">
-                <PolarGrid radialLines gridType="polygon" stroke="hsl(var(--border))" strokeOpacity={0.75} />
-                <PolarAngleAxis
-                  dataKey="label"
-                  tick={(tickProps: any) => {
-                    const { payload, x, y, textAnchor } = tickProps;
-                    const active = payload?.payload?.key === selectedCategoryKey;
-                    return (
-                      <text
-                        x={x}
-                        y={y}
-                        textAnchor={textAnchor}
-                        className={active ? "fill-foreground" : "fill-muted-foreground"}
-                        style={{ fontSize: 11, fontWeight: active ? 700 : 600, cursor: "pointer" }}
-                        onClick={() => payload?.payload?.key && setSelectedCategoryKey(payload.payload.key)}
-                      >
-                        {payload?.value}
-                      </text>
-                    );
-                  }}
-                />
-                <Radar
-                  dataKey="value"
-                  stroke="var(--color-score)"
-                  fill="var(--color-score)"
-                  fillOpacity={0.1}
-                  strokeWidth={2.5}
-                  dot={(props: any) => {
-                    const active = props?.payload?.key === selectedCategoryKey;
-                    return (
-                      <g onClick={() => props?.payload?.key && setSelectedCategoryKey(props.payload.key)} style={{ cursor: "pointer" }}>
-                        <circle cx={props.cx} cy={props.cy} r={18} fill="hsl(var(--background))" fillOpacity={0.01} />
-                        <circle cx={props.cx} cy={props.cy} r={active ? 8 : 6.5} fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"} stroke="hsl(var(--primary))" strokeWidth={2} />
-                      </g>
-                    );
-                  }}
-                />
-              </RadarChart>
-            </ChartContainer>
-            <div className="mt-3 text-center">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Overall score</p>
-              <p className="text-3xl font-mono font-bold text-accent">{Math.round(radarData.reduce((sum, item) => sum + item.value, 0) / radarData.length)}</p>
+        <div className="rounded-xl border border-border/60 bg-card/60 p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Creative asset being analyzed</p>
+          <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xl font-semibold text-foreground">{asset.name}</p>
+              <p className="text-[11px] text-muted-foreground">{asset.id} · {asset.channel} · {asset.type}</p>
             </div>
-          </div>
-
-          <div className="rounded-lg border border-border/60 bg-card overflow-hidden">
-            <div className="grid grid-cols-[minmax(0,1.05fr)_120px_minmax(0,2.2fr)] gap-3 border-b border-border/60 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              <div>Category</div>
-              <div>Status</div>
-              <div>Metrics used vs avg</div>
+            <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              <span className="rounded-full border border-border/60 px-3 py-1">Format: {asset.type}</span>
+              <span className="rounded-full border border-border/60 px-3 py-1">Campaign asset profile</span>
             </div>
-            {creativeDiagnostics.map((item) => (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => setSelectedCategoryKey(item.key)}
-                className={`grid w-full grid-cols-[minmax(0,1.05fr)_120px_minmax(0,2.2fr)] gap-3 border-b border-border/60 px-4 py-3 text-left last:border-b-0 transition-colors ${selectedCategoryKey === item.key ? "bg-primary/5" : "hover:bg-muted/30"}`}
-              >
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold text-foreground">{item.label}</p>
-                  <p className="text-[10px] text-muted-foreground">{item.value}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-foreground">{item.status}</p>
-                </div>
-                <div className="flex flex-wrap gap-x-4 gap-y-1">
-                  {item.metrics.map((metric) => (
-                    <span key={`${item.label}-${metric.label}`} className="text-[10px] text-muted-foreground">
-                      <span className="font-semibold text-foreground">{metric.label}</span> {metric.value} vs {metric.average} ({metric.delta > 0 ? "+" : ""}{metric.delta}%)
-                    </span>
-                  ))}
-                </div>
-              </button>
-            ))}
           </div>
         </div>
 
+        <Tabs value={activeTopTab} onValueChange={(value) => setActiveTopTab(value as "creative" | "campaign")} className="space-y-4">
+          <TabsList className="h-auto w-full justify-start rounded-xl border border-border/60 bg-card p-1">
+            <TabsTrigger value="creative" className="px-4 py-2 text-[11px] uppercase tracking-[0.16em]">Creative Asset Performance</TabsTrigger>
+            <TabsTrigger value="campaign" className="px-4 py-2 text-[11px] uppercase tracking-[0.16em]">Campaign Performance</TabsTrigger>
+          </TabsList>
 
-        <SectionHeader title="Campaign performance" description="" />
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
-          {storySummaryRows.map((row) => (
-            <KpiCard
-              key={row.key}
-              label={row.title}
-              value={formatStoryMetricValue(row.drivers[0].value, row.drivers[0].format)}
-              sub={row.drivers[0].label}
-              active={activePillar === row.key}
-              onClick={() => setActivePillar(row.key)}
-            />
-          ))}
-        </div>
+          <TabsContent value="creative" className="mt-0 space-y-4">
+            <SectionHeader title="Creative asset performance" description="Each row shows whether a creative profile category is doing good, mixed, or weak based on the campaign-average metrics used to evaluate it." />
+            <div className="grid gap-4 lg:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.45fr)] lg:items-start">
+              <div className="rounded-lg border border-border/60 bg-card p-4">
+                <ChartContainer config={{ score: { label: "Score", color: "hsl(var(--primary))" } }} className="mx-auto h-[360px] w-full max-w-[420px]">
+                  <RadarChart data={radarData} outerRadius="72%">
+                    <PolarGrid radialLines gridType="polygon" stroke="hsl(var(--border))" strokeOpacity={0.75} />
+                    <PolarAngleAxis
+                      dataKey="label"
+                      tick={(tickProps: any) => {
+                        const { payload, x, y, textAnchor } = tickProps;
+                        const active = payload?.payload?.key === selectedCategoryKey;
+                        return (
+                          <text
+                            x={x}
+                            y={y}
+                            textAnchor={textAnchor}
+                            className={active ? "fill-foreground" : "fill-muted-foreground"}
+                            style={{ fontSize: 11, fontWeight: active ? 700 : 600, cursor: "pointer" }}
+                            onClick={() => payload?.payload?.key && setSelectedCategoryKey(payload.payload.key)}
+                          >
+                            {payload?.value}
+                          </text>
+                        );
+                      }}
+                    />
+                    <Radar
+                      dataKey="value"
+                      stroke="var(--color-score)"
+                      fill="var(--color-score)"
+                      fillOpacity={0.1}
+                      strokeWidth={2.5}
+                      dot={(props: any) => {
+                        const active = props?.payload?.key === selectedCategoryKey;
+                        return (
+                          <g onClick={() => props?.payload?.key && setSelectedCategoryKey(props.payload.key)} style={{ cursor: "pointer" }}>
+                            <circle cx={props.cx} cy={props.cy} r={18} fill="hsl(var(--background))" fillOpacity={0.01} />
+                            <circle cx={props.cx} cy={props.cy} r={active ? 8 : 6.5} fill={active ? "hsl(var(--primary))" : "hsl(var(--background))"} stroke="hsl(var(--primary))" strokeWidth={2} />
+                          </g>
+                        );
+                      }}
+                    />
+                  </RadarChart>
+                </ChartContainer>
+                <div className="mt-3 text-center">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Overall score</p>
+                  <p className="text-3xl font-mono font-bold text-accent">{Math.round(radarData.reduce((sum, item) => sum + item.value, 0) / radarData.length)}</p>
+                </div>
+              </div>
 
-        {pillarContent[activePillar]}
+              <div className="rounded-lg border border-border/60 bg-card overflow-hidden">
+                <div className="grid grid-cols-[minmax(0,1.05fr)_120px_minmax(0,2.2fr)] gap-3 border-b border-border/60 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  <div>Category</div>
+                  <div>Status</div>
+                  <div>Metrics used vs avg</div>
+                </div>
+                {creativeDiagnostics.map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => setSelectedCategoryKey(item.key)}
+                    className={`grid w-full grid-cols-[minmax(0,1.05fr)_120px_minmax(0,2.2fr)] gap-3 border-b border-border/60 px-4 py-3 text-left last:border-b-0 transition-colors ${selectedCategoryKey === item.key ? "bg-primary/5" : "hover:bg-muted/30"}`}
+                  >
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-semibold text-foreground">{item.label}</p>
+                      <p className="text-[10px] text-muted-foreground">{item.value}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-foreground">{item.status}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1">
+                      {item.metrics.map((metric) => (
+                        <span key={`${item.label}-${metric.label}`} className="text-[10px] text-muted-foreground">
+                          <span className="font-semibold text-foreground">{metric.label}</span> {metric.value} vs {metric.average} ({metric.delta > 0 ? "+" : ""}{metric.delta}%)
+                        </span>
+                      ))}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="campaign" className="mt-0 space-y-4">
+            <SectionHeader title="Campaign performance" description="" />
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
+              {storySummaryRows.map((row) => (
+                <KpiCard
+                  key={row.key}
+                  label={row.title}
+                  value={formatStoryMetricValue(row.drivers[0].value, row.drivers[0].format)}
+                  sub={row.drivers[0].label}
+                  active={activePillar === row.key}
+                  onClick={() => setActivePillar(row.key)}
+                />
+              ))}
+            </div>
+
+            {pillarContent[activePillar]}
+          </TabsContent>
+        </Tabs>
       </div>
     </TooltipProvider>
   );
