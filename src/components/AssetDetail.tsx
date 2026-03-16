@@ -484,7 +484,7 @@ const AssetDetail = ({ asset, campaignAssets, onBack }: AssetDetailProps) => {
             </div>
 
             {/* ═══ B. ENGAGEMENT & GROWTH ═══ */}
-            <SectionHeader title="Engagement & Growth" description="On-platform signals — likes, shares, and profile actions that drive organic reach and brand building." />
+            <SectionHeader sectionId="section-engagement" title="Engagement & Growth" description="On-platform signals — likes, shares, and profile actions that drive organic reach and brand building." contribution="Brand prominence and format contribute most here by shaping how worth-sharing and memorable the asset feels." />
             <div className="grid grid-cols-2 gap-3">
               {/* Engagement donut */}
               <div className="rounded-lg border border-border/60 bg-card p-4">
