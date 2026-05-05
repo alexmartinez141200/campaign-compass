@@ -43,7 +43,7 @@ const AppSidebar = () => {
       {/* Logo */}
       <div className="px-5 py-5">
         <button className="flex items-center gap-1.5 text-foreground">
-          <span className="text-[15px] font-semibold tracking-tight">Celtra</span>
+          <span className="text-[15px] font-semibold tracking-tight">Company Name here</span>
           <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
         </button>
       </div>
